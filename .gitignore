@@ -1,4 +1,7 @@
 .idea/
 logs/
+venv/
+data/
 */**/__pycache__/
 logging.conf
+test.py
