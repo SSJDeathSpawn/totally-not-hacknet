@@ -2,6 +2,7 @@
 logs/
 venv/
 data/
-*/**/__pycache__/
+**/__pycache__/
+**/testing/
 logging.conf
-test.py
+**/test.py
