@@ -40,6 +40,10 @@ class System(object):
                 logger.info('Exiting Application...')
                 pygame.quit()
                 exit()
+                
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                for application in self.os.application_queue:
+                    application.quit()
 
         for application in self.os.application_queue:
             application.event_queue += events
@@ -48,8 +52,12 @@ class System(object):
     def graphics_handler(self):
         self.graphics.conn_pygame_graphics.main()
 
-    async def run_main_loop(self):
-        await self.os.run_main_loop()
+    async def run_loops(self):
+        logger.info('Starting System Processes...')
+        await asyncio.gather(self.os.run_main_loop(), self.system_loop())
+
+    async def system_loop(self):
+        logger.info('Starting Main Loop...')
         while True:
             await asyncio.sleep(0)
             self.event_handler()
@@ -60,6 +68,7 @@ class System(object):
             logger.critical('No bootable media. How did this even happen?')
             exit()
         await self.bootable_media.install(self)
+        logger.info('Operating System Installed Successfully.')
 
     def output(self, message):
         pass

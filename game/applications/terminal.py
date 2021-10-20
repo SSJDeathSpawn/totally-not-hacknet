@@ -22,7 +22,7 @@ class Terminal(Application):
         self.stdin = ''
 
     def new_line(self):
-        pass
+        return f'{self.os.username}# '
 
     def update_content(self, new):
         self.content += new
@@ -36,7 +36,12 @@ class Terminal(Application):
         if self.current_event.type == pygame.KEYDOWN and self.current_event.key == pygame.K_RETURN:
             await self.run_command(self.stdin)
             self.stdin = ''
-            self.update_content('\n')
+            self.update_content(f'\n{self.new_line()}')
+
+        if self.current_event.type == pygame.KEYDOWN and self.current_event.key == pygame.K_BACKSPACE:
+            if len(self.stdin) > 0:
+                self.stdin = self.stdin[:-1]
+                self.content = self.content[:-1]
 
         if self.current_event.type == pygame.TEXTINPUT:
             self.stdin += self.current_event.text
@@ -44,14 +49,16 @@ class Terminal(Application):
 
     async def graphics_handler(self):
         await super().graphics_handler()
+        self.os.system.graphics.fill_application_window(self.surface, (0, 255, 0))
+        self.os.system.graphics.display_terminal_text(self.surface, self.content)
 
-        self.os.system.graphics.fill_application_window((0, 255, 0))
-        
 
     async def run_command(self, stdin):
-        args = stdin.split(' ')
-        cmd = args.pop(0)
-        await self.commands[cmd](args)
+        try:
+            args = stdin.split(' ')
+            cmd = args.pop(0)
+            await self.commands[cmd](args)
+        except Exception: pass
 
     async def pwd(self, args):
         pass

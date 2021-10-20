@@ -17,11 +17,15 @@ class Application(object):
         self.current_event = None
         self.modifiers = [False, False, False] # Ctrl, Shift, Alt
 
+        logger.debug(f'Started a {self.__class__.__name__} Instance requested by OS with username {opened_by.username} ({opened_by.system.IP}).')
+
     async def event_handler(self):
         if len(self.event_queue) < 1:
             self.current_event = None
             return
+
         self.current_event = self.event_queue.pop(0)
+
         if self.current_event.type in (pygame.KEYDOWN, pygame.KEYUP):
             if self.current_event.key in (pygame.K_LALT, pygame.K_RALT):
                 self.modifiers[2] = False if self.current_event.type == pygame.KEYUP else True
@@ -47,6 +51,8 @@ class Application(object):
     async def input_event(self, event):
         self.event_queue.append(event)
 
-    async def quit(self):
-        self.os.application_stack.pop()
+    def quit(self):
+        logger.debug(f'Quitting {self.__class__.__name__} Instance.')
+        self.os.system.graphics.conn_pygame_graphics.pop_surface(self.surface)
+        self.os.application_queue.remove(self)
         self.os.applications[self.__class__.__name__.upper()]['instances'].remove(self)

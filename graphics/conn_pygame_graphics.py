@@ -20,7 +20,7 @@ class Surface(pygame.Surface):
         Parameters:
             size - Tuple containing width and height of the Surface. (int width, int height)
         """
-        super().__init__(size)
+        super().__init__(size, pygame.SRCALPHA)
         self.ID = f'SURFACE-{id_generator.generate_id()}'
         self.pos = pos
 
@@ -46,7 +46,9 @@ class ConnPygameGraphics(object):
         self.height = height
         self.caption = caption
 
-        self.first_run = False
+        self.first_run = True
+        self.win = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption(self.caption)
 
         self.fps = 30
         self.clock = pygame.time.Clock()
@@ -63,11 +65,6 @@ class ConnPygameGraphics(object):
     def main(self):
         """Called on every Iteration of the Game Loop."""
 
-        if not self.first_run:
-            self.first_run = True
-            self.win = pygame.display.set_mode((self.width, self.height))
-            pygame.display.set_caption(self.caption)
-
         self.clock.tick(self.fps)
         self.win.fill(pygame.Color('black'))
         for surface in self.render_queue:
@@ -78,15 +75,15 @@ class ConnPygameGraphics(object):
         """Push a surface to the Stack."""
 
         self.render_queue.append(surface)
-        logger.debug(f'Pushed Surface with ID {surface.ID} to the Render Stack.')
+        logger.debug(f'Pushed Surface with ID {surface.ID} to the Render Queue.')
 
     def pop_surface(self, surface):
         """Pop a surface from the stack"""
 
-        self.render_queue.pop(surface)
-        logger.debug(f'Poped Surface with ID {surface.ID} from the Render Stack.')
+        self.render_queue.remove(surface)
+        logger.debug(f'Poped Surface with ID {surface.ID} from the Render Queue.')
 
-    def render_text(self, font_type, size, text, color, background, center, surface=None):
+    def render_text(self, font_type, size, text, color, background, point, alignment=0b0000000000001, surface=None):
         """
         Render text on a given Surface.
 
@@ -95,6 +92,11 @@ class ConnPygameGraphics(object):
             size - Font size
             text - Text to render
             color - Color of the text
+            point - Point to align to
+            alignment - top, left, bottom, right
+                        topleft, bottomleft, topright, bottomright
+                        midtop, midleft, midbottom, midright
+                        center
             background - Color of text background. No background if None.
             center -  Center of where to display the text
             surface - Surface to render on
@@ -108,9 +110,23 @@ class ConnPygameGraphics(object):
             logger.error(f'Invalid Font Type "{font_type}". Ignoring Render Request...')
             return
 
-        text = font.render(text, True, color, background=background) if background else font.render(text, True, color)
+        text = font.render(text, False, color, background=background) if background else font.render(text, True, color)
         text_rect = text.get_rect()
-        text_rect.center = center
+
+        if alignment & 0b1000000000000: text_rect.top = point
+        if alignment & 0b100000000000: text_rect.left = point
+        if alignment & 0b10000000000: text_rect.bottom = point
+        if alignment & 0b1000000000: text_rect.right = point
+        if alignment & 0b100000000: text_rect.topleft = point
+        if alignment & 0b10000000: text_rect.bottomleft = point
+        if alignment & 0b1000000: text_rect.topright = point
+        if alignment & 0b100000: text_rect.bottomright = point
+        if alignment & 0b10000: text_rect.midtop = point
+        if alignment & 0b1000: text_rect.midleft = point
+        if alignment & 0b100: text_rect.midbottom = point
+        if alignment & 0b10: text_rect.midright = point
+        if alignment & 0b1: text_rect.center = point
+
         surface.blit(text, text_rect)
 
 

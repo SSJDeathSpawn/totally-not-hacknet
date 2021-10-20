@@ -1,3 +1,5 @@
+import asyncio
+
 from custom_logging.logging import get_logger
 from game.applications.terminal import Terminal
 
@@ -10,6 +12,10 @@ class OperatingSystem(object):
         self.system = system
         self.memory_being_used = 0
 
+        # Just for now
+        self.username = 'asyncxeno'
+        self.password = None
+
         self.applications = {
             'TERMINAL': {
                 'class': Terminal,
@@ -20,9 +26,14 @@ class OperatingSystem(object):
         self.application_queue = []
 
     async def run_main_loop(self):
-        await self.application_queue[0].run()
-        for application in self.application_queue[1:]:
-            await application.idle()
+        logger.info('Starting Main Loop...')
+        while True:
+            await asyncio.sleep(0)
+            if len(self.application_queue) > 0:
+                await self.application_queue[0].run()
+                if len(self.application_queue) > 1:
+                    for application in self.application_queue[1:]:
+                        await application.idle()
 
     async def initialize(self):
         self.start_application('TERMINAL', self)
