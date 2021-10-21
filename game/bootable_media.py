@@ -6,7 +6,7 @@ logger = get_logger('game')
 
 
 class BootableMedia(object):
-    @staticmethod
-    async def install(system):
-        system.os = OperatingSystem(system)
-        await system.os.initialize()
+	@staticmethod
+	async def install(system):
+		system.os = OperatingSystem(system)
+		await system.os.initialize()
