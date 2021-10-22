@@ -72,6 +72,7 @@ class OperatingSystem(object):
 
 	def start_application(self, name, os):
 		app = self.applications[name]['class'](self, os)
+		app.surface = self.system.graphics.draw_application_window(*app.starting_size, (0, 255, 0), app.title)
 		if app.memory + self.memory_being_used > self.system.memory:
 			raise Exception() # MAKE AND RAISE CUSTOM EXCEPTION WHICH WILL BE HANDLED OUTSIDE
 		self.applications[name]['instances'].append(app)

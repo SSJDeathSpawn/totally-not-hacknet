@@ -12,7 +12,9 @@ class Terminal(Application):
 	def __init__(self, os, opened_by):
 		super().__init__(os, opened_by, 50)
 
-		self.surface = self.os.system.graphics.draw_application_window(540, 360, (0, 255, 0), 'TERMINAL')
+		
+		self.starting_size = (540, 360)
+		self.title = 'TERMINAL'
 
 		self.commands = {
 			'pwd': self.pwd
@@ -42,10 +44,13 @@ class Terminal(Application):
 			if len(self.stdin) > 0:
 				self.stdin = self.stdin[:-1]
 				self.content = self.content[:-1]
+		
 
 		if self.current_event.type == pygame.TEXTINPUT:
 			self.stdin += self.current_event.text
 			self.update_content(self.current_event.text)
+
+		await self.event_handler()
 
 	async def graphics_handler(self):
 		await super().graphics_handler()

@@ -10,8 +10,10 @@ class Application(object):
 	def __init__(self, os, opened_by, memory):
 		self.os = os
 		self.opened_by = opened_by
-
+		self.title = "Application"
+		self.starting_size = (360, 360)
 		self.memory = memory # In MBs
+		self.is_being_moved = False
 
 		self.event_queue = []
 		self.current_event = None
@@ -23,9 +25,24 @@ class Application(object):
 		if len(self.event_queue) < 1:
 			self.current_event = None
 			return
-
+		
 		self.current_event = self.event_queue.pop(0)
 
+		if self.is_being_moved and self.current_event.type==pygame.MOUSEMOTION and self.current_event.buttons[0] == 1:
+			self.surface.pos = (self.surface.pos[0] + self.current_event.rel[0], self.surface.pos[1] + self.current_event.rel[1])
+
+		if self.current_event.type == pygame.MOUSEBUTTONDOWN and self.current_event.button==1:
+			range_for_move = ((self.surface.pos[0], self.surface.pos[0] + self.surface.get_width()*(9/10)),
+								(self.surface.pos[1], self.surface.pos[1]+self.surface.get_height()/10))
+			range_for_close = ((self.surface.pos[0] + self.surface.get_width() * (9/10), self.surface.pos[0] + self.surface.get_width()),
+								(self.surface.pos[1], self.surface.pos[1] + self.surface.get_height()/10))
+
+			if (range_for_move[0][0] <= self.current_event.pos[0] <= range_for_move[0][1]) and (range_for_move[1][0] <= self.current_event.pos[1] <= range_for_move[1][1]):
+				self.is_being_moved = True
+			if (range_for_close[0][0] <= self.current_event.pos[0] <= range_for_close[0][1] ) and (range_for_close[1][0] <= self.current_event.pos[1] <= range_for_close[1][1]):
+				self.quit()
+		if self.is_being_moved and self.current_event.type == pygame.MOUSEBUTTONUP and self.current_event.button==1:
+			self.is_being_moved = False
 
 	async def graphics_handler(self):
 		pass
