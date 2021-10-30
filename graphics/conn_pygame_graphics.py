@@ -1,5 +1,6 @@
 from custom_logging.logging import get_logger
 from utils import id_generator
+import os
 
 import pygame, math
 
@@ -83,7 +84,7 @@ class ConnPygameGraphics(object):
 		self.render_queue.remove(surface)
 		logger.debug(f'Poped Surface with ID {surface.ID} from the Render Queue.')
 
-	def render_text(self, font_type, size, text, color, background, point, alignment=0b1100, surface=None):
+	def render_text(self, font_type, size, text, colour, point, background=None, alignment=0b1100, surface=None):
 		"""
 		Render text on a given Surface.
 
@@ -93,25 +94,27 @@ class ConnPygameGraphics(object):
 			text - Text to render
 			color - Color of the text
 			point - Point to align to
-			alignment - (Center X?, Center Y?, X value (if not centered), Y value (if not centered))
-						# top, left, bottom, right
-						# topleft, bottomleft, topright, bottomright
-						# midtop, midleft, midbottom, midright
-						# center
+			alignment - Where the position is based on (left-top, center-center, bottom-right, etc). A 4 bit number
+						Bits:
+							1st - Whether x should be centred
+							2nd - Whether y should be centred
+							3rd - Left or Right (if x is not centred) 
+							4th - Top or Bottom (if y is not centred) 
 			background - Color of text background. No background if None.
 			center -  Center of where to display the text
 			surface - Surface to render on
 		"""
 
 		surface = surface if surface else self.win
-
+		logger.debug(point)
 		try:
 			font = pygame.font.Font(self.fonts[font_type], size)
 		except KeyError:
 			logger.error(f'Invalid Font Type "{font_type}". Ignoring Render Request...')
 			return
 
-		text = font.render(text, False, color, background=background) if background else font.render(text, True, color)
+		#text = font.render(text, False, colour, background) if background else font.render(text, True, colour)
+		text = font.render(text, False, colour, background) if background else font.render(text, True, colour)
 		text_rect = text.get_rect()
 
 
@@ -139,21 +142,71 @@ class ConnPygameGraphics(object):
 				else:
 					text_rect.topleft = point
 
-		# if alignment & 0b1000000000000: text_rect.top = point
-		# if alignment & 0b100000000000: text_rect.left = point
-		# if alignment & 0b10000000000: text_rect.bottom = point
-		# if alignment & 0b1000000000: text_rect.right = point
-		# if alignment & 0b100000000: text_rect.topleft = point
-		# if alignment & 0b10000000: text_rect.bottomleft = point
-		# if alignment & 0b1000000: text_rect.topright = point
-		# if alignment & 0b100000: text_rect.bottomright = point
-		# if alignment & 0b10000: text_rect.midtop = point
-		# if alignment & 0b1000: text_rect.midleft = point
-		# if alignment & 0b100: text_rect.midbottom = point
-		# if alignment & 0b10: text_rect.midright = point
-		# if alignment & 0b1: text_rect.center = point
-
 		surface.blit(text, text_rect)
+	
+	def outline_surface(self, surface, colour, outline) -> Surface:
+		mask = pygame.mask.from_surface(surface)
+		mask_surf = mask.to_surface(setcolor=colour)
+		mask_surf = pygame.transform.scale(mask_surf, (mask_surf.get_width()+(outline*2), mask_surf.get_height()+(outline*2) ))
+		surf_rect = surface.get_rect()
+		surf_rect.center = (mask_surf.get_width()/2, mask_surf.get_height()/2)
+		mask_surf.blit(surface, surf_rect)
+		return mask_surf
+
+	def convert_to_pygame_image(self, path_from_res):
+		image = pygame.image.load(os.path.dirname(os.path.realpath(__file__))+'/../res'+path_from_res)
+		return image
+
+	def blit_image(self, pos, image, width=-1, height=-1, additive=True, alignment=0b1100, surface=None):
+		"""
+		Put an image on a surface at a certain location.
+
+		Args:
+			pos - The position where image should be placed
+			image - The pygame image object of the image you want to draw
+			width - The width of the final image that is to be drawn. -1 means that it will take the width of the image provided.
+			height - The height of the final image that is to be drawn. -1 means that it will take the height of the image provided.
+			additive - Draws using additive mode and not just putting on top. Defaults to True.
+			alignment - Where the position is based on (left-top, center-center, bottom-right, etc). A 4 bit number
+						Bits:
+							1st - Whether x should be centred
+							2nd - Whether y should be centred
+							3rd - Left or Right (if x is not centred) 
+							4th - Top or Bottom (if y is not centred) 
+			surface - The surface to which the image should be drawn to. Defaults to None.
+		"""
+
+		#TODO: Add additive and width and height stuff
+		surface = surface if surface else self.win
+		logger.debug(type(image))
+		new_image_size = (width if width > 0 else image.get_width(), height if height>0 else height.get_height())
+		image = pygame.transform.scale(image, new_image_size)
+		image_rect = image.get_rect()
+
+		if alignment & 0b1100: #If both are supposed to be centered
+			image_rect.center = pos
+		elif alignment & 0b100: #If Only y is to be centered
+			if alignment & 0b10: #Y center, right
+				image_rect.midright = pos
+			else: #Y center, left
+				image_rect.midleft = pos
+		elif alignment & 0b1000: #If only x is to be centered
+			if alignment & 0b1: # X center, down
+				image_rect.midbottom = pos
+			else: #X center, up
+				image_rect.midtop = pos
+		else: #No centered
+			if alignment & 0b10: # Right
+				if alignment &0b1:
+					image_rect.bottomright = pos
+				else:
+					image_rect.topright = pos
+			else: #Left
+				if alignment & 0b1:
+					image_rect.bottomleft = pos
+				else:
+					image_rect.topleft = pos
+		surface.blit(image, image_rect)
 
 
 	def draw_rect(self, color, rect_x, rect_y, rect_width, rect_height, width=0, surface=None):

@@ -14,10 +14,11 @@ class Application(object):
 		self.starting_size = (360, 360)
 		self.memory = memory # In MBs
 		self.is_being_moved = False
+		self.bg_colour = (255,255,255)
+		self.titlebar=True
 
 		self.event_queue = []
 		self.current_event = None
-		self.modifiers = [False, False, False] # Ctrl, Shift, Alt
 
 		logger.debug(f'Started a {self.__class__.__name__} Instance requested by OS with username {opened_by.username} ({opened_by.system.IP}).')
 
@@ -27,6 +28,9 @@ class Application(object):
 			return
 		
 		self.current_event = self.event_queue.pop(0)
+
+		if self.os.modifiers["alt"] and self.current_event.type == pygame.KEYUP and self.current_event.key == pygame.K_F3:
+			self.quit()
 
 		if self.is_being_moved and self.current_event.type==pygame.MOUSEMOTION and self.current_event.buttons[0] == 1:
 			self.surface.pos = (self.surface.pos[0] + self.current_event.rel[0], self.surface.pos[1] + self.current_event.rel[1])
@@ -45,7 +49,7 @@ class Application(object):
 			self.is_being_moved = False
 
 	async def graphics_handler(self):
-		pass
+		self.os.system.graphics.fill_application_window(self.surface, self.bg_colour)
 
 	async def run(self):
 		await self.event_handler()

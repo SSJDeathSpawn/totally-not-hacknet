@@ -2,6 +2,7 @@ import asyncio
 import pygame
 
 from custom_logging.logging import get_logger
+from game.applications.desktop_manager import DesktopManager
 from game.applications.terminal import Terminal
 
 
@@ -26,6 +27,10 @@ class OperatingSystem(object):
 			'TERMINAL': {
 				'class': Terminal,
 				'instances': []
+			},
+			'DESKTOP': {
+				'class': DesktopManager,
+				'instances': []
 			}
 		}
 
@@ -42,7 +47,7 @@ class OperatingSystem(object):
 						await application.idle()
 
 	async def initialize(self):
-		self.start_application('TERMINAL', self)
+		self.start_application('DESKTOP', self)
 
 		# prompt for username and password
 
@@ -64,15 +69,12 @@ class OperatingSystem(object):
 				elif event.key in (pygame.K_LCTRL, pygame.K_RCTRL):
 					self.modifiers["alt"] = False if event.type == pygame.KEYUP else True
 
-			if self.modifiers["alt"] and event.type == pygame.KEYUP and event.key == pygame.K_F3:
-				self.application_queue[0].quit()
-
 		for application in self.application_queue:
 			application.event_queue += events
 
 	def start_application(self, name, os):
 		app = self.applications[name]['class'](self, os)
-		app.surface = self.system.graphics.draw_application_window(*app.starting_size, (0, 255, 0), app.title)
+		app.surface = self.system.graphics.draw_application_window(*app.starting_size, (0, 255, 0), app.title, app.titlebar)
 		if app.memory + self.memory_being_used > self.system.memory:
 			raise Exception() # MAKE AND RAISE CUSTOM EXCEPTION WHICH WILL BE HANDLED OUTSIDE
 		self.applications[name]['instances'].append(app)

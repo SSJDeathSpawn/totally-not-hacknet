@@ -12,7 +12,8 @@ class Terminal(Application):
 	def __init__(self, os, opened_by):
 		super().__init__(os, opened_by, 50)
 
-		
+		self.bg_colour = (0, 0, 50)
+		self.fg_colour = (255, 255, 255)
 		self.starting_size = (540, 360)
 		self.title = 'TERMINAL'
 
@@ -54,8 +55,7 @@ class Terminal(Application):
 
 	async def graphics_handler(self):
 		await super().graphics_handler()
-		self.os.system.graphics.fill_application_window(self.surface, (0, 255, 0))
-		self.os.system.graphics.display_terminal_text(self.surface, self.content)
+		self.os.system.graphics.display_terminal_text(self.surface, self.content, self.fg_colour)
 
 
 	async def run_command(self, stdin):

@@ -6,3 +6,4 @@ data/
 **/testing/
 logging.conf
 **/test.py
+res/images/
