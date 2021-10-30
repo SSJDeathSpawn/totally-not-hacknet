@@ -1,4 +1,9 @@
 .idea/
 logs/
-*/**/__pycache__/
+venv/
+data/
+**/__pycache__/
+**/testing/
 logging.conf
+**/test.py
+res/images/
