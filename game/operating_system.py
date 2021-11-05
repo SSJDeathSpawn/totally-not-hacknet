@@ -1,9 +1,11 @@
 import asyncio
 import pygame
+from pygame.display import get_window_size
 
 from custom_logging.logging import get_logger
 from game.applications.desktop_manager import DesktopManager
 from game.applications.terminal import Terminal
+from graphics import conn_pygame_graphics
 
 
 logger = get_logger('game')
@@ -34,17 +36,13 @@ class OperatingSystem(object):
 			}
 		}
 
-		self.application_queue = []
+		self.master_application = None
 
 	async def run_main_loop(self):
 		logger.info('Starting Main Loop...')
 		while True:
 			await asyncio.sleep(0)
-			if len(self.application_queue) > 0:
-				await self.application_queue[0].run()
-				if len(self.application_queue) > 1:
-					for application in self.application_queue[1:]:
-						await application.idle()
+			await self.master_application.run()
 
 	async def initialize(self):
 		self.start_application('DESKTOP', self)
@@ -69,14 +67,21 @@ class OperatingSystem(object):
 				elif event.key in (pygame.K_LCTRL, pygame.K_RCTRL):
 					self.modifiers["alt"] = False if event.type == pygame.KEYUP else True
 
-		for application in self.application_queue:
-			application.event_queue += events
+		self.master_application.event_queue += events
 
-	def start_application(self, name, os):
+	def start_application(self, name, os, master_app=None, headless=False):
 		app = self.applications[name]['class'](self, os)
-		app.surface = self.system.graphics.draw_application_window(*app.starting_size, (0, 255, 0), app.title, app.titlebar)
+		if not headless:
+			app.surface = self.system.graphics.draw_application_window(*app.starting_size if master_app else self.system.graphics.conn_pygame_graphics.win.get_size(), (0, 255, 0), app.title if master_app else "", app.titlebar if master_app else False)
 		if app.memory + self.memory_being_used > self.system.memory:
 			raise Exception() # MAKE AND RAISE CUSTOM EXCEPTION WHICH WILL BE HANDLED OUTSIDE
 		self.applications[name]['instances'].append(app)
-		self.application_queue.append(app)
+		if master_app:
+			if master_app == self.master_application:
+				self.master_application.application_queue.append(app)
+				app.master_app = self.master_application
+			else:
+				raise Exception() #Wrong OS instance/ Machine 
+		else:
+			self.master_application = app
 		return app

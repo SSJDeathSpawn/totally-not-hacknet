@@ -5,6 +5,35 @@ from custom_logging.logging import get_logger
 
 logger = get_logger('game')
 
+class MasterApplication(object):
+	def __init__(self, os, opened_by, memory):
+		self.os = os
+		self.opened_by = opened_by
+		self.memory = memory
+		self.application_queue = []
+		self.event_queue = []
+		self.current_event = None
+
+		logger.debug(f'Started a {self.__class__.__name__} Instance requested by OS with username {opened_by.username} ({opened_by.system.IP}).')
+	
+	async def event_handler(self):
+		if len(self.event_queue) < 1:
+			self.current_event = None
+			return
+
+	async def graphics_handler(self):
+		pass
+
+	async def idle(self):
+		pass
+
+	async def run(self):
+		await self.event_handler()
+		await self.graphics_handler()
+		if self.application_queue:
+			await self.application_queue[0].run()
+			for app in self.application_queue[1:]:
+				await app.idle()
 
 class Application(object):
 	def __init__(self, os, opened_by, memory):
@@ -64,5 +93,5 @@ class Application(object):
 	def quit(self):
 		logger.debug(f'Quitting {self.__class__.__name__} Instance.')
 		self.os.system.graphics.conn_pygame_graphics.pop_surface(self.surface)
-		self.os.application_queue.remove(self)
+		self.master_app.application_queue.remove(self)
 		self.os.applications[self.__class__.__name__.upper()]['instances'].remove(self)

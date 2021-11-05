@@ -35,11 +35,14 @@ class Graphics(object):
 		icon = Surface(((image.get_width()+20 if width < 0 else width+20), (image.get_height()+30 if height < 0 else height+30)),(0,0))
 		image = pygame.transform.scale(image, (width if width > 0 else image.get_width(), height if height > 0 else image.get_height()))
 		self.conn_pygame_graphics.blit_image((10, 10), image, height, width, additive, 0b0000, icon)
-		self.conn_pygame_graphics.render_text('regular', font_size, icon_name, text_colour, point=(((width if width != -1 else image.get_width())//2), (height if height != -1 else image.get_height())+text_gap), background=None, alignment=0b1000, surface=icon)
+		self.conn_pygame_graphics.render_text('regular', font_size, icon_name, text_colour, point=(((width+20 if width != -1 else image.get_width()+20)/2), (height+20 if height != -1 else image.get_height()+20)+text_gap), background=None, alignment=0b1000, surface=icon)
 		return icon 
 	
 	def outline_surface(self, surface, colour, thickness):
 		return self.conn_pygame_graphics.outline_surface(surface, colour, thickness)
+
+	def fill(self, surface, color):
+		self.conn_pygame_graphics.draw_rect(color, 0, 0, surface.get_width(), surface.get_height(), width=0, surface=surface)
 
 	def fill_application_window(self, surface, color):
 		self.conn_pygame_graphics.draw_rect(color, 0, surface.get_height() / 10, surface.get_width(), surface.get_height() * (9 / 10), width=0, surface=surface)
