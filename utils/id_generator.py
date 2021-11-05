@@ -18,4 +18,3 @@ def generate_id(length:int=6):
         json.dump(generated, f, indent=4)
         
     return gen
-    
