@@ -28,15 +28,17 @@ class System(object):
 			'not_found': 'Bootable Media not found...'
 		}
 
-		self.surface = self.graphics.draw_system_borders()
+		self.surface = self.graphics.get_system_surface()
+		self.graphics.outline_surface(self.surface, 'green', 1)
 
 		logger.debug(f'Initialized System with ID {self.ID} and IP {self.IP}.')
 
 	def event_handler(self):
-		self.os.handle_events()
+		# self.os.handle_events()
+		pass
 
 	def graphics_handler(self):
-		self.graphics.conn_pygame_graphics.main()
+		self.graphics.conn_pygame_graphics.main(self.surface.ID)
 
 	async def run_loops(self):
 		logger.info('Starting System Processes...')

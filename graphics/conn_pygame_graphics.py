@@ -29,16 +29,20 @@ class Surface(pygame.Surface):
 
 
 class ConnPygameGraphics(object):
-	"""
-	This class handles the outermost layer of graphics in the Application.
+	"""This class handles the outermost layer of graphics in the Application.
+
+	Attributes:
+		width -- width of the pygame window.
+		height -- height of the pygame window.
+		caption -- caption of the pygame window.
 	"""
 
 	def __init__(self, width, height, caption):
 		"""
 		Parameters:
-			width - width of the pygame window.
-			height - height of the pygame window.
-			caption - caption of the pygame window.
+			width -- width of the pygame window.
+			height -- height of the pygame window.
+			caption -- caption of the pygame window.
 		"""
 
 		pygame.init()
@@ -63,26 +67,35 @@ class ConnPygameGraphics(object):
 
 		logger.info('Initialized Main Graphics API.')
 
-	def main(self):
+	def main(self, system_id):
 		"""Called on every Iteration of the Game Loop."""
 
 		self.clock.tick(self.fps)
 		self.win.fill(pygame.Color('black'))
 		for surface in self.render_queue:
-			self.win.blit(surface, surface.pos)
+			if not surface.ID == system_id:	self.win.blit(surface, surface.pos)
+		# system = list(filter(lambda s: s.ID == system_id, self.render_queue))[0]
+		self.win.blit(system:=list(filter(lambda s: s.ID == system_id, self.render_queue))[0], system.pos) 
 		pygame.display.update()
 
 	def push_surface(self, surface):
-		"""Push a surface to the Stack."""
+		"""Push a surface to the queue."""
 
 		self.render_queue.append(surface)
 		logger.debug(f'Pushed Surface with ID {surface.ID} to the Render Queue.')
 
 	def pop_surface(self, surface):
-		"""Pop a surface from the stack"""
+		"""Pop a surface from the queue"""
 
 		self.render_queue.remove(surface)
 		logger.debug(f'Poped Surface with ID {surface.ID} from the Render Queue.')
+
+	def select_surface(self, surface):
+		"""Puts a surface at the bottom of the queue."""
+
+		self.render_queue.remove(surface)
+		self.render_queue.append(surface)
+		logger.debug(f'Surface with ID {surface.ID} selected.')
 
 	def render_text(self, font_type, size, text, colour, point, background=None, alignment=0b1100, surface=None):
 		"""
@@ -144,14 +157,15 @@ class ConnPygameGraphics(object):
 
 		surface.blit(text, text_rect)
 	
-	def outline_surface(self, surface, colour, outline) -> Surface:
-		mask = pygame.mask.from_surface(surface)
-		mask_surf = mask.to_surface(setcolor=colour)
-		mask_surf = pygame.transform.scale(mask_surf, (mask_surf.get_width()+(outline*2), mask_surf.get_height()+(outline*2) ))
-		surf_rect = surface.get_rect()
-		surf_rect.center = (mask_surf.get_width()/2, mask_surf.get_height()/2)
-		mask_surf.blit(surface, surf_rect)
-		return mask_surf
+	def outline_surface(self, surface, colour, outline):
+		self.draw_rect(colour, 0, 0, surface.get_width(), surface.get_height(), outline, surface)
+		# mask = pygame.mask.from_surface(surface)
+		# mask_surf = mask.to_surface(setcolor=colour)
+		# mask_surf = pygame.transform.scale(mask_surf, (mask_surf.get_width()+(outline*2), mask_surf.get_height()+(outline*2) ))
+		# surf_rect = surface.get_rect()
+		# surf_rect.center = (mask_surf.get_width()/2, mask_surf.get_height()/2)
+		# mask_surf.blit(surface, surf_rect)
+		# return mask_surf
 
 	def convert_to_pygame_image(self, path_from_res):
 		image = pygame.image.load(os.path.dirname(os.path.realpath(__file__))+'/../res'+path_from_res)

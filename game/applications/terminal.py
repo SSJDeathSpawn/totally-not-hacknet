@@ -1,4 +1,5 @@
 import pygame
+import random
 
 from custom_logging.logging import get_logger
 from game.application import Application
@@ -12,7 +13,8 @@ class Terminal(Application):
 	def __init__(self, os, opened_by):
 		super().__init__(os, opened_by, 50)
 
-		self.bg_colour = (0, 0, 50)
+		self.current_dir = os.root
+		self.bg_colour = (random.randint(0, 155), random.randint(0, 155), random.randint(0, 155))
 		self.fg_colour = (255, 255, 255)
 		self.starting_size = (540, 360)
 		self.title = 'TERMINAL'
@@ -25,7 +27,7 @@ class Terminal(Application):
 		self.stdin = ''
 
 	def new_line(self):
-		return f'{self.os.username}# '
+		return f'{self.os.username}:{self.current_dir.get_path()}$ '
 
 	def update_content(self, new):
 		self.content += new

@@ -11,10 +11,8 @@ class Graphics(object):
 	def __init__(self, conn_pygame_graphics):
 		self.conn_pygame_graphics = conn_pygame_graphics
 
-	def draw_system_borders(self) -> Surface:
+	def get_system_surface(self):
 		surface = Surface((self.conn_pygame_graphics.width, self.conn_pygame_graphics.height), (0, 0))
-		surface.fill((0, 0, 0, 0))
-		self.conn_pygame_graphics.draw_rect((0, 255, 0), 5, 5, surface.get_width() - 10, surface.get_height() - 10, width=1, surface=surface)
 		self.conn_pygame_graphics.push_surface(surface)
 		return surface
 
@@ -30,7 +28,7 @@ class Graphics(object):
 		self.conn_pygame_graphics.push_surface(surface)
 		return surface 
 	
-	def rendered_icon(self, path_from_res, icon_name, text_colour, font_size, text_gap, draw_outline=False, outline_col=(0,0,0), outline_thickness=0, height=-1, width=-1, additive=True):
+	def rendered_icon(self, path_from_res, icon_name, text_colour, font_size, text_gap, height=-1, width=-1, additive=True):
 		image = self.conn_pygame_graphics.convert_to_pygame_image(path_from_res)
 		icon = Surface(((image.get_width()+20 if width < 0 else width+20), (image.get_height()+30 if height < 0 else height+30)),(0,0))
 		image = pygame.transform.scale(image, (width if width > 0 else image.get_width(), height if height > 0 else image.get_height()))

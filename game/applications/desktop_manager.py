@@ -1,6 +1,4 @@
-import logging
 import pygame
-from pygame.constants import MOUSEBUTTONDOWN
 import math
 
 from custom_logging.logging import get_logger
@@ -29,11 +27,21 @@ class DesktopManager(MasterApplication):
 			self.current_event = None
 			return
 		self.current_event = self.event_queue.pop(0)
-		
-		if self.application_queue:
-			self.application_queue[0].event_queue+=[self.current_event]
 
 		if self.current_event.type==pygame.MOUSEBUTTONDOWN and self.current_event.button==1:
+			if self.application_queue:
+				popindex = None
+				if (not (self.application_queue[0].surface.pos[0] < self.current_event.pos[0] < self.application_queue[0].surface.pos[0] + self.application_queue[0].surface.get_width() and self.application_queue[0].surface.pos[1] < self.current_event.pos[1] < self.application_queue[0].surface.pos[1] + self.application_queue[0].surface.get_height())):
+					for index, application in enumerate(self.application_queue[1:], start=1):
+						if (application.surface.pos[0] < self.current_event.pos[0] < application.surface.pos[0] + application.surface.get_width() and application.surface.pos[1] < self.current_event.pos[1] < application.surface.pos[1] + application.surface.get_height()):
+							popindex = index
+							break
+				if popindex: 
+					app = self.application_queue.pop(popindex)
+					self.application_queue.insert(0, app)
+					self.os.system.graphics.conn_pygame_graphics.select_surface(app.surface)
+					popindex = None
+
 			predicate = self.current_event.pos[0] <= (len(self.icons)//self.icon_limit_row)*self.icon_size[0] and self.current_event.pos[1] <= self.icon_limit_row*self.icon_size[1] or \
 				(len(self.icons)//self.icon_limit_row)*self.icon_size[0] < self.current_event.pos[0] <= math.ceil(len(self.icons)/self.icon_limit_row)*self.icon_size[0] and self.current_event.pos[1] <= (len(self.icons) % self.icon_limit_row)*self.icon_size[1]
 			if predicate:
@@ -44,9 +52,13 @@ class DesktopManager(MasterApplication):
 				self.selected=self.selected.union({select_index})
 			else:
 				self.selected = set()
+
 		if self.selected and self.current_event.type==pygame.KEYDOWN and self.current_event.key==pygame.K_RETURN:
 			for i in self.selected:
-				app = self.icons[i].open(self)
+				self.icons[i].open(self)
+
+		if self.application_queue:
+			self.application_queue[0].event_queue += [self.current_event]
 
 		await self.event_handler()
 

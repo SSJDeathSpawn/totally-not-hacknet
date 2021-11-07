@@ -1,11 +1,10 @@
 import asyncio
 import pygame
-from pygame.display import get_window_size
 
 from custom_logging.logging import get_logger
 from game.applications.desktop_manager import DesktopManager
 from game.applications.terminal import Terminal
-from graphics import conn_pygame_graphics
+from game.storage_system.directory import RootDir
 
 
 logger = get_logger('game')
@@ -15,6 +14,7 @@ class OperatingSystem(object):
 	def __init__(self, system):
 		self.system = system
 		self.memory_being_used = 0
+		self.root = RootDir([])
 		self.modifiers = {
 			"shift": False,
 			"alt": False,
@@ -42,6 +42,7 @@ class OperatingSystem(object):
 		logger.info('Starting Main Loop...')
 		while True:
 			await asyncio.sleep(0)
+			self.handle_events()
 			await self.master_application.run()
 
 	async def initialize(self):
@@ -75,10 +76,10 @@ class OperatingSystem(object):
 			app.surface = self.system.graphics.draw_application_window(*app.starting_size if master_app else self.system.graphics.conn_pygame_graphics.win.get_size(), (0, 255, 0), app.title if master_app else "", app.titlebar if master_app else False)
 		if app.memory + self.memory_being_used > self.system.memory:
 			raise Exception() # MAKE AND RAISE CUSTOM EXCEPTION WHICH WILL BE HANDLED OUTSIDE
-		self.applications[name]['instances'].append(app)
+		self.applications[name]['instances'].insert(0, app)
 		if master_app:
 			if master_app == self.master_application:
-				self.master_application.application_queue.append(app)
+				self.master_application.application_queue.insert(0, app)
 				app.master_app = self.master_application
 			else:
 				raise Exception() #Wrong OS instance/ Machine 
