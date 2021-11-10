@@ -119,7 +119,6 @@ class ConnPygameGraphics(object):
 		"""
 
 		surface = surface if surface else self.win
-		logger.debug(point)
 		try:
 			font = pygame.font.Font(self.fonts[font_type], size)
 		except KeyError:
@@ -192,7 +191,6 @@ class ConnPygameGraphics(object):
 
 		#TODO: Add additive and width and height stuff
 		surface = surface if surface else self.win
-		logger.debug(type(image))
 		new_image_size = (width if width > 0 else image.get_width(), height if height>0 else height.get_height())
 		image = pygame.transform.scale(image, new_image_size)
 		image_rect = image.get_rect()

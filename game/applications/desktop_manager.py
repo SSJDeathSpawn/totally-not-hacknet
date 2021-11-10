@@ -14,7 +14,6 @@ class DesktopManager(MasterApplication):
 		super().__init__(os, opened_by, 50)
 		#After filesystems have been implemented, make the OS add the User/Desktop applications in here 
 		self.icons = [Icon("Terminal", "/images/icons/term_icon.png", 'TERMINAL')]
-		logger.debug(type(self.icons[0]))
 		#The list of indices of the icons that are selected 
 		self.selected = set()
 		self.icon_size = (150, 150)
@@ -48,7 +47,6 @@ class DesktopManager(MasterApplication):
 				selected_x = self.current_event.pos[0] // self.icon_size[0] 
 				selected_y = self.current_event.pos[1] // self.icon_size[1] 
 				select_index = selected_x + selected_y*self.icon_limit_row
-				logger.debug(select_index)
 				self.selected=self.selected.union({select_index})
 			else:
 				self.selected = set()
