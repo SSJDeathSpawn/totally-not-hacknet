@@ -24,7 +24,7 @@ class Graphics(object):
 			self.conn_pygame_graphics.draw_rect((255, 0, 0), surface.get_width() * (9 / 10), 0, surface.get_width()/10, surface.get_height() / 10, width=0, surface=surface)
 			self.conn_pygame_graphics.draw_rect((155, 155, 155), surface.get_width() * (8 / 10), 0, surface.get_width() / 10, surface.get_height() / 10, width=0, surface=surface)
 			self.conn_pygame_graphics.draw_rect(color, 0, surface.get_height() / 10, surface.get_width(), surface.get_height() * (9 / 10), width=0, surface=surface)
-			self.conn_pygame_graphics.render_text('bold', surface.get_height() // 20, name, (0, 0, 0), (surface.get_width() * (2 / 5), surface.get_height() / 20), surface=surface)
+			self.conn_pygame_graphics.render_text('bold', surface.get_height() // 20, name, (0, 0, 0), (surface.get_width() * (2 / 5), surface.get_height() / 20), alignment=0b1100, surface=surface)
 		self.conn_pygame_graphics.push_surface(surface)
 		return surface 
 	
@@ -45,39 +45,41 @@ class Graphics(object):
 	def fill_application_window(self, surface, color):
 		self.conn_pygame_graphics.draw_rect(color, 0, surface.get_height() / 10, surface.get_width(), surface.get_height() * (9 / 10), width=0, surface=surface)
 
-	def display_terminal_text(self, surface, text, colour):
+	def display_terminal_text(self, surface, text):
 		text_surface = pygame.Surface((surface.get_width(), surface.get_height() * (9 / 10)), pygame.SRCALPHA)
 		text_surface.fill((0, 0, 0, 0))
 
-		lines = []
+		# lines = []
 
-		font_size = text_surface.get_width() // 30
-		height = font_size
-		width = font_size * 3 / 5
-		number_of_characters = text_surface.get_width() // width
-		number_of_lines = text_surface.get_height() // height
+		# font_size = text_surface.get_width() // 30
+		# height = font_size
+		# width = font_size * 3 / 5
+		# number_of_characters = text_surface.get_width() // width
+		# number_of_lines = text_surface.get_height() // height
 
-		count = 0
-		newline = ''
-		for letter in text:
-			if count == number_of_characters:
-				count = 0
-				lines.append(newline)
-				newline = ''
-			if letter == '\n':
-				count = 0
-				lines.append(newline)
-				newline = ''
-				continue
-			newline += letter
-			count += 1
-		lines.append(newline)
+		# count = 0
+		# newline = ''
+		# for letter in text:
+		# 	if count == number_of_characters:
+		# 		count = 0
+		# 		lines.append(newline)
+		# 		newline = ''
+		# 	if letter == '\n':
+		# 		count = 0
+		# 		lines.append(newline)
+		# 		newline = ''
+		# 		continue
+		# 	newline += letter
+		# 	count += 1
+		# lines.append(newline)
 
-		lines = lines[-number_of_lines:]
+		# lines = lines[-number_of_lines:]
 
-		# self.conn_pygame_graphics.render_text('regular', 20, text, (0, 0, 0), None, (0, 0), 0b100000000, text_surface)
+		# for i in range(len(lines)):
+		# 	self.conn_pygame_graphics.render_text('regular', font_size, lines[i], colour, point=(0, i * (font_size - 0.5)), background=None, alignment=0b0000, surface=text_surface)
 
-		for i in range(len(lines)):
-			self.conn_pygame_graphics.render_text('regular', font_size, lines[i], colour, point=(0, i * (font_size - 0.5)), background=None, alignment=0b0000, surface=text_surface)
+
+		for string in text.processed:
+			self.conn_pygame_graphics.render_text(string[1], text.get_font_size_scaled(), string[0], string[2], string[3], surface=text_surface)
 
 		surface.blit(text_surface, (0, surface.get_height() / 10))

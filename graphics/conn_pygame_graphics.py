@@ -60,12 +60,77 @@ class ConnPygameGraphics(object):
 
 		self.fonts = {
 			'regular': 'res/fonts/SourceCodePro-Regular.ttf',
-			'bold': 'res/fonts/SourceCodePro-Bold.ttf'
+			'bold': 'res/fonts/SourceCodePro-Bold.ttf',
+			'italic': 'res/fonts/SourceCodePro-Italic.ttf',
+			'bold-italic': 'res/fonts/SourceCodePro-BoldItalic.ttf'
+		}
+
+		self.escape_codes = {
+			'\u001b[0m': 'reset',
+			'\u001b[30m': 'black',
+			'\u001b[31m': 'red',
+			'\u001b[32m': 'green',
+			'\u001b[33m': 'yellow',
+			'\u001b[34m': 'blue',
+			'\u001b[35m': 'magenta',
+			'\u001b[36m': 'cyan',
+			'\u001b[37m': 'white',
 		}
 
 		self.render_queue = []
 
+		# self.setup()
+
 		logger.info('Initialized Main Graphics API.')
+
+	# def setup(self):
+	# 	logger.info('Setting things up...')
+
+	# 	self.text_presets = {
+	# 		"blue": {
+	# 			"reg": {},
+	# 			"bold": {}
+	# 		},
+	# 		"green": {
+	# 			"reg": {},
+	# 			"bold": {}
+	# 		},
+	# 		"red": {
+	# 			"reg": {},
+	# 			"bold": {}
+	# 		},
+	# 		"cyan": {
+	# 			"reg": {},
+	# 			"bold": {}
+	# 		},
+	# 		"magenta": {
+	# 			"reg": {},
+	# 			"bold": {}
+	# 		},
+	# 		"yellow": {
+	# 			"reg": {},
+	# 			"bold": {}
+	# 		},
+	# 		"black": {
+	# 			"reg": {},
+	# 			"bold": {}
+	# 		},
+	# 		"white": {
+	# 			"reg": {},
+	# 			"bold": {}
+	# 		},
+	# 	}
+
+	# 	font_reg = pygame.font.Font(self.fonts['regular'], 1)
+	# 	font_bold = pygame.font.Font(self.fonts['bold'], 1)
+
+	# 	for color in self.text_presets:
+	# 		for i in range(128):
+	# 			char = chr(i)
+	# 			self.text_presets[color]['reg'][char] = font_reg.render(char, False, color)
+	# 			self.text_presets[color]['bold'][char] = font_bold.render(char, False, color)
+			
+	# 	logger.info('Setup complete.')
 
 	def main(self, system_id):
 		"""Called on every Iteration of the Game Loop."""
@@ -97,7 +162,97 @@ class ConnPygameGraphics(object):
 		self.render_queue.append(surface)
 		logger.debug(f'Surface with ID {surface.ID} selected.')
 
-	def render_text(self, font_type, size, text, colour, point, background=None, alignment=0b1100, surface=None):
+	# def render_text_fill(self, font_type, max_size, base_color, text, surface=None):
+	# 	"""
+	# 	Renders text filling the given Surface.
+
+	# 	Parameters:
+	# 		font_type -- Font type (regular, thin, italic, combinations)
+	# 		max_size -- Maximum possible size of the font
+	# 		base_color -- Base color to use for the text
+	# 		text -- The text
+	# 		surface -- Surface to render the text on
+	# 	"""
+
+	# 	surface = surface if surface else self.win
+
+	# 	font_size = min(surface.get_width() // 30, max_size)
+	# 	height = font_size
+	# 	width = font_size * 3 / 5
+	# 	number_of_characters = surface.get_width() // width
+	# 	number_of_lines = surface.get_height() // height
+
+	# 	pos = [0.5, 0.5]
+	# 	scan = ''
+	# 	current_color = base_color
+
+	# 	for _ in text:
+	# 		scan += text
+	# 		for code in self.escape_codes:
+	# 			if code in scan:
+	# 				scan = scan[:-len(code)]
+					
+	# 				lines = {}
+	# 				count = 0
+	# 				newline = ''
+					
+	# 				for letter in scan:
+	# 					if count == number_of_characters:
+	# 						count = 0
+	# 						lines[newline] = pos
+	# 						newline = ''
+	# 						pos[1] += width
+	# 					if letter == '\n':
+	# 						count = 0
+	# 						lines[newline] = pos
+	# 						newline = ''
+	# 						pos[1] += width
+	# 						continue
+	# 					newline += letter
+	# 					count += 1
+	# 					pos[0] += width
+
+	# 				lines[newline] = pos
+
+	# 				renders = list(lines.items())[-number_of_lines:]
+
+	# 				for render in renders:
+	# 					self.render_text(font_type, font_size, render[0], current_color, point=render[1], background=None, alignment=0b0000, surface=surface)
+
+	# 				current_color = self.escape_codes[code] if code != '\u001b[0m' else base_color
+	# 				scan = ''
+
+	# 	lines = {}
+	# 	count = 0
+	# 	newline = ''
+		
+	# 	for letter in scan:
+	# 		if count == number_of_characters:
+	# 			count = 0
+	# 			lines[newline] = pos
+	# 			newline = ''
+	# 			pos[1] += width
+	# 		if letter == '\n':
+	# 			count = 0
+	# 			lines[newline] = pos
+	# 			newline = ''
+	# 			pos[1] += width
+	# 			continue
+	# 		newline += letter
+	# 		count += 1
+	# 		pos[0] += width
+
+	# 	lines[newline] = pos
+
+	# 	renders = list(lines.items())[-number_of_lines:]
+
+	# 	for render in renders:
+	# 		self.render_text(font_type, font_size, render[0], current_color, point=render[1], background=None, alignment=0b0000, surface=surface)
+
+	# 	current_color = self.escape_codes[code] if code != '\u001b[0m' else base_color
+	# 	scan = ''
+
+	def render_text(self, font_type, size, text, colour, point, background=None, alignment=0b0000, surface=None):
 		"""
 		Render text on a given Surface.
 

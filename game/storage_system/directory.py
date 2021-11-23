@@ -37,9 +37,10 @@ class Directory(StorageUnit):
         bfsstr = ''
         
         for su in self.get_contents():
+            bfsstr += '\n'
             bfsstr += ('|    ' * depth)
             bfsstr += ('| -- ')
-            bfsstr += f'{su.get_name()}\n'
+            bfsstr += {su.get_name()}
         
             if isinstance(su, Directory):
                 bfsstr += su.bfs(depth + 1)

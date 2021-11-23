@@ -3,7 +3,8 @@ import random
 
 from custom_logging.logging import get_logger
 from game.application import Application
-from graphics.conn_pygame_graphics import Surface
+from utils.text import Text
+from exceptions.applications import *
 
 
 logger = get_logger('game')
@@ -14,24 +15,33 @@ class Terminal(Application):
 		super().__init__(os, opened_by, 50)
 
 		self.current_dir = os.root
-		self.bg_colour = (random.randint(0, 155), random.randint(0, 155), random.randint(0, 155))
-		self.fg_colour = (255, 255, 255)
+		self.bg_colour = (25, 25, 25)
 		self.starting_size = (540, 360)
+		self.scale = 1
 		self.title = 'TERMINAL'
 
 		self.commands = {
-			'pwd': self.pwd
+			'pwd': self._pwd,
+			'tree': self._tree,
+			'clear': self._clear
 		}
 
-		self.content = f'{self.new_line()}'
+		fontsize = (self.starting_size[0] / 50) * (5 / 3)
+
+		self.content = Text(f'{self.get_new_line()}', (215, 215, 215), 'regular', fontsize, ending=[30, (self.starting_size[1] * (9 / 10) // fontsize)])
 		self.stdin = ''
 
 	def new_line(self):
-		return f'{self.os.username}:{self.current_dir.get_path()}$ '
+		# logger.warn(self.content.get_raw_text())
+		# logger.warn('------------------------------')
+		self.update_content(f'\n{self.get_new_line()}')
+		# logger.warn(self.content.get_raw_text())
+
+	def get_new_line(self):
+		return '${c:green}' + f'{self.os.username}' + '${c:reset}:${s:italic}' + f'{self.current_dir.get_path()}' + '${s:reset}$ '	
 
 	def update_content(self, new):
-		self.content += new
-		if self.content.count('\n') > 300: self.content = '\n'.join(self.content.split('\n')[-300:])
+		self.content.update_string(new)
 
 	async def event_handler(self):
 		await super().event_handler()
@@ -40,12 +50,12 @@ class Terminal(Application):
 		if self.current_event.type == pygame.KEYDOWN and self.current_event.key == pygame.K_RETURN:
 			await self.run_command(self.stdin)
 			self.stdin = ''
-			self.update_content(f'\n{self.new_line()}')
 
 		if self.current_event.type == pygame.KEYDOWN and self.current_event.key == pygame.K_BACKSPACE:
 			if len(self.stdin) > 0:
 				self.stdin = self.stdin[:-1]
-				self.content = self.content[:-1]
+				self.content.string = self.content.string[:-1]
+				self.content._process_string()
 		
 
 		if self.current_event.type == pygame.TEXTINPUT:
@@ -56,7 +66,7 @@ class Terminal(Application):
 
 	async def graphics_handler(self):
 		await super().graphics_handler()
-		self.os.system.graphics.display_terminal_text(self.surface, self.content, self.fg_colour)
+		self.os.system.graphics.display_terminal_text(self.surface, self.content)
 
 
 	async def run_command(self, stdin):
@@ -64,7 +74,26 @@ class Terminal(Application):
 			args = stdin.split(' ')
 			cmd = args.pop(0)
 			await self.commands[cmd](args)
-		except Exception: pass
+		except KeyError:
+			return self.response(1, None, 'Command Not Recognised')
 
-	async def pwd(self, args):
-		pass
+	def response(self, exit_code, stdout, stderr, update_in_terminal=True):
+		if update_in_terminal:
+			code = '${c:reset}' if not exit_code else '${c:red}' 
+			self.update_content(code + f'\nExit code: {exit_code}' + '${c:reset}')
+			if stdout: self.update_content(f'\n{stdout}')
+			if stderr: self.update_content(code + f'\n{stderr}' + '${c:reset}')
+			self.new_line()
+		return { 'exit_code': exit_code, 'stdout': stdout, 'stderr': stderr }
+
+	async def _pwd(self, _):
+		return self.response(0, self.current_dir.get_path(), None)
+
+	async def _tree(self, _):
+		return self.response(0, self.current_dir.bfs(), None)
+
+	async def _clear(self, _):
+		self.content.update_string(self.get_new_line(), new=True)
+		return self.response(0, None, None, update_in_terminal=False)
+		
+
