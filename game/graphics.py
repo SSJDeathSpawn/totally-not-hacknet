@@ -25,7 +25,7 @@ class Graphics(object):
 			self.conn_pygame_graphics.draw_rect((255, 0, 0), surface.get_width() - titlebar_comp_width, 0, titlebar_comp_width, titlebar_height, width=0, surface=surface)
 			self.conn_pygame_graphics.draw_rect((155, 155, 155), surface.get_width() - (2 * titlebar_comp_width), 0, titlebar_comp_width, titlebar_height, width=0, surface=surface)
 			self.conn_pygame_graphics.draw_rect(color, 0, titlebar_height, surface.get_width(), surface.get_height() - titlebar_height, width=0, surface=surface)
-			self.conn_pygame_graphics.render_text('bold', int(titlebar_height * (2 / 5)), name, (0, 0, 0), ((surface.get_width() - (2 * titlebar_comp_width)) // 2, titlebar_height // 2), surface=surface)
+			self.conn_pygame_graphics.render_text('bold', int(titlebar_height * (2 / 5)), name, (0, 0, 0), ((surface.get_width() - (2 * titlebar_comp_width)) // 2, titlebar_height // 2), alignment=0b1100, surface=surface)
 		self.conn_pygame_graphics.push_surface(surface)
 		return surface 
 	
@@ -44,8 +44,7 @@ class Graphics(object):
 		self.conn_pygame_graphics.draw_rect(color, 0, 0, surface.get_width(), surface.get_height(), width=0, surface=surface)
 
 	def fill_application_window(self, surface, color):
-		self.conn_pygame_graphics.draw_rect(color, 0, surface.get_height() / 10, surface.get_width(), surface.get_height() * (9 / 10), width=0, surface=surface)
-
+		self.conn_pygame_graphics.draw_rect(color, 0, titlebar_height, surface.get_width(), surface.get_height() - titlebar_height, width=0, surface=surface)
 
 	def display_terminal_text(self, surface, text):
 		text_surface = pygame.Surface((surface.get_width(), surface.get_height() - titlebar_height), pygame.SRCALPHA)
@@ -84,4 +83,4 @@ class Graphics(object):
 		for string in text.processed:
 			self.conn_pygame_graphics.render_text(string[1], text.get_font_size_scaled(), string[0], string[2], string[3], surface=text_surface)
 
-		surface.blit(text_surface, (0, surface.get_height() - titlebar_height))
+		surface.blit(text_surface, (0, titlebar_height))

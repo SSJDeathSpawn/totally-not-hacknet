@@ -27,9 +27,10 @@ class Terminal(Application):
 			'clear': self._clear
 		}
 
-		fontsize = (self.starting_size[0] / 50) * (5 / 3)
+		chars = self.starting_size[0] // 10
+		fontsize = (self.starting_size[0] / chars) * (5 / 3)
 
-		self.content = Text(f'{self.get_new_line()}', (215, 215, 215), 'regular', fontsize, ending=[49, (self.starting_size[1] * (9 / 10) // fontsize)])
+		self.content = Text(f'{self.get_new_line()}', (215, 215, 215), 'regular', fontsize, ending=[chars, ((self.starting_size[1] - titlebar_height) // fontsize)])
 		self.stdin = ''
 
 		self.wait_for_input = None
