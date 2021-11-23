@@ -31,14 +31,16 @@ class Terminal(Application):
 		self.content = Text(f'{self.get_new_line()}', (215, 215, 215), 'regular', fontsize, ending=[30, (self.starting_size[1] * (9 / 10) // fontsize)])
 		self.stdin = ''
 
+		self.wait_for_input = None
+
 	def new_line(self):
 		# logger.warn(self.content.get_raw_text())
 		# logger.warn('------------------------------')
-		self.update_content(f'\n{self.get_new_line()}')
+		self.update_content(f'\n\n{self.get_new_line()}')
 		# logger.warn(self.content.get_raw_text())
 
 	def get_new_line(self):
-		return '${c:green}' + f'{self.os.username}' + '${c:reset}:${s:italic}' + f'{self.current_dir.get_path()}' + '${s:reset}$ '	
+		return '${c:green}${s:bold}' + f'{self.os.username}' + '${c:reset}${s:reset}:${s:italic}' + f'{self.current_dir.get_path()}' + '${s:reset}$ '	
 
 	def update_content(self, new):
 		self.content.update_string(new)
@@ -70,10 +72,11 @@ class Terminal(Application):
 
 
 	async def run_command(self, stdin):
+		if self.wait_for_input: return self.wait_for_input(stdin)
 		try:
 			args = stdin.split(' ')
 			cmd = args.pop(0)
-			await self.commands[cmd](args)
+			return await self.commands[cmd](args)
 		except KeyError:
 			return self.response(1, None, 'Command Not Recognised')
 
@@ -95,5 +98,6 @@ class Terminal(Application):
 	async def _clear(self, _):
 		self.content.update_string(self.get_new_line(), new=True)
 		return self.response(0, None, None, update_in_terminal=False)
-		
 
+	async def _cd(self, args):
+		path = '/' if len(args) < 1 else args[0]

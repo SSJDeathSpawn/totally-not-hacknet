@@ -79,12 +79,16 @@ class Text(object):
         for string in strings:
             if len(string) > 0:
                 splitstring = string.split('\n')
+                
+                index = 0
                 for part in splitstring:
                     self.processed.append((part, style, color, tuple(pos)))
                     pos[0] += (len(part) * (width))
-                    if splitstring.index(part) + 1 < len(splitstring): 
+                    if index + 1 < len(splitstring): 
                         pos[0] = self.startingpos[0]
                         pos[1] += height
+                    index += 1
+                    
             if codes: 
                 code = codes.pop(0)
                 if code[2] == 'c':
