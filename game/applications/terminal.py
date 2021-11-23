@@ -3,6 +3,7 @@ import random
 
 from custom_logging.logging import get_logger
 from game.application import Application
+from game.constants import *
 from utils.text import Text
 from exceptions.applications import *
 
@@ -28,7 +29,7 @@ class Terminal(Application):
 
 		fontsize = (self.starting_size[0] / 50) * (5 / 3)
 
-		self.content = Text(f'{self.get_new_line()}', (215, 215, 215), 'regular', fontsize, ending=[30, (self.starting_size[1] * (9 / 10) // fontsize)])
+		self.content = Text(f'{self.get_new_line()}', (215, 215, 215), 'regular', fontsize, ending=[49, (self.starting_size[1] * (9 / 10) // fontsize)])
 		self.stdin = ''
 
 		self.wait_for_input = None
