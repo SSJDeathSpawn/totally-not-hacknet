@@ -17,7 +17,7 @@ class Terminal(Application):
 
 		self.current_dir = os.root
 		self.bg_colour = (25, 25, 25)
-		self.starting_size = (540, 360)
+		self.starting_size = (720, 480)
 		self.scale = 1
 		self.title = 'TERMINAL'
 

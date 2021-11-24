@@ -1,6 +1,7 @@
 import pygame
 
 from custom_logging.logging import get_logger
+from game.constants import *
 
 
 logger = get_logger('game')
@@ -34,7 +35,7 @@ class Application(object):
 
 		if self.is_being_moved and self.current_event.type==pygame.MOUSEMOTION and self.current_event.buttons[0] == 1:
 			min_val = (0, 0)
-			max_val = (self.os.system.graphics.conn_pygame_graphics.width - self.surface.get_width(), self.os.system.graphics.conn_pygame_graphics.height - (self.surface.get_height() / 10))
+			max_val = (self.os.system.graphics.conn_pygame_graphics.win.get_width() - self.surface.get_width(), self.os.system.graphics.conn_pygame_graphics.win.get_height() - titlebar_height)
 			self.surface.pos = max(min(self.surface.pos[0] + self.current_event.rel[0], max_val[0]), min_val[0]), max(min(self.surface.pos[1] + self.current_event.rel[1], max_val[1]), min_val[1])
 
 		if self.current_event.type == pygame.MOUSEBUTTONDOWN and self.current_event.button==1:

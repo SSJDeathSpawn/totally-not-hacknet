@@ -23,7 +23,7 @@ async def main():
 	setup()
 
 	logger.info('Starting Application...')
-	system = System('Xeno', 256, Graphics(ConnPygameGraphics(1080, 720, 'Totally Not Hacknet')))
+	system = System('Xeno', 256, Graphics(ConnPygameGraphics(1280, 720, 'Totally Not Hacknet')))
 	system.bootable_media = BootableMedia()
 	await system.install_os()
 	await system.run_loops()

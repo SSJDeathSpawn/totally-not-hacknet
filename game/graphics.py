@@ -13,12 +13,12 @@ class Graphics(object):
 		self.conn_pygame_graphics = conn_pygame_graphics
 
 	def get_system_surface(self):
-		surface = Surface((self.conn_pygame_graphics.width, self.conn_pygame_graphics.height), (0, 0))
+		surface = Surface((self.conn_pygame_graphics.win.get_width(), self.conn_pygame_graphics.win.get_height()), (0, 0))
 		self.conn_pygame_graphics.push_surface(surface)
 		return surface
 
 	def draw_application_window(self, width, height, color, name, titlebar=True) -> Surface:
-		surface = Surface((width, height), ((self.conn_pygame_graphics.width - width) / 2, (self.conn_pygame_graphics.height - height) / 2))
+		surface = Surface((width, height), ((self.conn_pygame_graphics.win.get_width() - width) / 2, (self.conn_pygame_graphics.win.get_height() - height) / 2))
 		surface.fill((0, 0, 0, 0))
 		if titlebar:
 			self.conn_pygame_graphics.draw_rect((255, 255, 255), 0, 0, surface.get_width(), titlebar_height, width=0, surface=surface)
