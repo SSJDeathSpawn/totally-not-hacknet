@@ -99,9 +99,9 @@ class MasterApplication(Application):
 		pass
 
 	async def run(self):
-		await self.event_handler()
-		await self.graphics_handler()
 		if self.application_queue:
 			await self.application_queue[0].run()
 			for app in self.application_queue[1:]:
 				await app.idle()
+		await self.event_handler()
+		await self.graphics_handler()

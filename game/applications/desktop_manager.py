@@ -25,6 +25,7 @@ class DesktopManager(MasterApplication):
 		if len(self.event_queue) < 1:
 			self.current_event = None
 			return
+			
 		self.current_event = self.event_queue.pop(0)
 
 		if self.current_event.type==pygame.MOUSEBUTTONDOWN and self.current_event.button==1:
@@ -54,6 +55,8 @@ class DesktopManager(MasterApplication):
 		if self.selected and self.current_event.type==pygame.KEYDOWN and self.current_event.key==pygame.K_RETURN:
 			for i in self.selected:
 				self.icons[i].open(self)
+			self.selected = set()
+			return
 
 		if self.application_queue:
 			self.application_queue[0].event_queue += [self.current_event]
@@ -82,7 +85,7 @@ class Icon(object):
 
 	def render_icon(self, pos, desktop_manager, selected):
 		if not self.render:
-			self.render = desktop_manager.os.system.graphics.rendered_icon(self.path, self.name, (255,255,255), 16, 0, width=80, height=70)
+			self.render = desktop_manager.os.system.graphics.rendered_icon(self.path, self.name, (255,255,255), 16, 0, width=60, height=60)
 		if not self.sel_render:
 			self.sel_render = desktop_manager.icon_background_render.copy()
 			rect = self.render.get_rect()
