@@ -50,36 +50,6 @@ class Graphics(object):
 		text_surface = pygame.Surface((surface.get_width(), surface.get_height() - titlebar_height), pygame.SRCALPHA)
 		text_surface.fill((0, 0, 0, 0))
 
-		# lines = []
-
-		# font_size = text_surface.get_width() // 30
-		# height = font_size
-		# width = font_size * 3 / 5
-		# number_of_characters = text_surface.get_width() // width
-		# number_of_lines = text_surface.get_height() // height
-
-		# count = 0
-		# newline = ''
-		# for letter in text:
-		# 	if count == number_of_characters:
-		# 		count = 0
-		# 		lines.append(newline)
-		# 		newline = ''
-		# 	if letter == '\n':
-		# 		count = 0
-		# 		lines.append(newline)
-		# 		newline = ''
-		# 		continue
-		# 	newline += letter
-		# 	count += 1
-		# lines.append(newline)
-
-		# lines = lines[-number_of_lines:]
-
-		# for i in range(len(lines)):
-		# 	self.conn_pygame_graphics.render_text('regular', font_size, lines[i], colour, point=(0, i * (font_size - 0.5)), background=None, alignment=0b0000, surface=text_surface)
-
-
 		for string in text.processed:
 			self.conn_pygame_graphics.render_text(string[1], text.get_font_size_scaled(), string[0], string[2], string[3], surface=text_surface)
 

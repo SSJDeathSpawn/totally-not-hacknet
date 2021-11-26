@@ -1,10 +1,12 @@
 import asyncio
 import pygame
+import json
 
 from custom_logging.logging import get_logger
 from game.applications.desktop_manager import DesktopManager
 from game.applications.terminal import Terminal
-from game.storage_system.directory import RootDir
+from game.storage_system.directory import Directory, RootDir
+from utils.storage_system_parser import parse_root
 
 
 logger = get_logger('game')
@@ -14,7 +16,8 @@ class OperatingSystem(object):
 	def __init__(self, system):
 		self.system = system
 		self.memory_being_used = 0
-		self.root = RootDir([])
+		with open('res/dev/root.json', 'r') as f:
+			self.root = parse_root(json.load(f))
 		self.modifiers = {
 			"shift": False,
 			"alt": False,
@@ -82,7 +85,48 @@ class OperatingSystem(object):
 				self.master_application.application_queue.insert(0, app)
 				app.master_app = self.master_application
 			else:
-				raise Exception() #Wrong OS instance/ Machine 
+				raise Exception()  # Wrong OS instance / Machine
 		else:
 			self.master_application = app
 		return app
+
+	def parse_path(self, path, relative_to=None, parent_dir=False):
+		
+		checktype = None
+		path = path.strip()	
+
+		if path in ['', '/']: return self.root
+		path = path.split('/')
+		if path[-1] == '':
+			path.pop()
+			checktype = Directory
+		if path[0] == '':
+			current = self.root
+			path.pop(0)
+		else:
+			if not relative_to:
+				raise Exception()  # I will make the exception later
+			current = relative_to
+
+		if parent_dir: path = path[:-1]
+
+		for part in path:
+			if part == '..':
+				if current == self.root:
+					raise Exception()  # I will make the exception later
+				current = current.get_parent()
+			elif part == '.':
+				continue
+			else:
+				try:
+					current = current.get_su_by_name(part)
+				except Exception:
+					raise Exception()  # I will make the exception later
+				except AttributeError:
+					raise Exception()  # Later
+
+		if checktype:
+			if not isinstance(current, checktype):
+				raise Exception()  # later
+
+		return current

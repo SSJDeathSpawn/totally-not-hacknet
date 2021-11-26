@@ -40,12 +40,12 @@ class Directory(StorageUnit):
             bfsstr += '\n'
             bfsstr += ('|    ' * depth)
             bfsstr += ('| -- ')
-            bfsstr += {su.get_name()}
+            bfsstr += su.get_name()
         
             if isinstance(su, Directory):
                 bfsstr += su.bfs(depth + 1)
             
-        return bfsstr
+        return bfsstr if depth != 0 else bfsstr[1:]
 
     def has_su(self, su):
         """Checks if a storage unit belongs to this directory or any of its sub directories."""
@@ -91,7 +91,7 @@ class Directory(StorageUnit):
         """Returns SU with the given name from contents."""
 
         elements = list(filter(lambda su: su.get_name() == su_name, self.contents))
-        if len(elements) > 1:
+        if len(elements) > 0:
             return elements[0]
         return
 

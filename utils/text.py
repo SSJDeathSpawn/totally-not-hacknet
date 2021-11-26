@@ -21,9 +21,9 @@ class Text(object):
         if additional_colors: self.escape_codes['color'].update(additional_colors)
 
         self.escape_pattern = re.compile(r'(\$\{(?:c|s):[a-zA-Z-]+\})')
-        self._process_string()
+        self.process_string()
 
-    def _process_string(self):
+    def process_string(self):
         base = self.string.split('\n')
         string = []
 
@@ -138,7 +138,7 @@ class Text(object):
 
     def update_string(self, string, new=False):
         self.string = self.string + string if not new else string 
-        self._process_string()
+        self.process_string()
 
     def update_color(self, color):
         self.starting_color = color
@@ -150,8 +150,8 @@ class Text(object):
 
     def update_scale_factor(self, scale):
         self.scale_factor = scale
-        self._process_string
+        self.process_string
 
     def update_starting_position(self, startpos):
         self.startingpos = startpos
-        self._process_string
+        self.process_string

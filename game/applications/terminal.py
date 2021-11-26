@@ -4,6 +4,7 @@ import random
 from custom_logging.logging import get_logger
 from game.application import Application
 from game.constants import *
+from game.storage_system.directory import Directory
 from utils.text import Text
 from exceptions.applications import *
 
@@ -24,7 +25,9 @@ class Terminal(Application):
 		self.commands = {
 			'pwd': self._pwd,
 			'tree': self._tree,
-			'clear': self._clear
+			'ls': self._ls,
+			'clear': self._clear,
+			'cd': self._cd,
 		}
 
 		chars = self.starting_size[0] // 10
@@ -59,8 +62,7 @@ class Terminal(Application):
 			if len(self.stdin) > 0:
 				self.stdin = self.stdin[:-1]
 				self.content.string = self.content.string[:-1]
-				self.content._process_string()
-		
+				self.content.process_string()
 
 		if self.current_event.type == pygame.TEXTINPUT:
 			self.stdin += self.current_event.text
@@ -71,7 +73,6 @@ class Terminal(Application):
 	async def graphics_handler(self):
 		await super().graphics_handler()
 		self.os.system.graphics.display_terminal_text(self.surface, self.content)
-
 
 	async def run_command(self, stdin):
 		if self.wait_for_input: return self.wait_for_input(stdin)
@@ -85,9 +86,9 @@ class Terminal(Application):
 	def response(self, exit_code, stdout, stderr, update_in_terminal=True):
 		if update_in_terminal:
 			code = '${c:reset}' if not exit_code else '${c:red}' 
-			self.update_content(code + f'\nExit code: {exit_code}' + '${c:reset}')
-			if stdout: self.update_content(f'\n{stdout}')
+			if exit_code: self.update_content(code + f'\nExit code: {exit_code}' + '${c:reset}')
 			if stderr: self.update_content(code + f'\n{stderr}' + '${c:reset}')
+			if stdout: self.update_content(f'\n{stdout}')
 			self.new_line()
 		return { 'exit_code': exit_code, 'stdout': stdout, 'stderr': stderr }
 
@@ -97,9 +98,21 @@ class Terminal(Application):
 	async def _tree(self, _):
 		return self.response(0, self.current_dir.bfs(), None)
 
+	async def _ls(self, _):
+		return self.response(0, '\n'.join([su.get_name() for su in self.current_dir.contents]), None)
+
 	async def _clear(self, _):
 		self.content.update_string(self.get_new_line(), new=True)
 		return self.response(0, None, None, update_in_terminal=False)
 
 	async def _cd(self, args):
 		path = '/' if len(args) < 1 else args[0]
+
+		try:
+			destination = self.os.parse_path(path, relative_to=self.current_dir)
+		except Exception as e:
+			return self.response(1, None, 'Something went wrong...')
+		
+		if not isinstance(destination, Directory): return self.response(1, None, 'No such directory found.')
+		self.current_dir = destination
+		return self.response(0, None, None)
