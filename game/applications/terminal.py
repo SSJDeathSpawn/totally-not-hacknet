@@ -25,6 +25,7 @@ class Terminal(Application):
 		self.title = 'TERMINAL'
 
 		self.commands = {
+			'login': self._login,
 			'ip': self._ip,
 			'echo': self._echo,
 			'pwd': self._pwd,
@@ -88,7 +89,7 @@ class Terminal(Application):
 		self.os.system.graphics.display_terminal_text(self.surface, self.content)
 
 	async def run_command(self, stdin):
-		if self.wait_for_input: return self.wait_for_input(stdin)
+		if self.wait_for_input: return await self.wait_for_input(stdin)
 		try:
 			args = stdin.strip().split(' ')
 			while '' in args: args.remove('')
@@ -105,6 +106,23 @@ class Terminal(Application):
 			if stdout: self.update_content(f'\n{stdout}')
 			self.new_line()
 		return { 'exit_code': exit_code, 'stdout': stdout, 'stderr': stderr }
+
+	async def _subcommand(self, content_update, subcommand_func):
+		self.wait_for_input = subcommand_func
+		self.update_content(content_update)
+
+	async def _wait_for_password(self, password):
+		self.wait_for_input = None
+		self.hideinput = False
+		if password == 'asyncxeno':
+			return self.response(0, 'Logged in successfully.', None)
+		else:
+			return self.response(1, None, 'Incorrect Password.')
+
+	async def _login(self, args):
+		# username = args[0]
+		await self._subcommand('\nPassword: ', self._wait_for_password)
+		self.hideinput = True
 
 	async def _ip(self, _):
 		return self.response(0, self.os.system.get_ip(), None)
