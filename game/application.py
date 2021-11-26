@@ -10,6 +10,7 @@ logger = get_logger('game')
 class Application(object):
 	def __init__(self, os, opened_by, memory):
 		self.os = os
+		self.current_dir = os.root
 		self.opened_by = opened_by
 		self.title = "Application"
 		self.starting_size = (540, 360)

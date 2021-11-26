@@ -17,8 +17,7 @@ logger = get_logger('game')
 class Terminal(Application):
 	def __init__(self, os, opened_by):
 		super().__init__(os, opened_by, 50)
-
-		self.current_dir = os.root
+		
 		self.bg_colour = (25, 25, 60)
 		self.starting_size = (720, 480)
 		self.scale = 1
@@ -184,6 +183,7 @@ class Terminal(Application):
 
 		try:
 			su = self.os.parse_path(args[0], self.current_dir)
+			if self.os.su_open_in_app(su): return self.response(1, None, f'{su.__class__.__name__} is open in another application.')
 		except SUPathError as e:
 			return self.response(1, None, e.message)
 
@@ -248,6 +248,7 @@ class Terminal(Application):
 
 		try:
 			old = self.os.parse_path(old, relative_to=self.current_dir)
+			if self.os.su_open_in_app(old): return self.response(1, None, f'{old.__class__.__name__} is open in another application.')
 		except SUPathError as e:
 			return self.response(1, None, e.message)
 		

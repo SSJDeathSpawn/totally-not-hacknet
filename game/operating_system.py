@@ -107,6 +107,13 @@ class OperatingSystem(object):
 			self.master_application = app
 		return app
 
+	def su_open_in_app(self, su):
+		for app in self.applications:
+			for instance in self.applications[app]['instances']:
+				if su == instance.current_dir or su.has_su(instance.current_dir):
+					return True
+		return False
+
 	def parse_path(self, path, relative_to=None, parent_dir=False):
 		original = path
 		
