@@ -5,7 +5,9 @@ import json
 from custom_logging.logging import get_logger
 from game.applications.desktop_manager import DesktopManager
 from game.applications.terminal import Terminal
-from game.storage_system.directory import Directory, RootDir
+from game.storage_system.directory import Directory
+from game.storage_system.file import File
+from exceptions.storage_system import SUPathError
 from utils.storage_system_parser import parse_root
 
 
@@ -55,6 +57,21 @@ class OperatingSystem(object):
 
 		pass
 
+	async def make_file(self, name, contents, parent):
+		fl = File(name, contents, parent)
+		parent.add(fl)
+		return fl
+
+	async def make_dir(self, name, contents, parent):
+		dr = Directory(name, [], parent)
+		for content in contents:
+			if isinstance(content, Directory):
+				await self.make_dir(content.get_name(), content.get_contents(), dr)
+			else:
+				await self.make_file(content.get_name(), content.get_contents(), dr)
+		parent.add(dr)
+		return dr
+
 	def handle_events(self):
 		events = pygame.event.get()
 		for event in events:
@@ -91,6 +108,7 @@ class OperatingSystem(object):
 		return app
 
 	def parse_path(self, path, relative_to=None, parent_dir=False):
+		original = path
 		
 		checktype = None
 		path = path.strip()	
@@ -105,7 +123,8 @@ class OperatingSystem(object):
 			path.pop(0)
 		else:
 			if not relative_to:
-				raise Exception()  # I will make the exception later
+				logger.error('relative_to variable not provided for a relative path. How did this even happen?')
+				exit()
 			current = relative_to
 
 		if parent_dir: path = path[:-1]
@@ -113,20 +132,19 @@ class OperatingSystem(object):
 		for part in path:
 			if part == '..':
 				if current == self.root:
-					raise Exception()  # I will make the exception later
+					raise SUPathError(original, 'Cannot go further back than the root Directory.')
 				current = current.get_parent()
 			elif part == '.':
 				continue
 			else:
 				try:
 					current = current.get_su_by_name(part)
-				except Exception:
-					raise Exception()  # I will make the exception later
+					if not current: raise SUPathError(original, 'Path not found.')
 				except AttributeError:
-					raise Exception()  # Later
+					raise SUPathError(original, 'Path not found.')
 
 		if checktype:
 			if not isinstance(current, checktype):
-				raise Exception()  # later
+				raise SUPathError(original, 'Path not found.')
 
 		return current

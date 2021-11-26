@@ -33,6 +33,9 @@ class System(object):
 
 		logger.debug(f'Initialized System with ID {self.ID} and IP {self.IP}.')
 
+	def get_ip(self):
+		return self.IP
+
 	def event_handler(self):
 		# self.os.handle_events()
 		pass

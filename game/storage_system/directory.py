@@ -118,7 +118,7 @@ class Directory(StorageUnit):
         if not isinstance(su, StorageUnit):
             raise DirectoryElementError(su, 'Element needs to be of type StorageUnit')
 
-        if su in self.contents:
+        if su.get_name() in [s.get_name() for s in self.contents]:
             raise DirectoryElementError(su, 'Directory cannot have duplicate elements')
 
 

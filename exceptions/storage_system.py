@@ -1,3 +1,20 @@
+class SUPathError(Exception):
+    """Exception raised for errors related to SU Paths.
+
+    Attributes:
+        path -- invalid path which caused this error
+        message -- explaination of the error
+    """
+
+    def __init__(self, path, message='Path is Invalid.'):
+        self.path = path
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f'{self.path} -> {self.message}'
+
+
 class SUNameError(Exception):
     """Exception raised for errors while setting SU names.
 

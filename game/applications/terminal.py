@@ -1,10 +1,12 @@
 import pygame
-import random
+import copy
 
 from custom_logging.logging import get_logger
+from exceptions.storage_system import SUNameError, SUPathError, DirectoryElementError
 from game.application import Application
 from game.constants import *
-from game.storage_system.directory import Directory
+from game.storage_system.directory import Directory, RootDir
+from game.storage_system.file import File
 from utils.text import Text
 from exceptions.applications import *
 
@@ -23,11 +25,19 @@ class Terminal(Application):
 		self.title = 'TERMINAL'
 
 		self.commands = {
+			'ip': self._ip,
+			'echo': self._echo,
 			'pwd': self._pwd,
 			'tree': self._tree,
 			'ls': self._ls,
 			'clear': self._clear,
 			'cd': self._cd,
+			'cat': self._cat,
+			'rm': self._rm,
+			'touch': self._touch,
+			'mkdir': self._mkdir,
+			'cp': self._cp,
+			'mv': self._mv,
 		}
 
 		chars = self.starting_size[0] // 10
@@ -37,6 +47,7 @@ class Terminal(Application):
 		self.stdin = ''
 
 		self.wait_for_input = None
+		self.hideinput = False
 
 	def new_line(self):
 		# logger.warn(self.content.get_raw_text())
@@ -45,7 +56,7 @@ class Terminal(Application):
 		# logger.warn(self.content.get_raw_text())
 
 	def get_new_line(self):
-		return '${c:green}${s:bold}' + f'{self.os.username}' + '${c:reset}${s:reset}:${s:italic}' + f'{self.current_dir.get_path()}' + '${s:reset}$ '	
+		return '${c:green}${s:italic}' + f'{self.os.username}' + '${c:reset}${s:reset}:' + f'{self.current_dir.get_path()}' + '> '	
 
 	def update_content(self, new):
 		self.content.update_string(new)
@@ -61,12 +72,14 @@ class Terminal(Application):
 		if self.current_event.type == pygame.KEYDOWN and self.current_event.key == pygame.K_BACKSPACE:
 			if len(self.stdin) > 0:
 				self.stdin = self.stdin[:-1]
-				self.content.string = self.content.string[:-1]
-				self.content.process_string()
+				if not self.hideinput:
+					self.content.string = self.content.string[:-1]
+					self.content.process_string()
 
 		if self.current_event.type == pygame.TEXTINPUT:
 			self.stdin += self.current_event.text
-			self.update_content(self.current_event.text)
+			if not self.hideinput:
+				self.update_content(self.current_event.text)
 
 		await self.event_handler()
 
@@ -77,9 +90,10 @@ class Terminal(Application):
 	async def run_command(self, stdin):
 		if self.wait_for_input: return self.wait_for_input(stdin)
 		try:
-			args = stdin.split(' ')
+			args = stdin.strip().split(' ')
+			while '' in args: args.remove('')
 			cmd = args.pop(0)
-			return await self.commands[cmd](args)
+			return await self.commands[cmd.lower()](args)
 		except KeyError:
 			return self.response(1, None, 'Command Not Recognised')
 
@@ -91,6 +105,9 @@ class Terminal(Application):
 			if stdout: self.update_content(f'\n{stdout}')
 			self.new_line()
 		return { 'exit_code': exit_code, 'stdout': stdout, 'stderr': stderr }
+
+	async def _ip(self, _):
+		return self.response(0, self.os.system.get_ip(), None)
 
 	async def _pwd(self, _):
 		return self.response(0, self.current_dir.get_path(), None)
@@ -105,14 +122,198 @@ class Terminal(Application):
 		self.content.update_string(self.get_new_line(), new=True)
 		return self.response(0, None, None, update_in_terminal=False)
 
+	async def _echo(self, args):
+		if '>>' in args:
+			sep = args.index('>>')
+			if not (len(args) - 1 > sep): return self.response(0, ' '.join(args), None)
+			text = ' '.join(args[:sep])
+			fl = args[sep + 1]
+			try:
+				su = self.os.parse_path(fl, self.current_dir)
+			except SUPathError as e: return self.response(1, None, e.message)
+			if not isinstance(su, File): return self.response(1, None, 'Argument after \'>>\' must be a file.')
+			su.set_contents(text)
+			return self.response(0, None, None)
+
+		else:
+			return self.response(0, ' '.join(args), None)
+
 	async def _cd(self, args):
 		path = '/' if len(args) < 1 else args[0]
 
 		try:
 			destination = self.os.parse_path(path, relative_to=self.current_dir)
-		except Exception as e:
-			return self.response(1, None, 'Something went wrong...')
+		except SUPathError as e:
+			return self.response(1, None, e.message)
 		
 		if not isinstance(destination, Directory): return self.response(1, None, 'No such directory found.')
 		self.current_dir = destination
 		return self.response(0, None, None)
+
+	async def _cat(self, args):
+		if len(args) < 1: return self.response(1, None, 'Too few Arguments. Use the \'help\' command for more info on commands.')
+
+		try:
+			su = self.os.parse_path(args[0], self.current_dir)
+		except SUPathError as e:
+			return self.response(1, None, e.message)
+
+		if not isinstance(su, File): return self.response(1, None, 'Argument must be a File.')
+		return self.response(0, str(su.get_contents()), None)
+	
+	async def _rm(self, args):
+		if len(args) < 1: return self.response(1, None, 'Too few Arguments. Use the \'help\' command for more info on commands.')
+
+		try:
+			su = self.os.parse_path(args[0], self.current_dir)
+		except SUPathError as e:
+			return self.response(1, None, e.message)
+
+		su.get_parent().delete(su.get_name())
+		return self.response(0, None, None)
+
+	async def _mkdir(self, args):
+		if len(args) < 1: return self.response(1, None, 'Too few Arguments. Use the \'help\' command for more info on commands.')
+
+		path = args[0].split('/')
+		name = path.pop()
+		if name == '': name = path.pop()
+
+		if len(path) > 0:
+			try:
+				destination = self.os.parse_path(f'{"/".join(path)}/', self.current_dir)
+			except SUPathError as e:
+				return self.response(1, None, e.message)
+		else: destination = self.current_dir
+
+		try:
+			await self.os.make_dir(name, [], destination)
+		except SUPathError as e:
+			return self.response(1, None, e.message)
+
+		return self.response(0, None, None)
+
+	async def _touch(self, args):
+		if len(args) < 1: return self.response(1, None, 'Too few Arguments. Use the \'help\' command for more info on commands.')
+
+		path = args[0].split('/')
+		name = path.pop()
+		if name == '': return self.response(1, None, 'You need to provide a file name.')
+
+		if len(path) > 0:
+			try:
+				destination = self.os.parse_path(f'{"/".join(path)}/', self.current_dir)
+			except SUPathError as e:
+				return self.response(1, None, e.message)
+		else: destination = self.current_dir 
+
+		try:
+			await self.os.make_file(name, '', destination)
+		except SUPathError as e:
+			return self.response(1, None, e.message)
+
+		return self.response(0, None, None)
+
+	async def _mv(self, args):
+		if len(args) < 2:
+			return self.response(1, None, 'Too few Arguments. Use the \'help\' command for more info on commands.')
+
+		check_type = None
+
+		old = args[0]
+		new = args[1]
+		new = new.split('/')
+		if new[-1] == '':
+			new.pop()
+			check_type = Directory
+		new = '/'.join(new)
+
+		try:
+			old = self.os.parse_path(old, relative_to=self.current_dir)
+		except SUPathError as e:
+			return self.response(1, None, e.message)
+		
+		try:
+			new = self.os.parse_path(new, relative_to=self.current_dir)
+		except SUPathError as e:
+			try:
+				new_dir = self.os.parse_path(new, relative_to=self.current_dir, parent_dir=True)
+			except SUPathError as e:
+				return self.response(1, None, e.message)
+			if check_type:
+				if not isinstance(old, Directory):
+					return self.response(1, None, 'Cannot put a file as a directory.')
+			if isinstance(old, Directory):
+				if old.has_su(new_dir) or old == new_dir:
+					return self.response(1, None ,'Cannot move a directory to a subdirectory of itself.')
+			try:
+				old.set_name(new.split('/')[-1])
+			except SUNameError as e:
+				return self.response(1, None, e.message)
+			old.get_parent().delete(old.get_name())
+			new_dir.add(old)
+			return self.response(0, None, None)
+		else:
+			if not isinstance(new, Directory):
+				return self.response(1, None, f'A {new.__class__.__name__} with that name already exists in the destination path.')
+			else:
+				if isinstance(old, Directory):
+					if old.has_su(new) or old == new:
+						return self.response(1, None ,'Cannot move a directory to a subdirectory of itself.')
+				try:
+					new.add(old)
+				except DirectoryElementError as e:
+					return self.response(1, None, e.message)
+				return self.response(0, None, None)
+
+	async def _cp(self, args):
+		if len(args) < 2:
+			return self.response(1, None, 'Too few arguments.\nSyntax: cp <oldpath> <newpath>')
+
+		check_type = None
+
+		old = args[0]
+		new = args[1]
+		new = new.split('/')
+		if new[-1] == '':
+			new.pop()
+			check_type = Directory
+		new = '/'.join(new)
+
+		try:
+			old = self.os.parse_path(old, relative_to=self.current_dir)
+			if isinstance(old, RootDir):
+				return self.response(1, None, 'Cannot copy root directory into itself.')
+		except SUPathError as e:
+			return self.response(1, None, e.message)
+		
+		try:
+			new = self.os.parse_path(new, relative_to=self.current_dir)
+		except SUPathError as e:
+			try:
+				new_dir = self.os.parse_path(new, relative_to=self.current_dir, parent_dir=True)
+			except SUPathError as e:
+				return self.response(1, None, e.message)
+			if check_type:
+				if not isinstance(old, Directory):
+					return self.response(1, None, 'Cannot put a file as a directory.')
+			try:
+				if isinstance(old, File):
+					await self.os.make_file(new.split('/')[-1], copy.deepcopy(old.get_contents()), new_dir)
+				else:
+					await self.os.make_dir(new.split('/')[-1], copy.deepcopy(old.get_contents()), new_dir)
+			except DirectoryElementError as e:
+				return self.response(1, None, e.message)
+			return self.response(0, None, None)
+		else:
+			if not isinstance(new, Directory):
+				return self.response(1, None, f'A {new.__class__.__name__} with that name already exists in the destination path.')
+			else:
+				try:
+					if isinstance(old, File):
+						await self.os.make_file(old.get_name(), copy.deepcopy(old.get_contents()), new)
+					else:
+						await self.os.make_dir(old.get_name(), copy.deepcopy(old.get_contents()), new)
+				except DirectoryElementError as e:
+					return self.response(1, None, e.message)
+				return self.response(0, None, None)
