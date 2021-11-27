@@ -21,11 +21,11 @@ class Graphics(object):
 		surface = Surface((width, height), ((self.conn_pygame_graphics.win.get_width() - width) / 2, (self.conn_pygame_graphics.win.get_height() - height) / 2))
 		surface.fill((0, 0, 0, 0))
 		if titlebar:
-			self.conn_pygame_graphics.draw_rect((255, 255, 255), 0, 0, surface.get_width(), titlebar_height, width=0, surface=surface)
+			self.conn_pygame_graphics.draw_rect((0, 0, 0), 0, 0, surface.get_width(), titlebar_height, width=0, surface=surface)
 			self.conn_pygame_graphics.draw_rect((255, 0, 0), surface.get_width() - titlebar_comp_width, 0, titlebar_comp_width, titlebar_height, width=0, surface=surface)
 			self.conn_pygame_graphics.draw_rect((155, 155, 155), surface.get_width() - (2 * titlebar_comp_width), 0, titlebar_comp_width, titlebar_height, width=0, surface=surface)
-			self.conn_pygame_graphics.draw_rect(color, 0, titlebar_height, surface.get_width(), surface.get_height() - titlebar_height, width=0, surface=surface)
-			self.conn_pygame_graphics.render_text('bold', int(titlebar_height * (2 / 5)), name, (0, 0, 0), ((surface.get_width() - (2 * titlebar_comp_width)) // 2, titlebar_height // 2), alignment=0b1100, surface=surface)
+			self.fill_application_window(surface, color)
+			self.conn_pygame_graphics.render_text('bold', int(titlebar_height / 2), name, (255, 255, 255), ((surface.get_width() - (2 * titlebar_comp_width)) // 2, titlebar_height // 2), alignment=0b1100, surface=surface)
 		self.conn_pygame_graphics.push_surface(surface)
 		return surface 
 	
