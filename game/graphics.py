@@ -43,6 +43,9 @@ class Graphics(object):
 	def fill(self, surface, color):
 		self.conn_pygame_graphics.draw_rect(color, 0, 0, surface.get_width(), surface.get_height(), width=0, surface=surface)
 
+	def fill_with_image(self, surface, path_to_img):
+		self.conn_pygame_graphics.blit_image((0, 0), self.conn_pygame_graphics.convert_to_pygame_image(path_to_img), alignment=0b0000, surface=surface)
+
 	def fill_application_window(self, surface, color):
 		self.conn_pygame_graphics.draw_rect(color, 0, titlebar_height, surface.get_width(), surface.get_height() - titlebar_height, width=0, surface=surface)
 

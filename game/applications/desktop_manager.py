@@ -65,7 +65,8 @@ class DesktopManager(MasterApplication):
 
 	async def graphics_handler(self):
 		#TODO: Remove once desktop images are a thing
-		self.os.system.graphics.fill(self.surface, (0, 0, 0))
+		self.os.system.graphics.fill(self.surface, (155, 155, 155))
+		self.os.system.graphics.fill_with_image(self.surface, '/images/wallpapers/cool.jpg')
 		x,y=0,0
 		for index, icon in enumerate(self.icons):
 			icon.render_icon((x+10,y+10), self, index in self.selected)
@@ -85,7 +86,7 @@ class Icon(object):
 
 	def render_icon(self, pos, desktop_manager, selected):
 		if not self.render:
-			self.render = desktop_manager.os.system.graphics.rendered_icon(self.path, self.name, (255,255,255), 16, 0, width=60, height=60)
+			self.render = desktop_manager.os.system.graphics.rendered_icon(self.path, self.name, (255, 255, 255), 12, 0, width=40, height=40)
 		if not self.sel_render:
 			self.sel_render = desktop_manager.icon_background_render.copy()
 			rect = self.render.get_rect()

@@ -18,8 +18,8 @@ class Terminal(Application):
 	def __init__(self, os, opened_by):
 		super().__init__(os, opened_by, 50)
 		
-		self.bg_colour = (25, 25, 60)
-		self.starting_size = (720, 480)
+		self.bg_colour = (48, 10, 36, 215)
+		self.starting_size = (540, 360)
 		self.scale = 1
 		self.title = 'TERMINAL'
 
@@ -43,7 +43,7 @@ class Terminal(Application):
 		chars = self.starting_size[0] // 10
 		fontsize = (self.starting_size[0] / chars) * (5 / 3)
 
-		self.content = Text(f'{self.get_new_line()}', (215, 215, 215), 'regular', fontsize, ending=[chars, ((self.starting_size[1] - titlebar_height) // fontsize)])
+		self.content = Text(f'{self.get_new_line()}', (200, 200, 200), 'regular', fontsize, ending=[chars, ((self.starting_size[1] - titlebar_height) // fontsize)])
 		self.stdin = ''
 
 		self.wait_for_input = None
