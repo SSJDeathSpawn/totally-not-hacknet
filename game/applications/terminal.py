@@ -52,7 +52,7 @@ class Terminal(Application):
 	def new_line(self):
 		# logger.warn(self.content.get_raw_text())
 		# logger.warn('------------------------------')
-		self.update_content(f'\n\n{self.get_new_line()}')
+		self.update_content(f'\n{self.get_new_line()}')
 		# logger.warn(self.content.get_raw_text())
 
 	def get_new_line(self):
