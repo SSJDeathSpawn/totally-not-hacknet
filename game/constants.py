@@ -3,8 +3,8 @@ import enum
 
 
 modifier_change = pygame.USEREVENT + 1
-titlebar_height = 22
-titlebar_comp_width = 34 
+titlebar_height = 25
+titlebar_comp_width = 35 
 
 x_align = {
     "left": 0,

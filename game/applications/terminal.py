@@ -43,7 +43,7 @@ class Terminal(Application):
 		chars = self.starting_size[0] // 10
 		fontsize = (self.starting_size[0] / chars) * (5 / 3)
 
-		self.content = Text(f'{self.get_new_line()}', (200, 200, 200), 'regular', fontsize, startingpos= [2, 2], ending=[chars - 1, ((self.starting_size[1] - titlebar_height) // fontsize)])
+		self.content = Text(f'{self.get_new_line()}', (200, 200, 200), 'regular', fontsize, startingpos= [3, 3], ending=[chars - 1, ((self.starting_size[1] - titlebar_height) // fontsize) - 1])
 		self.stdin = ''
 
 		self.wait_for_input = None
