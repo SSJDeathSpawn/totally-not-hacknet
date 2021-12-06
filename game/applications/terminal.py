@@ -56,7 +56,7 @@ class Terminal(Application):
 		# logger.warn(self.content.get_raw_text())
 
 	def get_new_line(self):
-		return '${c:green}${s:italic}' + f'{self.os.username}' + '${c:reset}${s:reset}:' + f'{self.current_dir.get_path()}' + '> '	
+		return '${c:green}${s:italic}' + f'{self.os.username}' + '${c:reset}${s:reset}:' + '${c:blue}' + f'{self.current_dir.get_path()}' + '${c:reset}' + '> '	
 
 	def update_content(self, new):
 		self.content.update_string(new)

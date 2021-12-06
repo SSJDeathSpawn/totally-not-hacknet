@@ -4,6 +4,7 @@ import json
 
 from custom_logging.logging import get_logger
 from game.applications.desktop_manager import DesktopManager
+from game.applications.explorer import AuthenticFile
 from game.applications.terminal import Terminal
 from game.storage_system.directory import Directory
 from game.storage_system.file import File
@@ -35,6 +36,10 @@ class OperatingSystem(object):
 				'class': Terminal,
 				'instances': []
 			},
+			'AUTHENTICFILE': {
+				'class': AuthenticFile,
+				'instances': []
+			},
 			'DESKTOP': {
 				'class': DesktopManager,
 				'instances': []
@@ -52,6 +57,7 @@ class OperatingSystem(object):
 
 	async def initialize(self):
 		self.start_application('DESKTOP', self)
+		self.start_application('AUTHENTICFILE', self, master_app=self.master_application)
 
 		# prompt for username and password
 

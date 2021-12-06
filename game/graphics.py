@@ -49,6 +49,16 @@ class Graphics(object):
 	def fill_application_window(self, surface, color):
 		self.conn_pygame_graphics.draw_rect(color, 0, titlebar_height, surface.get_width(), surface.get_height() - titlebar_height, width=0, surface=surface)
 
+	def display_explorer_icons(self, surface, units, icon_dimensions, space, scroll, file_icon_path, folder_icon_path):
+		limit = surface.get_width() // (icon_dimensions[0] + space[0])
+		new_surface_height = ((icon_dimensions[1] + space[1]) * ((len(units.keys()) // limit) + 1))
+
+		if scroll > (new_surface_height - surface.get_height()):
+			scroll = new_surface_height - surface.get_height()
+
+		icons_surface = pygame.Surface((surface.get_width(), new_surface_height), pygame.SRCALPHA)
+		icons_surface.fill((0, 0, 0, 0))
+
 	def display_terminal_text(self, surface, text):
 		text_surface = pygame.Surface((surface.get_width(), surface.get_height() - titlebar_height), pygame.SRCALPHA)
 		text_surface.fill((0, 0, 0, 0))
