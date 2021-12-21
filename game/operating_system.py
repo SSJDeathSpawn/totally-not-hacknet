@@ -3,9 +3,11 @@ import pygame
 import json
 
 from custom_logging.logging import get_logger
+from game.application import TerminalApplication
 from game.applications.desktop_manager import DesktopManager
 from game.applications.explorer import AuthenticFile
 from game.applications.terminal import Terminal
+from game.applications.vim import PilotTextEditor
 from game.storage_system.directory import Directory
 from game.storage_system.file import File
 from exceptions.storage_system import SUPathError
@@ -42,6 +44,10 @@ class OperatingSystem(object):
 			},
 			'DESKTOP': {
 				'class': DesktopManager,
+				'instances': []
+			},
+			'PILOTTEXTEDITOR': {
+				'class': PilotTextEditor,
 				'instances': []
 			}
 		}
@@ -96,17 +102,22 @@ class OperatingSystem(object):
 
 		self.master_application.event_queue += events
 
-	def start_application(self, name, os, master_app=None, headless=False):
-		app = self.applications[name]['class'](self, os)
+	def start_application(self, name, os, master_app=None, headless=False, *args, **kwargs):
+		app = self.applications[name]['class'](self, os, *args, **kwargs)
 		if not headless:
 			app.surface = self.system.graphics.draw_application_window(*app.starting_size if master_app else self.system.graphics.conn_pygame_graphics.win.get_size(), (0, 255, 0), app.title if master_app else "", app.titlebar if master_app else False)
 		if app.memory + self.memory_being_used > self.system.memory:
 			raise Exception() # MAKE AND RAISE CUSTOM EXCEPTION WHICH WILL BE HANDLED OUTSIDE
 		self.applications[name]['instances'].insert(0, app)
 		if master_app:
-			if master_app == self.master_application:
+			if master_app == self.master_application: 
 				self.master_application.application_queue.insert(0, app)
 				app.master_app = self.master_application
+			elif master_app.master_app == self.master_application: 
+				master_app.child_app = app #Only one app for non desktop managers
+				app.master_app = master_app
+				if isinstance(master_app, Terminal) and isinstance(app, TerminalApplication):
+					app.surface = master_app.surface #copy by reference indeed
 			else:
 				raise Exception()  # Wrong OS instance / Machine
 		else:
