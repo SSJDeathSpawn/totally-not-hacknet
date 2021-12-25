@@ -138,8 +138,8 @@ class TerminalApplication(Application):
 	async def graphics_handler(self):
 		await super().graphics_handler()
 
-	def update_content(self, new):
-		self.content.update_string(new)
+	def update_content(self, string, new=False):
+		self.content.update_string(string, new=new)
 
 	async def idle(self):
 		pass

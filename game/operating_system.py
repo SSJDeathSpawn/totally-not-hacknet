@@ -63,7 +63,7 @@ class OperatingSystem(object):
 
 	async def initialize(self):
 		self.start_application('DESKTOP', self)
-		self.start_application('AUTHENTICFILE', self, master_app=self.master_application)
+		self.start_application('TERMINAL', self, master_app=self.master_application)
 
 		# prompt for username and password
 
@@ -91,14 +91,6 @@ class OperatingSystem(object):
 				logger.info('Exiting Application...')
 				pygame.quit()
 				exit()
-
-			if event.type in (pygame.KEYDOWN, pygame.KEYUP):
-				if event.key in (pygame.K_LALT, pygame.K_RALT):
-					self.modifiers["alt"] = False if event.type == pygame.KEYUP else True
-				elif event.key in (pygame.K_LSHIFT, pygame.K_RSHIFT):
-					self.modifiers["shift"] = False if event.type == pygame.KEYUP else True
-				elif event.key in (pygame.K_LCTRL, pygame.K_RCTRL):
-					self.modifiers["alt"] = False if event.type == pygame.KEYUP else True
 
 		self.master_application.event_queue += events
 

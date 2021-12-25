@@ -64,8 +64,7 @@ class Terminal(Application):
 
 	async def event_handler(self):
 		await super().event_handler()
-		if not self.current_event: return
-
+		if not self.current_event or self.child_app: return
 		if self.current_event.type == pygame.KEYDOWN and self.current_event.key == pygame.K_RETURN:
 			await self.run_command(self.stdin)
 			self.stdin = ''
