@@ -14,12 +14,16 @@ class AuthenticFile(Application):
 		
 		self.title = 'Authentic File'
 
-		self.file_icon_path = 'images/icons/file_icon.png'
-		self.folder_icon_path = 'images/icons/folder_icon.png'
+		self.file_icon_path = '/images/icons/file_icon.png'
+		self.folder_icon_path = '/images/icons/folder_icon.png'
 
 		self.storage_units = dict.fromkeys(self.current_dir.get_contents(), False)
 
 		self.scroll = 0
+
+	async def run(self):
+		self.storage_units = dict.fromkeys(self.current_dir.get_contents(), False)
+		await super().run()
 
 	async def event_handler(self):
 		await super().event_handler()
@@ -30,4 +34,4 @@ class AuthenticFile(Application):
 	async def graphics_handler(self):
 		await super().graphics_handler()
 
-		self.os.system.graphics.display_explorer_icons(self.surface, self.storage_units, [40, 40], [10, 20], self.scroll, self.file_icon_path, self.folder_icon_path)
+		self.os.system.graphics.display_explorer_icons(self.surface, self.storage_units, [64, 64], [10, 25], self.scroll, self.file_icon_path, self.folder_icon_path)
