@@ -346,5 +346,6 @@ class Terminal(Application):
 			file = self.os.parse_path(file, relative_to=self.current_dir)
 		except SUPathError as e:
 			return self.response(1, None, e.message)
-		
+
+		if not isinstance(file, File): return self.response(1, None, 'Argument must be a File.')
 		self.os.start_application('PILOTTEXTEDITOR', self.os, master_app=self, headless=True, master_terminal=self, file=file)

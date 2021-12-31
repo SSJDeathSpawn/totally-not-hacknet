@@ -35,12 +35,12 @@ class PilotTextEditor(TerminalApplication):
 		self.norm_controller = BaseNormVimCmd(self.key_cmds)
 		self.run_commands = {}
 		self.cmd_controller = BaseRunVimCmd(self.run_commands)
-		self.content = Text("", (166, 226, 46), 'regular', master_terminal.fontsize, ending=master_terminal.content.ending)
+		self.content = Text("", (166, 226, 46), 'regular', master_terminal.fontsize, startingpos= [3, 3], ending=master_terminal.content.ending)
 
 	def add_line_num(self, string):
 		split_lines = string.split("\n")
 		for i in range(len(split_lines)):
-			split_lines[i] = " "*(4-len(str(i)))+ str(i)+"|" + split_lines[i]
+			split_lines[i] = " "*(4-len(str(i+1)))+ str(i+1)+"|" + split_lines[i]
 		logger.warn(len(split_lines))
 		logger.warn(self.cur_pos[1])
 		split_lines[self.cur_pos[1]-1] = '⸸{c:white}' + split_lines[self.cur_pos[1]-1][:5] + '⸸{c:reset}'+split_lines[self.cur_pos[1]-1][5:]
@@ -88,7 +88,7 @@ class PilotTextEditor(TerminalApplication):
 						self.changed = True 
 				#When you press backspace in insert mode
 				elif self.current_event.key == pygame.K_BACKSPACE:
-					if len(self.stdin) > 0 and any([i > 1 for i in self.cur_pos]):
+					if any([i > 1 for i in self.cur_pos]):
 						offset = find_nth(self.stdin, "\n", self.cur_pos[1]-1)+1
 						pos = offset + self.cur_pos[0] - (1 if self.cur_pos[1]==1 else 0)
 						self.stdin = self.stdin[:pos-2] + self.stdin[pos-1:]
@@ -145,7 +145,7 @@ class BaseNormVimCmd(object):
 	def __init__(self, command_dict):
 		BaseNormVimCmd.key_dict = {
 			"i": BaseNormVimCmd.insert_mode, 
-			":" : BaseNormVimCmd.command_mode, 
+			":" : BaseNormVimCmd.command_mode,
 			"h" : BaseNormVimCmd.move_left,
 			"j" : BaseNormVimCmd.move_down,
 			"k" : BaseNormVimCmd.move_up,
@@ -161,17 +161,20 @@ class BaseNormVimCmd(object):
 	@staticmethod
 	def insert_mode(ref):
 		ref.cur_mode = ref.modes.index("INSERT")
+		ref.clear_keystrokes()
 
 	@staticmethod
 	def command_mode(ref):
 		ref.cur_mode = ref.modes.index("COMMAND")
 		ref.input_command = ":"
+		ref.clear_keystrokes()
 	
 	@staticmethod
 	def move_left(ref):
 		ref.cur_pos[0] = 1 if ref.cur_pos[0] == 1 else ref.cur_pos[0] - 1
 		if not ref.hideinput:
 			ref.update_content(ref.add_line_num(ref.stdin), new=True)
+		ref.clear_keystrokes()
 	
 	@staticmethod
 	def move_right(ref):
@@ -179,6 +182,7 @@ class BaseNormVimCmd(object):
 		ref.cur_pos[0] = lim+1 if ref.cur_pos[0] == lim+1 else ref.cur_pos[0] + 1
 		if not ref.hideinput:
 			ref.update_content(ref.add_line_num(ref.stdin), new=True)
+		ref.clear_keystrokes()
 	
 	@staticmethod
 	def move_down(ref):
@@ -186,12 +190,14 @@ class BaseNormVimCmd(object):
 		ref.cur_pos[1] = lim+1 if ref.cur_pos[1] == lim+1 else ref.cur_pos[1] + 1
 		if not ref.hideinput:
 			ref.update_content(ref.add_line_num(ref.stdin), new=True)
+		ref.clear_keystrokes()
 
 	@staticmethod
 	def move_up(ref):
 		ref.cur_pos[1] = 1 if ref.cur_pos[1] == 1 else ref.cur_pos[1] - 1 
 		if not ref.hideinput:
 			ref.update_content(ref.add_line_num(ref.stdin), new=True)
+		ref.clear_keystrokes()
 
 	@staticmethod
 	def debug(ref):
