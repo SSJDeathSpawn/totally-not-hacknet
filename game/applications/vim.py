@@ -37,6 +37,15 @@ class PilotTextEditor(TerminalApplication):
 		self.cmd_controller = BaseRunVimCmd(self.run_commands)
 		self.content = Text("", (166, 226, 46), 'regular', master_terminal.fontsize, ending=master_terminal.content.ending)
 
+	def add_line_num(self, string):
+		split_lines = string.split("\n")
+		for i in range(len(split_lines)):
+			split_lines[i] = " "*(4-len(str(i)))+ str(i)+"|" + split_lines[i]
+		logger.warn(len(split_lines))
+		logger.warn(self.cur_pos[1])
+		split_lines[self.cur_pos[1]-1] = '⸸{c:white}' + split_lines[self.cur_pos[1]-1][:5] + '⸸{c:reset}'+split_lines[self.cur_pos[1]-1][5:]
+		return "\n".join(split_lines)
+
 	async def event_handler(self):
 		await super().event_handler()
 		if not self.current_event: return
@@ -61,7 +70,7 @@ class PilotTextEditor(TerminalApplication):
 				else:
 					self.cur_pos[0]+=1
 				if not self.hideinput:
-					self.update_content(self.stdin, new=True)
+					self.update_content(self.add_line_num(self.stdin), new=True)
 				if self.content.string != self.editing_file.get_contents():
 					self.changed = True 
 
@@ -74,7 +83,7 @@ class PilotTextEditor(TerminalApplication):
 					self.stdin = self.stdin[:pos] + "\n" + self.stdin[pos:]
 					self.cur_pos[:] = [1, self.cur_pos[1]+1]
 					if not self.hideinput:
-						self.update_content(self.stdin, new=True)
+						self.update_content(self.add_line_num(self.stdin), new=True)
 					if self.content.string != self.editing_file.get_contents():
 						self.changed = True 
 				#When you press backspace in insert mode
@@ -92,7 +101,7 @@ class PilotTextEditor(TerminalApplication):
 						else:
 							self.cur_pos[0]-=1
 						if not self.hideinput:
-							self.update_content(self.stdin, new=True)
+							self.update_content(self.add_line_num(self.stdin), new=True)
 						if self.content.string != self.editing_file.get_contents():
 							self.changed = True 
 			if self.current_event.key == pygame.K_ESCAPE:
@@ -160,21 +169,29 @@ class BaseNormVimCmd(object):
 	
 	@staticmethod
 	def move_left(ref):
-		ref.cur_pos[0] = 0 if ref.cur_pos[0] == 0 else ref.cur_pos[0] - 1
+		ref.cur_pos[0] = 1 if ref.cur_pos[0] == 1 else ref.cur_pos[0] - 1
+		if not ref.hideinput:
+			ref.update_content(ref.add_line_num(ref.stdin), new=True)
 	
 	@staticmethod
 	def move_right(ref):
-		lim = find_nth(ref.stdin, "\n", ref.cur_pos[1]+1)
-		ref.cur_pos[0] = lim if ref.cur_pos[0] == lim else ref.cur_pos[0] + 1
+		lim = len(ref.stdin.split("\n")[ref.cur_pos[1]-1])
+		ref.cur_pos[0] = lim+1 if ref.cur_pos[0] == lim+1 else ref.cur_pos[0] + 1
+		if not ref.hideinput:
+			ref.update_content(ref.add_line_num(ref.stdin), new=True)
 	
 	@staticmethod
 	def move_down(ref):
 		lim = ref.stdin.count("\n")
-		ref.cur_pos[1] = lim if ref.cur_pos[1] == lim else ref.cur_pos[1] + 1
+		ref.cur_pos[1] = lim+1 if ref.cur_pos[1] == lim+1 else ref.cur_pos[1] + 1
+		if not ref.hideinput:
+			ref.update_content(ref.add_line_num(ref.stdin), new=True)
 
 	@staticmethod
 	def move_up(ref):
-		ref.cur_pos[1] = 0 if ref.cur_pos[1] == 0 else ref.cur_pos[1] - 1 
+		ref.cur_pos[1] = 1 if ref.cur_pos[1] == 1 else ref.cur_pos[1] - 1 
+		if not ref.hideinput:
+			ref.update_content(ref.add_line_num(ref.stdin), new=True)
 
 	@staticmethod
 	def debug(ref):
