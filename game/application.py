@@ -66,7 +66,7 @@ class Application(object):
 	async def run(self):
 		if self.timer_running:
 			self.timer += self.os.system.graphics.conn_pygame_graphics.dt
-			if self.timer > double_click_window:
+			if self.timer >= double_click_window:
 				self.timer_running = False
 		await self.event_handler()
 		await self.graphics_handler()

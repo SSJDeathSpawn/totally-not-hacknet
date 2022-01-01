@@ -64,7 +64,6 @@ class Graphics(object):
 		scroll_bar_height = explorer_surface.get_height() * scroll_bar_height_ratio
 		remaining_height = explorer_surface.get_height() - scroll_bar_height
 		extra_rows = max(0, ((len(units.keys()) // limit) + 2) - int(explorer_surface.get_height() / (icon_dimensions[1] + (3 * space[1]))))
-		logger.warn(extra_rows)
 		section = remaining_height / extra_rows if extra_rows != 0 else 0
 		scroll_bar_y = section * scroll
 

@@ -1,3 +1,4 @@
+from logging import Logger
 from os import times_result
 import pygame
 from pygame import surface
@@ -34,6 +35,7 @@ class AuthenticFile(Application):
 		self.ctrl = False
 
 	async def run(self):
+		logger.warn(self.timer_running)
 		await super().run()
 		updated = self.current_dir.get_contents()
 		for unit in updated:
@@ -49,6 +51,9 @@ class AuthenticFile(Application):
 				self.scroll += 1
 			if self.current_event.key == pygame.K_UP:
 				self.scroll -= 1
+
+			if self.current_event.key == pygame.K_BACKSPACE:
+				if self.current_dir.get_parent(): self.current_dir = self.current_dir.get_parent()
 
 			limit = self.surface.get_width() // (self.icon_dimensions[0] + 2 * (self.space[0]))
 			new_surface_height = ((self.icon_dimensions[1] + (3 * self.space[1])) * ((len(self.storage_units.keys()) // limit) + 2))
