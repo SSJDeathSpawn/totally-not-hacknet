@@ -53,14 +53,22 @@ class Graphics(object):
 		self.conn_pygame_graphics.draw_rect(color, 0, titlebar_height, surface.get_width(), surface.get_height() - titlebar_height, width=0, surface=surface)
 
 	def display_explorer_icons(self, surface, units, icon_dimensions, space, scroll, file_icon_path, folder_icon_path):
-		limit = surface.get_width() // (icon_dimensions[0] + (2 * space[0]))
-		extra = surface.get_width() - limit * (icon_dimensions[0] + (2 * space[0]))
-		new_surface_height = ((icon_dimensions[1] + (3 * space[1])) * ((len(units.keys()) // limit) + 1))
+		explorer_surface = pygame.Surface((surface.get_width(), surface.get_height() - titlebar_height), pygame.SRCALPHA)
+		explorer_surface.fill((0, 0, 0, 0))
 
-		if scroll > (abs(new_surface_height - surface.get_height())):
-			scroll = new_surface_height - surface.get_height()
+		limit = explorer_surface.get_width() // (icon_dimensions[0] + (2 * space[0]))
+		new_surface_height = ((icon_dimensions[1] + (3 * space[1])) * ((len(units.keys()) // limit) + 2))
 
-		icons_surface = pygame.Surface((surface.get_width(), new_surface_height), pygame.SRCALPHA)
+		scroll_bar_width = (explorer_surface.get_width() - limit * (icon_dimensions[0] + (2 * space[0]))) / 2
+		scroll_bar_height_ratio = min(1, explorer_surface.get_height() / new_surface_height)
+		scroll_bar_height = explorer_surface.get_height() * scroll_bar_height_ratio
+		remaining_height = explorer_surface.get_height() - scroll_bar_height
+		extra_rows = max(0, ((len(units.keys()) // limit) + 2) - int(explorer_surface.get_height() / (icon_dimensions[1] + (3 * space[1]))))
+		logger.warn(extra_rows)
+		section = remaining_height / extra_rows if extra_rows != 0 else 0
+		scroll_bar_y = section * scroll
+
+		icons_surface = pygame.Surface((explorer_surface.get_width(), new_surface_height), pygame.SRCALPHA)
 		icons_surface.fill((0, 0, 0, 0))
 
 		count = 0
@@ -95,13 +103,12 @@ class Graphics(object):
 
 			self.display_icon(icons_surface, render_last, row, col, icon_dimensions, space, path, units[render_last], full_name=True)
 
-		surface.blit(icons_surface, (extra//2, -scroll))
+		explorer_surface.blit(icons_surface, (0, -(scroll * (icon_dimensions[1] + (3 * space[1])))))
+		self.conn_pygame_graphics.draw_rect((205, 205, 205), limit * (icon_dimensions[0] + (2 * space[0])) + scroll_bar_width, scroll_bar_y, scroll_bar_width, scroll_bar_height, surface=explorer_surface)
+		surface.blit(explorer_surface, (0, titlebar_height))
 
 	def display_icon(self, surface, unit, row, col, icon_dimensions, space, path, selected, full_name=False):
 		name = unit.get_name()
-		if name == "home":
-			name = "asdhasuidahsd asfjhasf sdj sdjhs sjd"
-			full_name = True
 		x = col * (icon_dimensions[0] + (2 * space[0]))
 		y = row * (icon_dimensions[1] + (3 * space[1]))
 		name_attr = (space[0] + icon_dimensions[0] / 2, icon_dimensions[1] + space[1] + space[1] / 3)
@@ -109,7 +116,7 @@ class Graphics(object):
 
 		if not full_name: name = name[:int((icon_dimensions[0] // (fontsize * 3/5))-2)] + ".." if len(name) > (icon_dimensions[0] // (fontsize * 3/5)) else name
 
-		color = (0, 0, 0, 0) if not selected else (155, 155, 155, 25)
+		color = (0, 0, 0, 0) if not selected else (155, 155, 155, 90)
 
 		block = pygame.Surface((icon_dimensions[0] + (2 * space[0]), icon_dimensions[1] + (3 * space[1])), pygame.SRCALPHA)
 		block.fill(color)
@@ -139,6 +146,7 @@ class Graphics(object):
 						lines.append(check[:upperlimit])
 						check = check[upperlimit+1:]
 
+
 					elif check[upperlimit-1] == " ":
 						lines.append(check[:upperlimit-1])
 						check = check[upperlimit:]
@@ -146,6 +154,18 @@ class Graphics(object):
 					elif check[upperlimit-2] == " ":
 						lines.append(check[:upperlimit-2])
 						check = check[upperlimit-1:]
+					
+					elif check[upperlimit] == ".":
+						lines.append(check[:upperlimit])
+						check = check[upperlimit:]
+					
+					elif check[upperlimit-1] == ".":
+						lines.append(check[:upperlimit-1])
+						check = check[upperlimit-1:]
+
+					elif check[upperlimit-2] == ".":
+						lines.append(check[:upperlimit-2])
+						check = check[upperlimit-2:]
 					
 					else:
 						lines.append(check[:upperlimit-1] + "-")
@@ -155,7 +175,7 @@ class Graphics(object):
 					lines.append(check)
 					check = ""
 					
-			extra = len(lines) * fontsize
+			extra = (len(lines) - 1) * fontsize
 			block = pygame.Surface((icon_dimensions[0] + (2 * space[0]), icon_dimensions[1] + (3 * space[1]) + extra), pygame.SRCALPHA)
 			block.fill(color)
 
@@ -176,3 +196,4 @@ class Graphics(object):
 			self.conn_pygame_graphics.render_text(string[1], text.get_font_size_scaled(), string[0], string[2], string[3], surface=text_surface)
 
 		surface.blit(text_surface, (0, titlebar_height))
+

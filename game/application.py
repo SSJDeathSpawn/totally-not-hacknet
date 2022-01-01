@@ -22,6 +22,9 @@ class Application(object):
 		self.event_queue = []
 		self.current_event = None
 
+		self.timer = 0
+		self.timer_running = False
+
 		logger.debug(f'Started a {self.__class__.__name__} Instance requested by OS with username {opened_by.username} ({opened_by.system.IP}).')
 
 	async def event_handler(self):
@@ -38,6 +41,10 @@ class Application(object):
 			min_val = (0, 0)
 			max_val = (self.os.system.graphics.conn_pygame_graphics.win.get_width() - self.surface.get_width(), self.os.system.graphics.conn_pygame_graphics.win.get_height() - titlebar_height)
 			self.surface.pos = max(min(self.surface.pos[0] + self.current_event.rel[0], max_val[0]), min_val[0]), max(min(self.surface.pos[1] + self.current_event.rel[1], max_val[1]), min_val[1])
+
+		if self.current_event.type == pygame.MOUSEBUTTONDOWN and self.current_event.button==1:
+			self.timer = 0
+			self.timer_running = True
 
 		if self.current_event.type == pygame.MOUSEBUTTONDOWN and self.current_event.button==1:
 			range_for_move = ((self.surface.pos[0], self.surface.pos[0] + self.surface.get_width()*(9/10)),
@@ -57,6 +64,10 @@ class Application(object):
 		self.os.system.graphics.fill_application_window(self.surface, self.bg_colour)
 
 	async def run(self):
+		if self.timer_running:
+			self.timer += self.os.system.graphics.conn_pygame_graphics.dt
+			if self.timer > double_click_window:
+				self.timer_running = False
 		await self.event_handler()
 		await self.graphics_handler()
 
