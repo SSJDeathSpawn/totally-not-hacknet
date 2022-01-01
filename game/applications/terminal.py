@@ -349,3 +349,4 @@ class Terminal(Application):
 
 		if not isinstance(file, File): return self.response(1, None, 'Argument must be a File.')
 		self.os.start_application('PILOTTEXTEDITOR', self.os, master_app=self, headless=True, master_terminal=self, file=file)
+		return self.response(0, None, None)

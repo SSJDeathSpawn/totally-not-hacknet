@@ -74,8 +74,8 @@ class Application(object):
 
 	def quit(self):
 		logger.debug(f'Quitting {self.__class__.__name__} Instance.')
-		self.os.system.graphics.conn_pygame_graphics.pop_surface(self.surface)
 		if isinstance(self.master_app, MasterApplication):
+			self.os.system.graphics.conn_pygame_graphics.pop_surface(self.surface)
 			self.master_app.application_queue.remove(self)
 		else:
 			self.master_app.child_app = None
