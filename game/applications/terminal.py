@@ -19,7 +19,7 @@ class Terminal(Application):
 		super().__init__(os, opened_by, 50)
 		
 		self.bg_colour = (48, 10, 36, 245)
-		self.starting_size = (540, 360)
+		self.starting_size = (450, 300)
 		self.scale = 1
 		self.title = 'TERMINAL'
 

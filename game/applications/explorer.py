@@ -1,9 +1,4 @@
-from logging import Logger
-from os import times_result
 import pygame
-from pygame import surface
-from pygame.constants import KEYDOWN
-from pygame.math import enable_swizzling
 
 from custom_logging.logging import get_logger
 from game.application import Application
@@ -53,7 +48,10 @@ class AuthenticFile(Application):
 				self.scroll -= 1
 
 			if self.current_event.key == pygame.K_BACKSPACE:
-				if self.current_dir.get_parent(): self.current_dir = self.current_dir.get_parent()
+				if self.current_dir.get_parent(): 
+					self.current_dir = self.current_dir.get_parent()
+					self.scroll = 0
+					self.storage_units = dict.fromkeys(self.current_dir.get_contents(), False)
 
 			limit = self.surface.get_width() // (self.icon_dimensions[0] + 2 * (self.space[0]))
 			new_surface_height = ((self.icon_dimensions[1] + (3 * self.space[1])) * ((len(self.storage_units.keys()) // limit) + 2))
@@ -89,6 +87,10 @@ class AuthenticFile(Application):
 			
 					else:
 						self.storage_units[list(self.storage_units.keys())[index]] = not self.storage_units[list(self.storage_units.keys())[index]]
+
+		if self.current_event.type == pygame.MOUSEBUTTONDOWN and self.current_event.button==1:
+			self.timer = 0
+			self.timer_running = True
 
 		await self.event_handler()
 
