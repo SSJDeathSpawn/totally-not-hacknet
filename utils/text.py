@@ -1,5 +1,18 @@
 import re
 
+class Formatting():
+    BLACK = '⸸{c:black}'
+    RED = '⸸{c:red}'
+    GREEN = '⸸{c:green}'
+    YELLOW = '⸸{c:yellow}'
+    BLUE = '⸸{c:blue}'
+    MAGENTA = '⸸{c:magenta}'
+    WHITE = '⸸{c:white}'
+    RESET = '⸸{c:reset}⸸{s:reset}'
+    REGULAR = '⸸{s:regular}'
+    BOLD = '⸸{s:bold}'
+    ITALIC = '⸸{s:italic}'
+    BOLD_ITALIC = '⸸{s:bold-italic}'
 
 class Text(object):
     def __init__(self, string, color, style, fontsize, scale=1, startingpos=[0, 0], ending=[20, 10], additional_colors:dict=None):
@@ -13,14 +26,14 @@ class Text(object):
         self.ending = ending
         
         self.escape_codes = { 
-            'color': { '${c:reset}': self.starting_color, '${c:black}': (0, 0, 0), '${c:red}': (255, 0, 0), '${c:green}': (0, 255, 0), '${c:yellow}': (255, 255, 0), '${c:blue}': (0, 0, 255), '${c:magenta}': (255, 0, 255), '${c:cyan}': (0, 255, 255), '${c:white}': (255, 255, 255) },
+            'color': { '⸸{c:reset}': self.starting_color, '⸸{c:black}': (0, 0, 0), '⸸{c:red}': (255, 0, 0), '⸸{c:green}': (0, 255, 0), '⸸{c:yellow}': (255, 255, 0), '⸸{c:blue}': (0, 0, 255), '⸸{c:magenta}': (255, 0, 255), '⸸{c:cyan}': (0, 255, 255), '⸸{c:white}': (255, 255, 255) },
 
-            'style': { '${s:reset}': self.starting_style, '${s:regular}': 'regular', '${s:bold}': 'bold', '${s:italic}': 'italic', '${s:bold-italic}': 'bold-italic'}
+            'style': { '⸸{s:reset}': self.starting_style, '⸸{s:regular}': 'regular', '⸸{s:bold}': 'bold', '⸸{s:italic}': 'italic', '⸸{s:bold-italic}': 'bold-italic'}
         }
 
         if additional_colors: self.escape_codes['color'].update(additional_colors)
 
-        self.escape_pattern = re.compile(r'(\$\{(?:c|s):[a-zA-Z-]+\})')
+        self.escape_pattern = re.compile(r'(\⸸\{(?:c|s):[a-zA-Z-]+\})')
         self.process_string()
 
     def process_string(self):
@@ -127,7 +140,7 @@ class Text(object):
         self.processed = [(group[0], group[1], group[2], (group[3][0], group[3][1] - (height * push))) for group in truncated]
 
     def get_raw_text(self):
-        filtered = re.split(r'${[a-zA-Z0-9]+}', self.string)
+        filtered = re.split(r'⸸{[a-zA-Z0-9]+}', self.string)
         return ''.join(filtered[::2])
 
     def get_font_size(self):
@@ -142,11 +155,11 @@ class Text(object):
 
     def update_color(self, color):
         self.starting_color = color
-        self.escape_codes['color']['${color:reset}'] = self.starting_color
+        self.escape_codes['color']['⸸{color:reset}'] = self.starting_color
 
     def update_style(self, style):
         self.starting_style = style
-        self.escape_codes['style']['${style:reset}'] = self.starting_style
+        self.escape_codes['style']['⸸{style:reset}'] = self.starting_style
 
     def update_scale_factor(self, scale):
         self.scale_factor = scale

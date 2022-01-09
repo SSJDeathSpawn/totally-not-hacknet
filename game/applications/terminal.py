@@ -38,12 +38,13 @@ class Terminal(Application):
 			'mkdir': self._mkdir,
 			'cp': self._cp,
 			'mv': self._mv,
+			'pte': self._pte,
 		}
 
-		chars = self.starting_size[0] // 10
-		fontsize = (self.starting_size[0] / chars) * (5 / 3)
+		self.chars = self.starting_size[0] // 10
+		self.fontsize = (self.starting_size[0] / self.chars) * (5 / 3)
 
-		self.content = Text(f'{self.get_new_line()}', (200, 200, 200), 'regular', fontsize, startingpos= [3, 3], ending=[chars - 1, ((self.starting_size[1] - titlebar_height) // fontsize) - 1])
+		self.content = Text(f'{self.get_new_line()}', (200, 200, 200), 'regular', self.fontsize, startingpos= [3, 3], ending=[self.chars - 1, ((self.starting_size[1] - titlebar_height) // self.fontsize) - 1])
 		self.stdin = ''
 
 		self.wait_for_input = None
@@ -56,15 +57,14 @@ class Terminal(Application):
 		# logger.warn(self.content.get_raw_text())
 
 	def get_new_line(self):
-		return '${c:green}${s:italic}' + f'{self.os.username}' + '${c:reset}${s:reset}:' + '${c:blue}' + f'{self.current_dir.get_path()}' + '${c:reset}' + '> '	
+		return '⸸{c:green}⸸{s:italic}' + f'{self.os.username}' + '⸸{c:reset}⸸{s:reset}:' + '⸸{c:blue}' + f'{self.current_dir.get_path()}' + '⸸{c:reset}' + '> '	
 
 	def update_content(self, new):
 		self.content.update_string(new)
 
 	async def event_handler(self):
 		await super().event_handler()
-		if not self.current_event: return
-
+		if not self.current_event or self.child_app: return
 		if self.current_event.type == pygame.KEYDOWN and self.current_event.key == pygame.K_RETURN:
 			await self.run_command(self.stdin)
 			self.stdin = ''
@@ -99,9 +99,9 @@ class Terminal(Application):
 
 	def response(self, exit_code, stdout, stderr, update_in_terminal=True):
 		if update_in_terminal:
-			code = '${c:reset}' if not exit_code else '${c:red}' 
-			if exit_code: self.update_content(code + f'\nExit code: {exit_code}' + '${c:reset}')
-			if stderr: self.update_content(code + f'\n{stderr}' + '${c:reset}')
+			code = '⸸{c:reset}' if not exit_code else '⸸{c:red}' 
+			if exit_code: self.update_content(code + f'\nExit code: {exit_code}' + '⸸{c:reset}')
+			if stderr: self.update_content(code + f'\n{stderr}' + '⸸{c:reset}')
 			if stdout: self.update_content(f'\n{stdout}')
 			self.new_line()
 		return { 'exit_code': exit_code, 'stdout': stdout, 'stderr': stderr }
@@ -336,3 +336,17 @@ class Terminal(Application):
 				except DirectoryElementError as e:
 					return self.response(1, None, e.message)
 				return self.response(0, None, None)
+
+	async def _pte(self, args):
+		if len(args) < 1:
+			return self.response(1, None, 'Too few arguments.\nSyntax: pte <file name>')
+		file = args[0]
+
+		try:
+			file = self.os.parse_path(file, relative_to=self.current_dir)
+		except SUPathError as e:
+			return self.response(1, None, e.message)
+
+		if not isinstance(file, File): return self.response(1, None, 'Argument must be a File.')
+		self.os.start_application('PILOTTEXTEDITOR', self.os, master_app=self, headless=True, master_terminal=self, file=file)
+		return self.response(0, None, None)
