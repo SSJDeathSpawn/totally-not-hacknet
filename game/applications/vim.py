@@ -38,7 +38,7 @@ class PilotTextEditor(TerminalApplication):
 		self.norm_controller = BaseNormVimCmd(self.key_cmds)
 		self.run_commands = {}
 		self.cmd_controller = BaseRunVimCmd(self.run_commands)
-		self.content = Text(self.stdin, (166, 226, 46), 'regular', master_terminal.fontsize, startingpos= [3, 3], ending=master_terminal.content.ending)
+		self.content = Text(self.add_line_num(self.stdin), (166, 226, 46), 'regular', master_terminal.fontsize, startingpos= [3, 3], ending=master_terminal.content.ending)
 		self.status = Text(self.input_command, (166, 226, 46), 'regular', master_terminal.fontsize, startingpos= [3, master_terminal.starting_size[1]-titlebar_height-master_terminal.fontsize], ending=master_terminal.content.ending)
 
 	def add_line_num(self, string):
