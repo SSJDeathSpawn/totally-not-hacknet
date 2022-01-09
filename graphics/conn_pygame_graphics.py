@@ -136,7 +136,7 @@ class ConnPygameGraphics(object):
 	def main(self, system_id):
 		"""Called on every Iteration of the Game Loop."""
 
-		self.clock.tick(self.fps)
+		self.dt = self.clock.tick(self.fps) / 1000
 		self.win.fill(pygame.Color('black'))
 		for surface in self.render_queue:
 			if not surface.ID == system_id:	self.win.blit(surface, surface.pos)

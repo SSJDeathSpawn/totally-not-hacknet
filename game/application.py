@@ -23,6 +23,9 @@ class Application(object):
 		self.event_queue = []
 		self.current_event = None
 
+		self.timer = 0
+		self.timer_running = False
+
 		logger.debug(f'Started a {self.__class__.__name__} Instance requested by OS with username {opened_by.username} ({opened_by.system.IP}).')
 
 	async def event_handler(self):
@@ -59,6 +62,10 @@ class Application(object):
 		self.os.system.graphics.fill_application_window(self.surface, self.bg_colour)
 
 	async def run(self):
+		if self.timer_running:
+			self.timer += self.os.system.graphics.conn_pygame_graphics.dt
+			if self.timer >= double_click_window:
+				self.timer_running = False
 		await self.event_handler()
 		if self.child_app:
 			await self.child_app.run() 

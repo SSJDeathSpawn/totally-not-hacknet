@@ -1,5 +1,4 @@
 import pygame
-import enum
 
 
 modifier_change = pygame.USEREVENT + 1
@@ -17,3 +16,5 @@ y_align = {
     "middle": 1,
     "bottom": 2
 }
+
+double_click_window = 2
