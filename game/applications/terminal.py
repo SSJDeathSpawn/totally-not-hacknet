@@ -21,7 +21,10 @@ class Terminal(Application):
 		self.bg_colour = (48, 10, 36, 245)
 		self.starting_size = (450, 300)
 		self.scale = 1
+		self.cur_pos = 0
 		self.title = 'TERMINAL'
+		self.backlog = ['']
+		self.b_pointer = 1
 
 		self.commands = {
 			'login': self._login,
@@ -44,6 +47,10 @@ class Terminal(Application):
 		self.chars = self.starting_size[0] // 10
 		self.fontsize = (self.starting_size[0] / self.chars) * (5 / 3)
 
+		self.cursor = pygame.Surface((self.fontsize*3/5, self.fontsize))
+		self.cursor.fill((255, 255, 255))
+		self.cursor.set_alpha(0)
+
 		self.content = Text(f'{self.get_new_line()}', (200, 200, 200), 'regular', self.fontsize, startingpos= [3, 3], ending=[self.chars - 1, ((self.starting_size[1] - titlebar_height) // self.fontsize) - 1])
 		self.stdin = ''
 
@@ -65,19 +72,47 @@ class Terminal(Application):
 	async def event_handler(self):
 		await super().event_handler()
 		if not self.current_event or self.child_app: return
-		if self.current_event.type == pygame.KEYDOWN and self.current_event.key == pygame.K_RETURN:
-			await self.run_command(self.stdin)
-			self.stdin = ''
+		if self.current_event.type == pygame.KEYDOWN:
+			if self.current_event.key == pygame.K_RETURN:
+				if self.stdin == '':
+					self.new_line()
+				else:
+					self.backlog = self.backlog[:49]
+					self.backlog += ['']
+					await self.run_command(self.stdin)
+					self.stdin = ''
 
-		if self.current_event.type == pygame.KEYDOWN and self.current_event.key == pygame.K_BACKSPACE:
-			if len(self.stdin) > 0:
-				self.stdin = self.stdin[:-1]
+			if self.current_event.key == pygame.K_BACKSPACE:
+				if len(self.stdin) > 0:
+					self.stdin = self.stdin[:-1]
+					self.backlog[-1] = self.stdin
+					if not self.hideinput:
+						self.content.string = self.content.string[:-1]
+						self.content.process_string()
+			
+			if self.current_event.key == pygame.K_UP:
 				if not self.hideinput:
-					self.content.string = self.content.string[:-1]
-					self.content.process_string()
+					if self.b_pointer < min(len(self.backlog),49):
+						self.b_pointer+=1
+					logger.warn(self.b_pointer)
+					logger.warn(self.backlog)
+					self.content.string = self.content.string[:-len(self.stdin)] if len(self.stdin) > 0 else self.content.string
+					self.stdin = self.backlog[-self.b_pointer]
+					self.update_content(self.stdin)
+
+			if self.current_event.key == pygame.K_DOWN:
+				if not self.hideinput:
+					if self.b_pointer > 1:
+						self.b_pointer-=1
+					logger.warn(self.b_pointer)
+					logger.warn(self.backlog)
+					self.content.string = self.content.string[:-len(self.stdin)] if len(self.stdin) > 0 else self.content.string
+					self.stdin = self.backlog[-self.b_pointer]
+					self.update_content(self.stdin)
 
 		if self.current_event.type == pygame.TEXTINPUT:
 			self.stdin += self.current_event.text
+			self.backlog[-1] = self.stdin
 			if not self.hideinput:
 				self.update_content(self.current_event.text)
 
@@ -86,6 +121,13 @@ class Terminal(Application):
 	async def graphics_handler(self):
 		await super().graphics_handler()
 		self.os.system.graphics.display_terminal_text(self.surface, self.content)
+		T_half=500
+		val = lambda x: 1 - pow(1 - x, 4)
+		pass_val = lambda x: (T_half-abs(x%(2*T_half)-T_half))/T_half
+		alpha = 155 * val(pass_val(pygame.time.get_ticks()))
+		self.cursor.set_alpha(alpha) 
+		cursor_rect = self.cursor.get_rect(topleft=(self.content.processed[-1][-1][0]+self.fontsize*3/5*len(self.content.processed[-1][0]),titlebar_height+4+self.content.processed[-1][-1][1]))
+		self.surface.blit(self.cursor,cursor_rect)
 
 	async def run_command(self, stdin):
 		if self.wait_for_input: return await self.wait_for_input(stdin)

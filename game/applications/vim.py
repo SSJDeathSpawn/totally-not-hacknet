@@ -4,7 +4,9 @@ from game.application import TerminalApplication
 from game.applications.terminal import Terminal
 from custom_logging.logging import get_logger
 from game.constants import titlebar_height
+from game.constants import titlebar_height
 import pygame
+import math
 
 logger = get_logger('game')
 
@@ -32,14 +34,22 @@ class PilotTextEditor(TerminalApplication):
 		self.scroll = 0
 		self.changed = False
 		self.editing_file = file
+		self.font_size = master_terminal.fontsize*3/5
 		self.key_cmds = {}
 		self.skip = False
 		self.stdin = file.get_contents()
 		self.norm_controller = BaseNormVimCmd(self.key_cmds)
 		self.run_commands = {}
+		self.cursor = pygame.Surface((master_terminal.fontsize*3/5, master_terminal.fontsize))
+		self.cursor.fill((255,255,255))
+		self.cursor.set_alpha(0)
 		self.cmd_controller = BaseRunVimCmd(self.run_commands)
 		self.content = Text(self.add_line_num(self.stdin), (166, 226, 46), 'regular', master_terminal.fontsize, startingpos= [3, 3], ending=master_terminal.content.ending)
 		self.status = Text(self.input_command, (166, 226, 46), 'regular', master_terminal.fontsize, startingpos= [3, master_terminal.starting_size[1]-titlebar_height-master_terminal.fontsize], ending=master_terminal.content.ending)
+
+	async def run(self):
+		await self.event_handler()
+		await self.graphics_handler()
 
 	def add_line_num(self, string):
 		split_lines = string.split("\n")
@@ -49,6 +59,20 @@ class PilotTextEditor(TerminalApplication):
 		#logger.warn(self.cur_pos[1])
 		split_lines[self.cur_pos[1]-1] = '⸸{c:white}' + split_lines[self.cur_pos[1]-1][:5] + '⸸{c:reset}'+split_lines[self.cur_pos[1]-1][5:]
 		return "\n".join(split_lines)
+	
+
+	async def graphics_handler(self):
+		await super().graphics_handler()
+		T_half=500
+		val = lambda x: 1 - pow(1 - x, 4)
+		pass_val = lambda x: (T_half-abs(x%(2*T_half)-T_half))/T_half
+		alpha = 155 * val(pass_val(pygame.time.get_ticks()))
+		self.cursor.set_alpha(alpha) 
+		cursor_rect = self.cursor.get_rect(topleft=(3+(self.cur_pos[0]+4)*self.font_size,titlebar_height+6+(self.cur_pos[1]-1)*self.font_size*5/3))
+		self.surface.blit(self.cursor,cursor_rect)
+		#self.cursor.topleft= (3+(self.cur_pos[0]-1)*self.font_size,titlebar_height+3+(self.cur_pos[1]-1)*self.font_size)
+		self.os.system.graphics.display_terminal_text(self.surface, self.content)
+		self.os.system.graphics.display_terminal_text(self.surface, self.status)
 
 	async def event_handler(self):
 		await super().event_handler()
@@ -159,11 +183,6 @@ class PilotTextEditor(TerminalApplication):
 		elif string[0] == "/":
 			pass
 		self.cur_mode = self.modes.index("NORMAL")
-
-	async def graphics_handler(self):
-		await super().graphics_handler()
-		self.os.system.graphics.display_terminal_text(self.surface, self.content)
-		self.os.system.graphics.display_terminal_text(self.surface, self.status)
 
 class BaseNormVimCmd(object):
 
