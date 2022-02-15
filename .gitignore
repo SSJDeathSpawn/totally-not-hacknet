@@ -4,6 +4,6 @@ venv/
 data/
 **/__pycache__/
 **/testing/
-logging.conf
+logging_module/logging.conf
 **/test.py
 res/
