@@ -34,8 +34,8 @@ class Router(object):
 class Internet(object):
     """Class representing the Internet"""
 
-    conn_networks: dict = {}  # Network ID, Router
-    domain_names: dict = {}  # Name, IP Address
+    conn_networks: dict[str, Router] = {}  # Network ID, Router
+    domain_names: dict[str, str] = {}  # Name, IP Address
 
     @staticmethod
     def add_router(network_id: str, router: Router) -> None:
