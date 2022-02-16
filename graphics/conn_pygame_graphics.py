@@ -155,7 +155,7 @@ class ConnPygameGraphics(object):
 
     # Text
 
-    def render_text(self, font_type: str, size: int, text: str, color: tuple[int, int, int, int], pos: tuple(int, int), background: Optional[tuple[int, int, int, int]] = None, surface: Optional[Surface] = None) -> pygame.Rect:
+    def render_text(self, font_type: str, size: int, text: str, color: tuple[int, int, int, int], pos: tuple[int, int], background: Optional[tuple[int, int, int, int]] = None, surface: Optional[Surface] = None) -> pygame.Rect:
         """Renders text on a surface (default main window surface)"""
 
         if not surface:
