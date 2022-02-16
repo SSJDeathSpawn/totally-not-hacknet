@@ -1,7 +1,9 @@
 import pygame
 
+from typing import Optional
 from logging_module.custom_logging import get_logger
 from utils.general_utils import generate_id
+from graphics.constants import *
 
 
 class Surface(pygame.Surface):
@@ -38,7 +40,7 @@ class ConnPygameGraphics(object):
         self.fonts: dict[str, str] = {}
         self.render_queue: list = []
 
-        self.image_path = 'res/images/'
+        self.image_path: str = IMAGE_PATH
 
     # Main
 
@@ -61,10 +63,10 @@ class ConnPygameGraphics(object):
 
         self.render_queue.append(surface)
 
-    def pop_surface(self) -> None:
+    def pop_surface(self) -> Surface:
         """Pops a surface from the render queue"""
 
-        self.render_queue.pop(0)
+        return self.render_queue.pop(0)
 
     def remove_surface(self, surface: Surface) -> None:
         """Removes a specific surface from the render queue"""
@@ -79,7 +81,7 @@ class ConnPygameGraphics(object):
 
     # Shapes
 
-    def draw_line(self, color: tuple[int, int, int, int], start: tuple[int, int], end: tuple[int, int], width: int = 1, surface: Surface = None) -> pygame.Rect:
+    def draw_line(self, color: tuple[int, int, int, int], start: tuple[int, int], end: tuple[int, int], width: int = 1, surface: Optional[Surface] = None) -> pygame.Rect:
         """Draws a line of given width (default 1) on a surface (default main window surface)"""
 
         if not surface:
@@ -87,7 +89,7 @@ class ConnPygameGraphics(object):
 
         return pygame.draw.line(surface, color, start, end, width)
 
-    def draw_lines(self, color: tuple[int, int, int, int], points: list, width: int = 1, closed: bool = False, surface: Surface = None) -> pygame.Rect:
+    def draw_lines(self, color: tuple[int, int, int, int], points: list[tuple[int, int]], width: int = 1, closed: bool = False, surface: Optional[Surface] = None) -> pygame.Rect:
         """Draws multiple lines on the screen with given width (default 1) connecting all the points in the given sequence on a surface (default main window surface)"""
 
         if not surface:
@@ -95,7 +97,7 @@ class ConnPygameGraphics(object):
 
         return pygame.draw.lines(surface, color, closed, points, width)
 
-    def draw_circle(self, color: tuple[int, int, int, int], center: tuple[int, int], radius: int, quadrants: int = 0b1111, width: int = 0, surface: Surface = None) -> pygame.Rect:
+    def draw_circle(self, color: tuple[int, int, int, int], center: tuple[int, int], radius: int, quadrants: int = 0b1111, width: int = 0, surface: Optional[Surface] = None) -> pygame.Rect:
         """Draws the specified quadrants of the circle (default 0b1111) on a surface (default main window surface)"""
 
         if not surface:
@@ -105,7 +107,7 @@ class ConnPygameGraphics(object):
 
         return pygame.draw.circle(surface, color, center, radius, width, *quadrants)
 
-    def draw_rect(self, color: tuple[int, int, int, int], rect_x: int, rect_y: int, rect_width: int, rect_height: int, width: int = 0, surface: Surface = None) -> pygame.Rect:
+    def draw_rect(self, color: tuple[int, int, int, int], rect_x: int, rect_y: int, rect_width: int, rect_height: int, width: int = 0, surface: Optional[Surface] = None) -> pygame.Rect:
         """Draws a rectangle with given dimensions on a surface (default main window surface)"""
 
         if not surface:
@@ -113,7 +115,7 @@ class ConnPygameGraphics(object):
 
         return pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y, rect_width, rect_height), width)
 
-    def draw_polygon(self, color: tuple[int, int, int, int], points: list, width: int = 0, surface: Surface = None) -> pygame.Rect:
+    def draw_polygon(self, color: tuple[int, int, int, int], points: list[tuple[int, int]], width: int = 0, surface: Optional[Surface] = None) -> pygame.Rect:
         """Draws a polygon using the given points on a surface (defualt main window surface)"""
 
         if not surface:
@@ -134,7 +136,7 @@ class ConnPygameGraphics(object):
 
         return image
 
-    def blit_image(self, pos: tuple[int, int], image_name: str, width: int = 0, height: int = 0, surface: Surface = None) -> pygame.Rect:
+    def blit_image(self, pos: tuple[int, int], image_name: str, width: int = 0, height: int = 0, surface: Optional[Surface] = None) -> pygame.Rect:
         """Blits an image to a surface (default main window surface)"""
 
         if not surface:
@@ -153,7 +155,7 @@ class ConnPygameGraphics(object):
 
     # Text
 
-    def render_text(self, font_type: str, size: int, text: str, color: tuple[int, int, int, int], pos: tuple(int, int), background: tuple[int, int, int, int] = None, surface: Surface = None) -> pygame.Rect:
+    def render_text(self, font_type: str, size: int, text: str, color: tuple[int, int, int, int], pos: tuple(int, int), background: Optional[tuple[int, int, int, int]] = None, surface: Optional[Surface] = None) -> pygame.Rect:
         """Renders text on a surface (default main window surface)"""
 
         if not surface:
