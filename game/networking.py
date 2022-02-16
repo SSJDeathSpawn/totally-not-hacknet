@@ -1,4 +1,8 @@
 from utils.general_utils import generate_network_id, generate_host_id
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from game.operating_system import OperatingSystem
 
 
 class Router(object):
@@ -7,8 +11,8 @@ class Router(object):
     def __init__(self) -> None:
         """Normal constructor"""
 
-        self.network_id = generate_network_id()
-        self.conn_comps = {}
+        self.network_id: str = generate_network_id()
+        self.conn_comps: dict = {}
 
     def __init__(self, **kwargs) -> None:
         """Constructor to be used when loading from save file"""
@@ -16,12 +20,12 @@ class Router(object):
         for i in kwargs:
             self.__setattr__(i, kwargs[i])
 
-    def join(self, os):
+    def join(self, os: OperatingSystem) -> None:
         """Adds an OS to the network"""
 
         self.conn_comps[os] = self.network_id + "." + generate_host_id(self.network_id)
 
-    def is_connected(self, os):
+    def is_connected(self, os: OperatingSystem) -> bool:
         """Checks if an OS is part of the network"""
 
         return os in self.conn_comps 
@@ -30,20 +34,17 @@ class Router(object):
 class Internet(object):
     """Class representing the Internet"""
 
-    # Network ID, Router
-    conn_networks = {} 
-    
-    # Name, IP Address
-    domain_names = {}
+    conn_networks: dict = {}  # Network ID, Router
+    domain_names: dict = {}  # Name, IP Address
 
     @staticmethod
-    def add_router(network_id: str, router: Router):
+    def add_router(network_id: str, router: Router) -> None:
         """Adds a router to the internet"""
 
         Internet.conn_networks[network_id] = router
 
     @staticmethod
-    def add_domain(name: str, ip_address: str):
+    def add_domain(name: str, ip_address: str) -> None:
         """Adds a domain to the internet"""
 
         Internet.domain_names[ip_address] = name
