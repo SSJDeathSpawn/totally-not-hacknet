@@ -1,3 +1,4 @@
+import logging
 import pygame
 
 from typing import Optional
@@ -22,7 +23,7 @@ class ConnPygameGraphics(object):
 
     def __init__(self, width: int, height: int, caption: str, fps: int = 30) -> None:  
 
-        self.logger = get_logger('graphics')
+        self.logger: logging.Logger = get_logger('graphics')
         self.logger.info('Hello from ConnPygameGraphics!')
 
         pygame.init()
