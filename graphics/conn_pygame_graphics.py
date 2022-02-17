@@ -126,7 +126,7 @@ class ConnPygameGraphics(object):
 
     # Images
 
-    def convert_to_pygame_image(self, name: str) -> pygame.Surface:
+    def convert_to_pygame_image(self, name: str) -> Optional[pygame.Surface]:
         """Loads and returns a pygame image with given name"""
 
         try:
@@ -156,7 +156,7 @@ class ConnPygameGraphics(object):
 
     # Text
 
-    def render_text(self, font_type: str, size: int, text: str, color: tuple[int, int, int, int], pos: tuple[int, int], background: Optional[tuple[int, int, int, int]] = None, surface: Optional[Surface] = None) -> pygame.Rect:
+    def render_text(self, font_type: str, size: int, text: str, color: tuple[int, int, int, int], pos: tuple[int, int], background: Optional[tuple[int, int, int, int]] = None, surface: Optional[Surface] = None) -> Optional[pygame.Rect]:
         """Renders text on a surface (default main window surface)"""
 
         if not surface:
