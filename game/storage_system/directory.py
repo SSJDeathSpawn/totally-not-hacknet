@@ -6,6 +6,10 @@ from game.storage_system.storage_unit import StorageUnit
 from logging_module.custom_logging import get_logger
 
 
+#dict2dir
+#...
+#return Directory()
+
 class Directory(StorageUnit):
     """Class representing a directory in the virtual file system"""
 
@@ -75,7 +79,7 @@ class Directory(StorageUnit):
             if len(list(filter(lambda su: su.get_name() == element.get_name(), contents))) > 1:
                 raise DirectoryError('Directory cannot have more than 1 storage units with the same name')
 
-    def _validate_directory_element(element: StorageUnit) -> None:
+    def _validate_directory_element(self, element: StorageUnit) -> None:
         """Checks if the directory element is valid"""
 
         if not isinstance(element, StorageUnit):

@@ -15,7 +15,7 @@ class StorageUnit(object):
         self.parent: Directory = parent
 
         self._validate_name(name)
-        self.name: str = name
+        self.set_name(name)
 
         self._validate_contents(contents)
         self.contents: Union[str, bytes, list[StorageUnit]] = contents
@@ -61,6 +61,8 @@ class StorageUnit(object):
 
     def _validate_parent(self, parent: Directory) -> None:
         """Checks if the parent is valid"""
+
+        from game.storage_system.directory import Directory
 
         if not isinstance(parent, Directory):
             raise StorageUnitError('Storage unit\'s parent needs to be of type Directory.')

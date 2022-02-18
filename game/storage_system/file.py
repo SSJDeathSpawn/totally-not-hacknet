@@ -8,10 +8,11 @@ class File(StorageUnit):
     """Class representing a file in the virtual file system"""
 
     def __init__(self, parent: Directory, name: str, contents: Union[str, bytes]) -> None:
-        super().__init__(parent, name, contents)
 
         self.filename: str
         self.extension: Optional[str]
+
+        super().__init__(parent, name, contents)
 
     # Getters
 
