@@ -34,7 +34,7 @@ class Directory(StorageUnit):
 
     # Setters
 
-    def set_contents(self, contents: list[StorageUnit]):
+    def set_contents(self, contents: list[StorageUnit]) -> None:
         """Sets the contents of a directory"""
 
         self._validate_contents(contents)
@@ -48,7 +48,7 @@ class Directory(StorageUnit):
         self._validate_directory_element(su)
 
         if self.get_su_by_name(su.get_name()) is not None:
-            raise DirectoryError('Directory cannot have more than 2 storage units with the same name')
+            raise DirectoryError('Directory cannot have more than 1 storage units with the same name')
 
         self.contents.append(su)
 

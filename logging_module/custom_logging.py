@@ -36,7 +36,7 @@ except FileNotFoundError:
     exit()
 
 # Adding Colors to Console Logs
-stream_handler = logging.StreamHandler()
+stream_handler: logging.Handler = logging.StreamHandler()
 stream_handler.setFormatter(fmt=CustomFormatter())
 logging.root.addHandler(stream_handler)
 
