@@ -4,6 +4,7 @@ import string
 
 from logging import Logger
 from logging_module.custom_logging import get_logger
+from typing import Optional
 
 
 logger: Logger = get_logger(__name__)
@@ -12,7 +13,7 @@ GENERATED_IDS_PATH: str = 'data/generated_ids.json'
 GENERATED_NETWORK_IDS_PATH: str = 'data/generated_network_ids.json'
 
 
-def generate_id(length: int = 4) -> str:
+def generate_id(length: int = 4) -> Optional[str]:
     """Generates, stores and returns a random ID with the given length (default 4)"""
 
     # Trying to read the file
@@ -28,8 +29,7 @@ def generate_id(length: int = 4) -> str:
         logger.warning(f'Encountered an error while generating ID. Trying to fix')
 
         try:
-            with open(GENERATED_IDS_PATH, 'w'):
-                pass
+            open(GENERATED_IDS_PATH, 'w')
             
             # Generating ID and setting it as the only generated ID
             new_id = ''.join(random.choices(string.ascii_uppercase, k=length))
@@ -56,7 +56,7 @@ def generate_id(length: int = 4) -> str:
     return new_id
         
         
-def generate_network_id() -> str:
+def generate_network_id() -> Optional[str]:
     """Generates, stores and returns a random network ID"""
     
     # Trying to read the file
@@ -72,8 +72,7 @@ def generate_network_id() -> str:
         logger.warning(f'Encountered an error while generating ID. Trying to fix')
 
         try:
-            with open(GENERATED_NETWORK_IDS_PATH, 'w'):
-                pass
+            open(GENERATED_NETWORK_IDS_PATH, 'w')
             
             # Generating ID and setting it as the only generated ID
             new_id = '.'.join(list(map(str, (random.randint(1, 255), random.randint(1, 255), random.randint(1, 255)))))
@@ -101,7 +100,7 @@ def generate_network_id() -> str:
     return new_id
 
 
-def generate_host_id(network_id: str) -> str:
+def generate_host_id(network_id: str) -> Optional[str]:
     """Generates, stores and returns a random host ID for a given network ID"""
 
     # Trying to read the file

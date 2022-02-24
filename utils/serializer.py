@@ -5,7 +5,7 @@ from logging import Logger
 from logging_module.custom_logging import get_logger
 from game.storage_system.directory import Directory, RootDir
 from game.storage_system.file import File
-from utils.validator import *
+from utils.validator import validate_root_dir_contents
 
 logger: Logger = get_logger(__name__)
 

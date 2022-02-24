@@ -1,6 +1,7 @@
 import json
 
-from typing import Optional
+from __future__ import annotations
+from typing import Optional, TYPE_CHECKING
 from logging import Logger
 
 from logging_module.custom_logging import get_logger
@@ -8,7 +9,10 @@ from game.storage_system.directory import Directory, RootDir
 from game.storage_system import constants as ss_consts
 from game.storage_system.file import File
 from exceptions.ser_des import DeserializationError
-from utils.validator import *
+from utils.validator import validate_root_dir_contents
+if TYPE_CHECKING:
+    from game.storage_system.storage_unit import StorageUnit
+
 
 logger: Logger = get_logger(__name__)
 
@@ -56,8 +60,8 @@ def __dict2dir(dir_dict: dict[str, list[StorageUnit]], parent: Directory) -> Dir
 def __dict2file(file_dict: dict[str, str], parent: Directory) -> File:
     """Converts a dictionary into a File object"""
     
-    if file_dict.get('name').split('.')[-1] in ss_consts.BINARY_EXTS:
-        return File(parent, file_dict.get('name'), file_dict.get('contents')) # FIXME: Make this ^^ work. Convert to 0's and 1s but in string
-    else:
-        return File(parent, file_dict.get('name'), file_dict.get('contents'))
+    #if file_dict.get('name').split('.')[-1] in ss_consts.BINARY_EXTS:
+    return File(parent, file_dict.get('name'), file_dict.get('contents')) # FIXME: Make this ^^ work. Convert to 0's and 1s but in string
+    #else:
+    #    return File(parent, file_dict.get('name'), file_dict.get('contents'))
     

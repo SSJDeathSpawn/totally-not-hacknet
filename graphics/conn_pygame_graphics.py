@@ -4,7 +4,7 @@ import pygame
 from typing import Optional
 from logging_module.custom_logging import get_logger
 from utils.general_utils import generate_id
-from graphics.constants import *
+from graphics.constants import IMAGE_PATH
 
 
 class Surface(pygame.Surface):
@@ -30,7 +30,7 @@ class ConnPygameGraphics(object):
 
         self.width: int = width
         self.height: int = height
-        self.caption: int = caption
+        self.caption: str = caption
 
         self.window: pygame.Surface = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption(self.caption)
