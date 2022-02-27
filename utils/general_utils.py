@@ -10,6 +10,7 @@ from typing import Optional
 logger: Logger = get_logger(__name__)
 
 GENERATED_IDS_PATH: str = 'data/generated_ids.json'
+GENERATED_PIDS_PATH: str = 'data/generated_pids.json'
 GENERATED_NETWORK_IDS_PATH: str = 'data/generated_network_ids.json'
 
 
@@ -51,6 +52,49 @@ def generate_id(length: int = 4) -> Optional[str]:
 
     # Storing ID
     with open(GENERATED_IDS_PATH, 'w') as f:
+        json.dump(generated, f, indent=2)
+
+    return new_id
+
+
+def generate_pid(length: int = 4) -> Optional[str]:
+    """Generates, stores and returns a random process ID with the given length (default 4)"""
+
+    # Trying to read the file
+    try:
+        with open(GENERATED_PIDS_PATH, 'r') as f:
+            generated = json.load(f)
+
+        if not isinstance(generated, list):
+            raise TypeError
+    
+    # File probably has some issues. Creating a new empty file
+    except (FileNotFoundError, json.decoder.JSONDecodeError, TypeError):
+        logger.warning(f'Encountered an error while generating PID. Trying to fix')
+
+        try:
+            open(GENERATED_PIDS_PATH, 'w')
+            
+            # Generating PID and setting it as the only generated ID
+            new_id = ''.join(random.choices(string.ascii_uppercase, k=length))
+            generated = [new_id]
+
+        # Directory not found
+        except FileNotFoundError:
+            logger.error(f'Directory <{"/".join(GENERATED_PIDS_PATH.split("/")[:-1])}> not found. The application will continue to run but no PID will be returned')
+            return None
+        
+    # Generating PID
+    else:
+        while True:
+            new_id = ''.join(random.choices(string.ascii_uppercase, k=length))
+
+            if new_id not in generated:
+                generated.append(new_id)
+                break
+
+    # Storing PID
+    with open(GENERATED_PIDS_PATH, 'w') as f:
         json.dump(generated, f, indent=2)
 
     return new_id

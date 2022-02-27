@@ -21,7 +21,7 @@ class Surface(pygame.Surface):
 class ConnPygameGraphics(object):
     """Graphics handler at the outermost level"""
 
-    def __init__(self, width: int, height: int, caption: str, fps: int = 30) -> None:  
+    def __init__(self, width: int, height: int, caption: str) -> None:  
 
         self.logger: logging.Logger = get_logger('graphics')
         self.logger.info('Hello from ConnPygameGraphics!')
@@ -35,9 +35,6 @@ class ConnPygameGraphics(object):
         self.window: pygame.Surface = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption(self.caption)
 
-        self.fps: int = fps
-        self.clock: pygame.time.Clock = pygame.time.Clock()
-
         self.fonts: dict[str, str] = {}
         self.render_queue: list = []
 
@@ -47,8 +44,6 @@ class ConnPygameGraphics(object):
 
     def main(self) -> None:
         """Called on every iteration of the Game Loop"""
-
-        self.clock.tick(self.fps)
 
         self.window.fill((0, 0, 0))
 
