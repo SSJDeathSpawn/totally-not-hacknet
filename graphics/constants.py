@@ -1,9 +1,7 @@
 from typing import Union
 
 
-IMAGE_PATH: str = 'res/images/'
-
-TITLEBAR_OPTIONS_PATH: str = 'titlebar_options.png' 
+TITLEBAR_OPTIONS_PATH: str = 'titlebar_options.png'
 TITLEBAR_OPTIONS_RATIO: tuple[int, int] = (2, 1)  # width to height
 
 TITLEBAR_1PX_PATH: str = 'titlebar_1px.png'
@@ -50,7 +48,7 @@ TEXT_CODES: dict[str, Union[tuple[int, int, int], str]] = {
     
     '⸸{s:regular}': 'regular', 
     '⸸{s:bold}': 'bold', 
-    '⸸{s:italic}': 'italic', 
+    '⸸{s:italic}': 'italic',
     '⸸{s:bold-italic}': 'bold-italic'
     
 }
@@ -58,3 +56,8 @@ TEXT_CODES: dict[str, Union[tuple[int, int, int], str]] = {
 TEXT_ESCAPE_CHAR: str = '⸸'
 
 FONTSIZE_WIDTH_HEIGHT_RATIO: tuple[int, int, int] = ()
+
+
+# Images
+IMAGE_PATH: str = 'res/images/'
+DESKTOP_BACKGROUND_PATH = 'desktop/background.jpg'

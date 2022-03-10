@@ -132,7 +132,7 @@ class ConnPygameGraphics(object):
 
         return image
 
-    def blit_image(self, pos: tuple[int, int], image_name: str, width: int = 0, height: int = 0, surface: Optional[Surface] = None) -> pygame.Rect:
+    def blit_image(self, pos: tuple[int, int], image_name: str, width: int = 0, height: int = 0, surface: Optional[Surface] = None) -> Optional[pygame.Rect]:
         """Blits an image to a surface (default main window surface)"""
 
         if not surface:
@@ -140,13 +140,17 @@ class ConnPygameGraphics(object):
 
         image = self.convert_to_pygame_image(image_name)
 
+        if not image:
+            self.logger.error('No image file found. Ignoring blit request')
+            return
+
         image_size = (
             width if width > 0 else image.get_width(),
             height if height > 0 else image.get_height()
         )
 
         image = pygame.transform.scale(image, image_size)
-        
+
         return surface.blit(image, pos)
 
     # Text

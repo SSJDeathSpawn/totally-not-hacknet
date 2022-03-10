@@ -1,25 +1,39 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Optional, ClassVar
+from typing import TYPE_CHECKING, Optional, ClassVar, Any
+from graphics.conn_pygame_graphics import Surface
+from graphics.constants import RESOLUTION
 from threading import Thread
 from logging_module.custom_logging import get_logger
 if TYPE_CHECKING:
     from game.operating_system import OperatingSystem
+    from logging import Logger
 
+import pygame.event
 
 
 class Application(object):
     """Class representing an application which is installed in the OS"""
     
     def __init__(self, host: OperatingSystem, opened_by: Optional[OperatingSystem] = None):
+        
+        self.logger: Logger = get_logger('game')
 
         if not opened_by:
             opened_by = host
 
         self.opened_by: OperatingSystem = opened_by
         self.host: OperatingSystem = host
-        self.graphics: Any = graphics = self.host.system.graphics  #FIXME: replace Any with the class
+        self.graphics: Any = self.host.system.graphics  # FIXME: replace Any with the class
+        self.events: list[pygame.event.Event] = []
+        self.surface: Optional[Surface] = None
+        self.copy_surface: Optional[Surface] = None
+
+    def send_events(self, events: list[pygame.event.Event]):
+        """Sends events from the operating system to the application"""
+
+        self.events = events
     
-    def tick(self, bg=False) -> None:
+    def tick(self, bg=False) -> str:
         """A single tick of the application"""
     
         if bg:
@@ -40,13 +54,17 @@ class Application(object):
         
     def events_handler(self) -> None:
         """Handles the pygame events passed into the application on the current tick"""
-        
+
         pass
 
     def graphics_handler(self) -> None:
         """Calls the pygame graphics functions for the application"""
 
-        pass
+        self.copy_surface = Surface(RESOLUTION, [0,0])
+        self.copy_surface.blit(self.surface, (0, 0))
+
+        self.graphics.clear_surface(self.copy_surface)
+
 
 class MasterApplication(Application):
     """An application derivative that can make the OS open other applications and allocate new memory to them"""
@@ -60,17 +78,17 @@ class MasterApplication(Application):
         """Starts a new application instance on behalf of the host Operating System"""
 
         instance = self.host.start_app(app_class, self.opened_by, open_in_bg)
-        self.children.add(self.host.start_app())
+        self.children.add(instance)
 
 
-class ApplicationInstance(Thread):
+class ApplicationInstance(object):
     """A thread-based class which handles the instance of an Application which is an analogue to a running program"""
 
     def __init__(self, app: Application, pid: int, run_in_bg: bool = False) -> None:
 
         super().__init__()
 
-        self.logger = get_logger('game')
+        self.logger: Logger = get_logger('game')
 
         self.app: Application = app
         self.pid: int = pid
@@ -84,7 +102,7 @@ class ApplicationInstance(Thread):
 
         if self.alive and not self.running:
             self.running = True
-            self.app.tick(bg = self.run_in_bg)
+            self.app.tick(self.run())
             self.running = False
 
     def terminate(self) -> None:
