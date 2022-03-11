@@ -26,8 +26,8 @@ def generate_id(length: int = 4) -> Optional[str]:
             raise TypeError
     
     # File probably has some issues. Creating a new empty file
-    except (FileNotFoundError, json.decoder.JSONDecodeError, TypeError):
-        logger.warning(f'Encountered an error while generating ID. Trying to fix')
+    except (FileNotFoundError, json.decoder.JSONDecodeError, TypeError) as e:
+        logger.warning(f'Encountered an error while generating ID [{e.message}]. Trying to fix')
 
         try:
             open(GENERATED_IDS_PATH, 'w')

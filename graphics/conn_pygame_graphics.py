@@ -145,8 +145,8 @@ class ConnPygameGraphics(object):
             return
 
         image_size = (
-            width if width > 0 else image.get_width(),
-            height if height > 0 else image.get_height()
+            width if width > 0 else int(image.get_width()),
+            height if height > 0 else int(image.get_height())
         )
 
         image = pygame.transform.scale(image, image_size)

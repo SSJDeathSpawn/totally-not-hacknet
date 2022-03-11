@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from game.applications.application import MasterApplication
+from game.applications.application import Application, MasterApplication
 from graphics.conn_pygame_graphics import Surface
 from graphics.constants import DESKTOP_BACKGROUND_PATH, RESOLUTION
 from typing import Optional
@@ -16,10 +16,10 @@ class Desktop(MasterApplication):
 
         self.surface: Surface = self.graphics.get_surface(*RESOLUTION, [0, 0])
 
+    @Application.graphics_wrapper
     def graphics_handler(self) -> None:
-        super().graphics_handler()
+        self.graphics.clear_surface(self.copy_surface)
         self.graphics.draw_image(self.copy_surface, DESKTOP_BACKGROUND_PATH, (0, 0))
-        self.surface.blit(self.copy_surface, (0, 0))
 
     def events_handler(self) -> None:
         super().events_handler()

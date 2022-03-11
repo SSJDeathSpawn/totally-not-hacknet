@@ -1,13 +1,19 @@
 from typing import Union
 
+# Title Bar
 
-TITLEBAR_OPTIONS_PATH: str = 'titlebar_options.png'
-TITLEBAR_OPTIONS_RATIO: tuple[int, int] = (2, 1)  # width to height
+TITLEBAR_OPTIONS_PATH: str = 'application/titlebar_options.png'
+TITLEBAR_OPTIONS_DIMENSIONS: tuple[int, int] = (2, 1)  # width, height
 
-TITLEBAR_1PX_PATH: str = 'titlebar_1px.png'
-TITLEBAR_1PX_RATIO: tuple[int, int] = (1, 4)  # width to height
+TITLEBAR_1PX_PATH: str = 'application/titlebar_1px.png'
+TITLEBAR_1PX_DIMENSIONS: tuple[int, int] = (1, 4)  # width, height
+
+TITLEBAR_DEFAULT_HEIGHT: int = 30
 
 RESOLUTION: tuple[int, int] = (1366, 768) 
+
+APPLICATION_MIN_WIDTH = 100
+APPLICATION_MIN_HEIGHT = 100
 
 # File Explorer Color Pallete
 

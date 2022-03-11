@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 from logging_module.custom_logging import get_logger
 from graphics.conn_pygame_graphics import ConnPygameGraphics, Surface
-from graphics.constants import RESOLUTION
+from graphics.constants import *
 if TYPE_CHECKING:
     from logging import Logger
     from game.system import System
@@ -34,7 +34,7 @@ class Graphics(object):
 
     def draw_desktop_icon(self) -> None:  # Subject to change
         pass
-
+    
     def get_surface(self, width: int, height: int, pos: list[int, int]) -> Surface:
         """Returns a surface"""
 
@@ -42,9 +42,35 @@ class Graphics(object):
         self.conn_pygame_graphics.push_surface(surface)
         return surface
 
-    @staticmethod
-    def clear_surface(surface: Surface, area: Optional[tuple[int, int, int, int]]=None):  # x, y, width, height
+    def get_app_surface(self, width: int, height: int, pos: list[int ,int]) -> Optional[Surface]:
+        """Returns a surface with the titlebar in it or nothing if width or height is too small"""
+
+        if width < APPLICATION_MIN_WIDTH or height < APPLICATION_MIN_HEIGHT:
+            return None
+
+        padding = 0
+        surface = self.get_surface(width, height, pos)
+        self.conn_pygame_graphics.blit_image((0, 0), TITLEBAR_1PX_PATH, width, TITLEBAR_DEFAULT_HEIGHT, surface)
+
+        options_width = int(TITLEBAR_OPTIONS_DIMENSIONS[0]/TITLEBAR_OPTIONS_DIMENSIONS[1] * TITLEBAR_DEFAULT_HEIGHT)
+        options_pos = (width-options_width-padding,0)
+
+        self.conn_pygame_graphics.blit_image(options_pos, TITLEBAR_OPTIONS_PATH, options_width, TITLEBAR_DEFAULT_HEIGHT, surface)
+
+        return surface
+            
+
+    def clear_surface(self, surface: Surface, area: Optional[tuple[int, int, int, int]]=None):  # x, y, width, height
         """Clears a given surface"""
 
-        surface.fill(pygame.Color('black'))
-        # Do area stuff
+        if not area:
+            surface.fill(pygame.Color('black'))
+
+        else:
+            surface.fill(pygame.Color('black'), pygame.Rect(*area))
+        
+
+    def clear_app_surface(self, surface: Surface):
+        """Clears everything on a given surface except for the title bar"""
+
+        self.clear_surface(surface, (0, TITLEBAR_DEFAULT_HEIGHT, surface.get_width(), surface.get_height() - TITLEBAR_DEFAULT_HEIGHT))

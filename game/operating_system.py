@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from utils.general_utils import generate_pid
 from game.storage_system.directory import RootDir
 from game.applications.desktop import Desktop
+from game.applications.explorer import Explorer
 from game.constants import APPLICATIONS
 from game.applications.application import Application, ApplicationInstance
 if TYPE_CHECKING:
@@ -34,6 +35,7 @@ class OperatingSystem(object):
         self.startup_apps: dict[Application, bool] = {
             # class: is_bg
             Desktop: False,
+            Explorer: False
         }
 
         self.executor: ThreadPoolExecutor = ThreadPoolExecutor()
@@ -61,7 +63,7 @@ class OperatingSystem(object):
         while self.running:
             self.system.graphics.render_surfaces()
             # if self.temp:
-                # self.logger.debug(self.temp.result())
+            #     self.logger.debug(self.temp.result())
             clock.tick(fps)
 
             self.events = pygame.event.get()

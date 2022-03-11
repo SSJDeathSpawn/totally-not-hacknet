@@ -1,14 +1,17 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Optional, ClassVar, Any
+from typing import TYPE_CHECKING, Optional, Type, Any
 from graphics.conn_pygame_graphics import Surface
-from graphics.constants import RESOLUTION
+from graphics.constants import RESOLUTION, TITLEBAR_DEFAULT_HEIGHT
 from threading import Thread
 from logging_module.custom_logging import get_logger
 if TYPE_CHECKING:
     from game.operating_system import OperatingSystem
+    from game.graphics import Graphics
     from logging import Logger
 
 import pygame.event
+import pygame
+import functools
 
 
 class Application(object):
@@ -23,10 +26,12 @@ class Application(object):
 
         self.opened_by: OperatingSystem = opened_by
         self.host: OperatingSystem = host
-        self.graphics: Any = self.host.system.graphics  # FIXME: replace Any with the class
+        self.graphics: Graphics = self.host.system.graphics  # FIXME: replace Any with the class
         self.events: list[pygame.event.Event] = []
         self.surface: Optional[Surface] = None
         self.copy_surface: Optional[Surface] = None
+
+        self.selected: bool = False
 
     def send_events(self, events: list[pygame.event.Event]):
         """Sends events from the operating system to the application"""
@@ -51,19 +56,35 @@ class Application(object):
         """Idle state of the application"""
         
         pass
-        
+    
     def events_handler(self) -> None:
         """Handles the pygame events passed into the application on the current tick"""
+            
+        for event in self.events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pass
+    
+    def graphics_wrapper(func):
+        """Wrapper for the graphics handler"""
+        
+        @functools.wraps(func)
+        def wrap(self):
+            self.copy_surface = Surface(self.surface.get_size(), [0,0])
+            self.copy_surface.blit(self.surface, (0, 0))
+            func(self)
+            self.surface.blit(self.copy_surface, (0, 0))
 
-        pass
+        return wrap
 
+    
+    @graphics_wrapper
     def graphics_handler(self) -> None:
         """Calls the pygame graphics functions for the application"""
 
-        self.copy_surface = Surface(RESOLUTION, [0,0])
-        self.copy_surface.blit(self.surface, (0, 0))
+        pass
 
-        self.graphics.clear_surface(self.copy_surface)
+
+    graphics_wrapper = staticmethod(graphics_wrapper)
 
 
 class MasterApplication(Application):
@@ -74,11 +95,14 @@ class MasterApplication(Application):
         
         self.children: set[ApplicationInstance] = set()
 
-    def start_application(self, app_class: ClassVar[Application], open_in_bg: bool = False) -> None:
+    def start_application(self, app_class: Type[Application], open_in_bg: bool = False) -> None:
         """Starts a new application instance on behalf of the host Operating System"""
 
         instance = self.host.start_app(app_class, self.opened_by, open_in_bg)
         self.children.add(instance)
+    
+    def event_handler(self):
+        pass
 
 
 class ApplicationInstance(object):
