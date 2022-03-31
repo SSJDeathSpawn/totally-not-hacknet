@@ -5,6 +5,7 @@ import string
 from logging import Logger
 from logging_module.custom_logging import get_logger
 from typing import Optional
+from utils.resource_manager import ResourceManager, uses_resource
 
 
 logger: Logger = get_logger(__name__)
@@ -14,9 +15,9 @@ GENERATED_PIDS_PATH: str = 'data/generated_pids.json'
 GENERATED_NETWORK_IDS_PATH: str = 'data/generated_network_ids.json'
 
 
-def generate_id(length: int = 4) -> Optional[str]:
+def generate_id_inter(length: int = 4) -> Optional[str]:
     """Generates, stores and returns a random ID with the given length (default 4)"""
-
+    
     # Trying to read the file
     try:
         with open(GENERATED_IDS_PATH, 'r') as f:
@@ -27,7 +28,7 @@ def generate_id(length: int = 4) -> Optional[str]:
     
     # File probably has some issues. Creating a new empty file
     except (FileNotFoundError, json.decoder.JSONDecodeError, TypeError) as e:
-        logger.warning(f'Encountered an error while generating ID [{e.message}]. Trying to fix')
+        logger.warning(f'Encountered an error while generating ID [{e}]. Trying to fix')
 
         try:
             open(GENERATED_IDS_PATH, 'w')
@@ -57,8 +58,8 @@ def generate_id(length: int = 4) -> Optional[str]:
     return new_id
 
 
-def generate_pid(length: int = 4) -> Optional[str]:
-    """Generates, stores and returns a random process ID with the given length (default 4)"""
+def generate_pid_inter(length: int = 4) -> Optional[str]:
+    """Generates, stores and returns a random process PID with the given length (default 4)"""
 
     # Trying to read the file
     try:
@@ -69,8 +70,8 @@ def generate_pid(length: int = 4) -> Optional[str]:
             raise TypeError
     
     # File probably has some issues. Creating a new empty file
-    except (FileNotFoundError, json.decoder.JSONDecodeError, TypeError):
-        logger.warning(f'Encountered an error while generating PID. Trying to fix')
+    except (FileNotFoundError, json.decoder.JSONDecodeError, TypeError) as e:
+        logger.warning(f'Encountered an error while generating PID [{e}]. Trying to fix')
 
         try:
             open(GENERATED_PIDS_PATH, 'w')
@@ -100,7 +101,7 @@ def generate_pid(length: int = 4) -> Optional[str]:
     return new_id
         
         
-def generate_network_id() -> Optional[str]:
+def generate_network_id_inter() -> Optional[str]:
     """Generates, stores and returns a random network ID"""
     
     # Trying to read the file
@@ -112,8 +113,8 @@ def generate_network_id() -> Optional[str]:
             raise TypeError
     
     # File probably has some issues. Creating a new empty file
-    except (FileNotFoundError, json.decoder.JSONDecodeError, TypeError):
-        logger.warning(f'Encountered an error while generating ID. Trying to fix')
+    except (FileNotFoundError, json.decoder.JSONDecodeError, TypeError) as e:
+        logger.warning(f'Encountered an error while generating ID [{e}]. Trying to fix')
 
         try:
             open(GENERATED_NETWORK_IDS_PATH, 'w')
@@ -144,7 +145,7 @@ def generate_network_id() -> Optional[str]:
     return new_id
 
 
-def generate_host_id(network_id: str) -> Optional[str]:
+def generate_host_id_inter(network_id: str) -> Optional[str]:
     """Generates, stores and returns a random host ID for a given network ID"""
 
     # Trying to read the file
@@ -186,4 +187,15 @@ def generate_host_id(network_id: str) -> Optional[str]:
     with open(GENERATED_NETWORK_IDS_PATH, 'w') as f:
         json.dump(generated, f, indent=2) 
 
-    return new_id      
+    return new_id
+
+
+generate_id = lambda *args, **kwargs: ResourceManager.use_resource(uses_resource(generate_id_inter, GENERATED_IDS_PATH, True), *args, **kwargs)
+generate_pid = lambda *args, **kwargs: ResourceManager.use_resource(uses_resource(generate_pid_inter, GENERATED_PIDS_PATH, True), *args, **kwargs)
+generate_network_id = lambda *args, **kwargs: ResourceManager.use_resource(uses_resource(generate_network_id_inter, GENERATED_NETWORK_IDS_PATH, True), *args, **kwargs)
+generate_host_id = lambda *args, **kwargs: ResourceManager.use_resource(uses_resource(generate_host_id_inter, GENERATED_NETWORK_IDS_PATH, True), *args, **kwargs)
+
+# No Idea why this works
+# Double No Idea how this works
+# Triple No Idea how this works
+# Quadruple No Idea how this works

@@ -36,7 +36,7 @@ class System(object):
         self.os: OperatingSystem = OperatingSystem(self, deserialize_root_directory(DEFAULT_ROOTDIR_PATH))
         self.graphics = Graphics(self)
 
-        self.logger.debug(f'Initialized System with ID {self.ID}.')
+        self.logger.debug(f'Initialized System with ID {self.ID}')
 
     # def handle_boot(self) -> bool:
     #     """Handles boot"""
