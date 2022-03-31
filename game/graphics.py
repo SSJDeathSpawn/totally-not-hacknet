@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 from logging_module.custom_logging import get_logger
 from graphics.conn_pygame_graphics import ConnPygameGraphics, Surface
-from graphics.constants import *
+from graphics.constants import RESOLUTION, APPLICATION_MIN_HEIGHT, APPLICATION_MIN_WIDTH, TITLEBAR_1PX_DIMENSIONS, TITLEBAR_DEFAULT_HEIGHT, TITLEBAR_OPTIONS_PATH, TITLEBAR_OPTIONS_DIMENSIONS, TITLEBAR_1PX_PATH
 if TYPE_CHECKING:
     from logging import Logger
     from game.system import System

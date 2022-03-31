@@ -1,5 +1,6 @@
-from utils.general_utils import generate_network_id, generate_host_id
 from __future__ import annotations
+from utils.general_utils import generate_network_id, generate_host_id
+from utils.resource_manager import ResourceManager
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from game.operating_system import OperatingSystem
@@ -22,7 +23,7 @@ class Router(object):
 
     def join(self, os: OperatingSystem) -> None:
         """Adds an OS to the network"""
-
+        
         self.conn_comps[os] = self.network_id + "." + generate_host_id(self.network_id)
 
     def is_connected(self, os: OperatingSystem) -> bool:

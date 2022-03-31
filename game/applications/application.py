@@ -59,10 +59,21 @@ class Application(object):
     
     def events_handler(self) -> None:
         """Handles the pygame events passed into the application on the current tick"""
-            
+        
+        def between(point, corner_tl, corner_br):
+            return corner_tl[0] <= point[0] <= corner_br[0] and corner_tl[1] <= point[1] <= corner_br[1]
+        
+        def clamp(val, min_val, max_val):
+            return max(min(val, max_val), min_val)
+
         for event in self.events:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                pass
+                if event.button == 1 and between(event.pos, self.surface.pos, [self.surface.pos[0]+self.surface.get_width(), self.surface.pos[1]+TITLEBAR_DEFAULT_HEIGHT]):
+                    self.is_being_moved = True
+            elif event.type == pygame.MOUSEBUTTONUP and self.is_being_moved:
+                self.is_being_moved = False
+            elif event.type == pygame.MOUSEMOTION and self.is_being_moved:
+                self.surface.pos = [self.surface.pos[0]+event.rel[0], self.surface.pos[1]+event.rel[1]]
     
     def graphics_wrapper(func):
         """Wrapper for the graphics handler"""
