@@ -19,7 +19,7 @@ class Desktop(MasterApplication):
     @Application.graphics_wrapper
     def graphics_handler(self) -> None:
         self.graphics.clear_surface(self.surface)
-        self.graphics.draw_image(self.surface, DESKTOP_BACKGROUND_PATH, (0, 0))
+        self.graphics.draw_image(self.surface, DESKTOP_BACKGROUND_PATH, (0, 0), RESOLUTION)
 
     def event_handler(self):
         pass

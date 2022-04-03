@@ -66,4 +66,4 @@ FONTSIZE_WIDTH_HEIGHT_RATIO: tuple[int, int, int] = ()
 
 # Images
 IMAGE_PATH: str = 'res/images/'
-DESKTOP_BACKGROUND_PATH = 'desktop/background.jpg'
+DESKTOP_BACKGROUND_PATH = 'desktop/background.png'

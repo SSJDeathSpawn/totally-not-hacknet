@@ -8,7 +8,7 @@ import random
 from typing import Optional
 from logging_module.custom_logging import get_logger
 from utils.general_utils import generate_id
-from graphics.constants import IMAGE_PATH
+from graphics.constants import IMAGE_PATH, TITLEBAR_DEFAULT_HEIGHT
 
 
 class Surface(pygame.Surface):
@@ -31,6 +31,14 @@ class Surface(pygame.Surface):
         new.blit(self, (0, 0))
 
         return new
+
+    def get_surface_range(self, include_titlebar: bool = True) -> tuple[list[int], list[int]]:
+        """Returns the surface range from top-left to bottom-right"""
+
+        if not include_titlebar:
+            return ([self.pos[0], self.pos[1] + TITLEBAR_DEFAULT_HEIGHT], [self.pos[0] + self.get_width(), self.pos[1] + self.get_height() - TITLEBAR_DEFAULT_HEIGHT])
+
+        return (self.pos, [self.pos[0] + self.get_width(), self.pos[1] + self.get_height()])
 
 
 class ConnPygameGraphics(object):
@@ -64,6 +72,11 @@ class ConnPygameGraphics(object):
             return list(filter(lambda surface: surface.ID == surface_id, self.render_queue))[0]
         except IndexError:
             self.logger.warning(f'Surface with ID {surface_id} not found. Ignoring request')
+
+    def get_index(self, surface: Surface) -> int:
+        """Returns the index of a passed in surface"""
+
+        return self.render_queue.index(self.get_surface_by_id(surface.ID))
     
     # Main
 
@@ -100,6 +113,7 @@ class ConnPygameGraphics(object):
     def select_surface(self, surface: Surface) -> None:
         """Puts a render surface at the end of the queue"""
 
+        surface = self.get_surface_by_id(surface.ID)
         self.render_queue.remove(surface)
         self.render_queue.append(surface)
 

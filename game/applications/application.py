@@ -4,6 +4,7 @@ from graphics.conn_pygame_graphics import Surface
 from graphics.constants import RESOLUTION, TITLEBAR_DEFAULT_HEIGHT, TITLEBAR_OPTIONS_DIMENSIONS
 from threading import Thread
 from logging_module.custom_logging import get_logger
+from utils.math import between, clamp
 if TYPE_CHECKING:
     from game.operating_system import OperatingSystem
     from game.graphics import Graphics
@@ -76,7 +77,7 @@ class Application(object):
     def idle(self) -> None:
         """Idle state of the application"""
         
-        pass
+        self.graphics_handler()
     
     def quit(self) -> None:
         """Quits the application"""
@@ -84,22 +85,17 @@ class Application(object):
         self.logger.debug('QUITTING')
         
         self.graphics.remove_surface(self.surface)
-        self.host.running_apps.remove(self)
+        app_to_remove = list(filter(lambda app_instance: app_instance.app == self, self.host.running_apps))[0]
+        self.host.running_apps.remove(app_to_remove)
 
     def events_handler(self) -> None:
         """Handles the pygame events passed into the application on the current tick"""
 
-        def between(point: tuple[int, int], corner_tl: tuple[int, int], corner_br: tuple[int, int]):
-            """Returns True if a point is between two corner points (top left and bottom right)"""
-            return corner_tl[0] <= point[0] <= corner_br[0] and corner_tl[1] <= point[1] <= corner_br[1]
-        
-        def clamp(val, min_val, max_val):
-            return max(min(val, max_val), min_val)
 
         for event in self.events:
 
             if event.type == pygame.MOUSEBUTTONDOWN:  
-                self.logger.debug(f'I\'m pressing the mouse, and I\'m checking if {event.pos} is in between {((self.surface.pos[0] + self.surface.get_width()) - (TITLEBAR_OPTIONS_DIMENSIONS[0] * TITLEBAR_DEFAULT_HEIGHT), self.surface.pos[1])} and {(self.surface.pos[0] + self.surface.get_width(), self.surface.pos[1]+TITLEBAR_DEFAULT_HEIGHT)}')
+                #self.logger.debug(f'I\'m pressing the mouse, and I\'m checking if {event.pos} is in between {((self.surface.pos[0] + self.surface.get_width()) - (TITLEBAR_OPTIONS_DIMENSIONS[0] * TITLEBAR_DEFAULT_HEIGHT), self.surface.pos[1])} and {(self.surface.pos[0] + self.surface.get_width(), self.surface.pos[1]+TITLEBAR_DEFAULT_HEIGHT)}')
 
                 # Enables moving the window
                 if event.button == 1 and between(event.pos, self.surface.pos, (self.surface.pos[0] + self.surface.get_width() - TITLEBAR_OPTIONS_DIMENSIONS[0] * TITLEBAR_DEFAULT_HEIGHT * 2, self.surface.pos[1] + TITLEBAR_DEFAULT_HEIGHT)):
@@ -178,7 +174,7 @@ class ApplicationInstance(object):
 
         if self.alive and not self.running:
             self.running = True
-            self.app.tick(self.run())
+            self.app.tick(self.run_in_bg)
             self.running = False
 
     def terminate(self) -> None:
