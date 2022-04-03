@@ -47,7 +47,7 @@ class ConnPygameGraphics(object):
         self.height: int = height
         self.caption: str = caption
 
-        self.window: pygame.Surface = pygame.display.set_mode((self.width, self.height))
+        self.window: pygame.Surface = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
         pygame.display.set_caption(self.caption)
 
         self.fonts: dict[str, str] = {}
