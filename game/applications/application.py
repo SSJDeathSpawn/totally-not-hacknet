@@ -150,6 +150,7 @@ class MasterApplication(Application):
         self.children.add(instance)
 
     def events_handler(self):
+        # Duh, we don't want desktop to be moved around
         pass
 
 

@@ -9,3 +9,6 @@ class DirectoryError(Exception):
 
 class RootDirError(Exception):
     pass
+
+class PathError(Exception):
+    pass

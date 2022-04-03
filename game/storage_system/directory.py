@@ -56,7 +56,7 @@ class Directory(StorageUnit):
         """Deletes a storage unit from the contents"""
 
         try:
-            self.contents.remove(su)
+            self.contents.remov# TODO: Add hidden folderse(su)
         except ValueError:
             self.logger.warning('Given storage unit is not a child. Ignoring delete request')
 

@@ -61,6 +61,31 @@ class OperatingSystem(object):
             self.selected = instance
 
         return instance
+
+    def check_for_selection(self, event: int) -> None:
+        """Handles app selection"""
+        
+        nothing_zone = self.selected.app.surface.get_surface_range() if not isinstance(self.selected.app, Desktop) else ([0, 0], [0, 0])
+        
+        if not between(event.pos, *nothing_zone):
+            app_instance_choices = list(filter(lambda app_inst, event=event: between(event.pos, *app_inst.app.surface.get_surface_range()), self.running_apps))
+            
+            # Get surfaces, check it's rank in the render_queue and get the first
+            max_index = -1
+
+            def get_index(surface: Surface) -> int:
+                return self.system.graphics.conn_pygame_graphics.get_index(surface)
+
+            self.logger.debug(list(map(lambda app_inst: app_inst.app, app_instance_choices)))
+            app_surfaces = list(map(lambda app_inst: app_inst.app.surface, app_instance_choices))
+            for index, surface in enumerate(app_surfaces):
+                gotten_index = get_index(surface)
+                if max_index == -1 or gotten_index > get_index(app_surfaces[max_index]):
+                    max_index = index
+            
+            self.selected = app_instance_choices[max_index]
+            if not isinstance(self.selected.app, Desktop):
+                self.system.graphics.conn_pygame_graphics.select_surface(self.selected.app.surface)
     
     def events_handler(self) -> None:
         """Events handler for the operating system"""
@@ -72,27 +97,8 @@ class OperatingSystem(object):
                 return
     
             # Window selection
-            nothing_zone = self.selected.app.surface.get_surface_range() if not isinstance(self.selected.app, Desktop) else ([0, 0], [0, 0])
-            
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and not between(event.pos, *nothing_zone):
-                app_instance_choices = list(filter(lambda app_inst, event=event: between(event.pos, *app_inst.app.surface.get_surface_range()), self.running_apps))
-                
-                # Get surfaces, check it's rank in the render_queue and get the first
-                max_index = -1
-
-                def get_index(surface: Surface) -> int:
-                    return self.system.graphics.conn_pygame_graphics.get_index(surface)
-
-                self.logger.debug(list(map(lambda app_inst: app_inst.app, app_instance_choices)))
-                app_surfaces = list(map(lambda app_inst: app_inst.app.surface, app_instance_choices))
-                for index, surface in enumerate(app_surfaces):
-                    gotten_index = get_index(surface)
-                    if max_index == -1 or gotten_index > get_index(app_surfaces[max_index]):
-                        max_index = index
-                
-                self.selected = app_instance_choices[max_index]
-                if not isinstance(self.selected.app, Desktop):
-                    self.system.graphics.conn_pygame_graphics.select_surface(self.selected.app.surface)
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                self.check_for_selection(event)
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
                 self.start_app(Explorer, self)
@@ -117,10 +123,8 @@ class OperatingSystem(object):
                     self.running_apps.remove(instance)
 
             for instance in self.running_apps: 
-                if (not instance.running) and instance == self.selected:
-                    instance.set_bg(False)
-                elif (not instance.running) and instance != self.selected:
-                    instance.set_bg(True)
+                if (not instance.running):
+                    instance.set_bg(instance != self.selected)
 
                 instance.app.send_events(self.events)
                 self.temp = self.executor.submit(instance.run)
