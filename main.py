@@ -1,3 +1,5 @@
+#!venv/bin/python3
+
 from logging_module.custom_logging import get_logger
 from game.system import System
 

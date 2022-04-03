@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Type, Any
 from graphics.conn_pygame_graphics import Surface
-from graphics.constants import RESOLUTION, TITLEBAR_DEFAULT_HEIGHT
+from graphics.constants import RESOLUTION, TITLEBAR_DEFAULT_HEIGHT, TITLEBAR_OPTIONS_DIMENSIONS
 from threading import Thread
 from logging_module.custom_logging import get_logger
 if TYPE_CHECKING:
@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 import pygame.event
 import pygame
 import functools
+import time
 
 
 class Application(object):
@@ -26,12 +27,18 @@ class Application(object):
 
         self.opened_by: OperatingSystem = opened_by
         self.host: OperatingSystem = host
-        self.graphics: Graphics = self.host.system.graphics  # FIXME: replace Any with the class
+        self.graphics: Graphics = self.host.system.graphics
         self.events: list[pygame.event.Event] = []
         self.surface: Optional[Surface] = None
         self.copy_surface: Optional[Surface] = None
 
+        self.debug = {
+            'i': 0,
+            'time': [0,0]
+        }
+
         self.selected: bool = False
+        self.is_being_moved: bool = False
 
     def send_events(self, events: list[pygame.event.Event]):
         """Sends events from the operating system to the application"""
@@ -48,42 +55,76 @@ class Application(object):
 
     def run(self) -> None:
         """Runs the graphics and events handlers"""
+            
+        if self.debug.get('i') >= 99:
+            self.logger.debug(f"Average in 100 cycles for {self.__class__.__name__}:")
+            self.logger.debug(f"Graphics: {self.debug.get('time')[0] / 100}")
+            self.logger.debug(f"Events: {self.debug.get('time')[1] / 100}")
+            self.debug['i'] = 0
+            self.debug['time'] = [0, 0]
 
+        start = time.time()
         self.graphics_handler()
+        end = time.time()
+        self.debug['time'][0] += end-start
+        start = time.time()
         self.events_handler()
+        end = time.time()
+        self.debug['time'][1] += end-start
+        self.debug['i'] += 1
 
     def idle(self) -> None:
         """Idle state of the application"""
         
         pass
     
+    def quit(self) -> None:
+        """Quits the application"""
+        
+        self.logger.debug('QUITTING')
+        
+        self.graphics.remove_surface(self.surface)
+        self.host.running_apps.remove(self)
+
     def events_handler(self) -> None:
         """Handles the pygame events passed into the application on the current tick"""
-        
-        def between(point, corner_tl, corner_br):
+
+        def between(point: tuple[int, int], corner_tl: tuple[int, int], corner_br: tuple[int, int]):
+            """Returns True if a point is between two corner points (top left and bottom right)"""
             return corner_tl[0] <= point[0] <= corner_br[0] and corner_tl[1] <= point[1] <= corner_br[1]
         
         def clamp(val, min_val, max_val):
             return max(min(val, max_val), min_val)
 
         for event in self.events:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1 and between(event.pos, self.surface.pos, [self.surface.pos[0]+self.surface.get_width(), self.surface.pos[1]+TITLEBAR_DEFAULT_HEIGHT]):
+
+            if event.type == pygame.MOUSEBUTTONDOWN:  
+                self.logger.debug(f'I\'m pressing the mouse, and I\'m checking if {event.pos} is in between {((self.surface.pos[0] + self.surface.get_width()) - (TITLEBAR_OPTIONS_DIMENSIONS[0] * TITLEBAR_DEFAULT_HEIGHT), self.surface.pos[1])} and {(self.surface.pos[0] + self.surface.get_width(), self.surface.pos[1]+TITLEBAR_DEFAULT_HEIGHT)}')
+
+                # Enables moving the window
+                if event.button == 1 and between(event.pos, self.surface.pos, (self.surface.pos[0] + self.surface.get_width() - TITLEBAR_OPTIONS_DIMENSIONS[0] * TITLEBAR_DEFAULT_HEIGHT * 2, self.surface.pos[1] + TITLEBAR_DEFAULT_HEIGHT)):
                     self.is_being_moved = True
-            elif event.type == pygame.MOUSEBUTTONUP and self.is_being_moved:
+
+                # Quitting the window
+                elif event.button == 1 and between(event.pos, (self.surface.pos[0] + self.surface.get_width() - TITLEBAR_OPTIONS_DIMENSIONS[0] * TITLEBAR_DEFAULT_HEIGHT, self.surface.pos[1]), (self.surface.pos[0] + self.surface.get_width(), self.surface.pos[1]+TITLEBAR_DEFAULT_HEIGHT)):
+                    self.quit()
+                    return
+
+            # Disables moving the window
+            if event.type == pygame.MOUSEBUTTONUP and self.is_being_moved:
                 self.is_being_moved = False
-            elif event.type == pygame.MOUSEMOTION and self.is_being_moved:
-                self.surface.pos = [self.surface.pos[0]+event.rel[0], self.surface.pos[1]+event.rel[1]]
+
+            # Moves the window with mouse
+            if event.type == pygame.MOUSEMOTION and self.is_being_moved:
+                self.surface.pos = [clamp(self.surface.pos[0] + event.rel[0], 0 - self.surface.get_width() + 10, RESOLUTION[0] - 10), clamp(self.surface.pos[1] + event.rel[1], 0, RESOLUTION[1] - TITLEBAR_DEFAULT_HEIGHT)]
     
     def graphics_wrapper(func):
         """Wrapper for the graphics handler"""
         
         @functools.wraps(func)
         def wrap(self):
-            self.copy_surface = Surface(self.surface.get_size(), [0,0])
-            self.copy_surface.blit(self.surface, (0, 0))
+            self.surface = self.graphics.swap_surfaces(self.surface)
             func(self)
-            self.surface.blit(self.copy_surface, (0, 0))
 
         return wrap
 
@@ -111,8 +152,8 @@ class MasterApplication(Application):
 
         instance = self.host.start_app(app_class, self.opened_by, open_in_bg)
         self.children.add(instance)
-    
-    def event_handler(self):
+
+    def events_handler(self):
         pass
 
 

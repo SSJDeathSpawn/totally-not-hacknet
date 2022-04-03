@@ -62,8 +62,8 @@ class OperatingSystem(object):
 
         while self.running:
             self.system.graphics.render_surfaces()
-            # if self.temp:
-            #     self.logger.debug(self.temp.result())
+            if self.temp and self.temp.result() != None:
+                    self.logger.debug(self.temp.result())
             clock.tick(fps)
 
             self.events = pygame.event.get()

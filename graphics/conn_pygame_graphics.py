@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import logging
 import pygame
+import copy
+import random
 
 from typing import Optional
 from logging_module.custom_logging import get_logger
@@ -14,8 +18,19 @@ class Surface(pygame.Surface):
         
         super().__init__(size, pygame.SRCALPHA)
 
+        self.logger: logging.Logger = get_logger('graphics')
+
         self.ID: str = f'SURFACE-{generate_id()}'
         self.pos: list[int, int] = pos
+
+    def copy(self) -> Surface:
+        """Returns a copy of the surface"""
+        
+        new = Surface(self.get_size(), self.pos)
+        new.ID = self.ID
+        new.blit(self, (0, 0))
+
+        return new
 
 
 class ConnPygameGraphics(object):
@@ -32,7 +47,7 @@ class ConnPygameGraphics(object):
         self.height: int = height
         self.caption: str = caption
 
-        self.window: pygame.Surface = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+        self.window: pygame.Surface = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption(self.caption)
 
         self.fonts: dict[str, str] = {}
@@ -40,6 +55,16 @@ class ConnPygameGraphics(object):
 
         self.image_path: str = IMAGE_PATH
 
+    # Helpers
+
+    def get_surface_by_id(self, surface_id: str) -> Surface:
+        """Returns a surface with given id"""
+        
+        try:
+            return list(filter(lambda surface: surface.ID == surface_id, self.render_queue))[0]
+        except IndexError:
+            self.logger.warning(f'Surface with ID {surface_id} not found. Ignoring request')
+    
     # Main
 
     def main(self) -> None:
@@ -56,8 +81,9 @@ class ConnPygameGraphics(object):
 
     def push_surface(self, surface: Surface) -> None:
         """Pushes a surface to the render queue"""
-
-        self.render_queue.append(surface)
+        
+        # rendered_surface =
+        self.render_queue.append(surface.copy())
 
     def pop_surface(self) -> Surface:
         """Pops a surface from the render queue"""
@@ -67,7 +93,9 @@ class ConnPygameGraphics(object):
     def remove_surface(self, surface: Surface) -> None:
         """Removes a specific surface from the render queue"""
 
-        self.render_queue.remove(surface)
+        for a in range(len(self.render_queue)):
+            if self.render_queue[a].ID == surface.ID:
+                self.render_queue.pop(a)
 
     def select_surface(self, surface: Surface) -> None:
         """Puts a render surface at the end of the queue"""

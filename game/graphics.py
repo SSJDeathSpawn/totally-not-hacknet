@@ -24,6 +24,25 @@ class Graphics(object):
 
         self.conn_pygame_graphics.main()
 
+    def remove_surface(self, surface: Surface) -> None:
+        """Removes the given surface from the render queue"""
+
+        self.logger.debug('Removing surface')
+        self.conn_pygame_graphics.remove_surface(surface)
+            
+    def swap_surfaces(self, surface: Surface) -> Surface:
+        """Swaps the application surface with the conn_pygame_graphics surface"""
+
+        rendered_surface = self.conn_pygame_graphics.get_surface_by_id(surface.ID)
+        index = self.conn_pygame_graphics.render_queue.index(rendered_surface)
+
+        self.conn_pygame_graphics.render_queue[index] = surface
+        # self.logger.debug(f'ORIGINAL -> {id(surface)} FAKE -> {id(rendered_surface)}')
+
+        rendered_surface.pos = surface.pos.copy()
+        
+        return rendered_surface
+
     def draw_image(self, surface: Surface, name: str, pos: tuple[int, int] = (0, 0), dimensions: Optional[tuple[int, int]] = None) -> None:  # Subject to change
 
         if not dimensions:
@@ -35,11 +54,12 @@ class Graphics(object):
     def draw_desktop_icon(self) -> None:  # Subject to change
         pass
     
-    def get_surface(self, width: int, height: int, pos: list[int, int]) -> Surface:
+    def get_surface(self, width: int, height: int, pos: list[int, int], push: bool = True) -> Surface:
         """Returns a surface"""
 
         surface = Surface((width, height), pos)
-        self.conn_pygame_graphics.push_surface(surface)
+        if push:
+            self.conn_pygame_graphics.push_surface(surface)
         return surface
 
     def get_app_surface(self, width: int, height: int, pos: list[int ,int]) -> Optional[Surface]:
@@ -49,13 +69,15 @@ class Graphics(object):
             return None
 
         padding = 0
-        surface = self.get_surface(width, height, pos)
+        surface = self.get_surface(width, height, pos, False)
         self.conn_pygame_graphics.blit_image((0, 0), TITLEBAR_1PX_PATH, width, TITLEBAR_DEFAULT_HEIGHT, surface)
 
         options_width = int(TITLEBAR_OPTIONS_DIMENSIONS[0]/TITLEBAR_OPTIONS_DIMENSIONS[1] * TITLEBAR_DEFAULT_HEIGHT)
         options_pos = (width-options_width-padding,0)
 
         self.conn_pygame_graphics.blit_image(options_pos, TITLEBAR_OPTIONS_PATH, options_width, TITLEBAR_DEFAULT_HEIGHT, surface)
+
+        self.conn_pygame_graphics.push_surface(surface)
 
         return surface
             

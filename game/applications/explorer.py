@@ -16,4 +16,4 @@ class Explorer(Application):
 
     @Application.graphics_wrapper
     def graphics_handler(self) -> None:
-        self.graphics.clear_app_surface(self.copy_surface)
+        self.graphics.clear_app_surface(self.surface)

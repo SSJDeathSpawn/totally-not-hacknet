@@ -42,8 +42,10 @@ class ResourceManager(object):
                 return
 
         ResourceManager._acquire_resource(func.resource)
-        func(*args, **kwargs)
+        output = func(*args, **kwargs)
         ResourceManager._release_resource(func.resource)
+
+        return output
 
     @staticmethod
     def _acquire_resource(name: str) -> None:
