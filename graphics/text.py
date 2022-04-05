@@ -4,7 +4,7 @@ from logging import Logger
 from typing import Optional, Union
 
 from logging_module.custom_logging import get_logger
-from graphics.constants import TEXT_CODES, CODE_FORMATTING, TEXT_ESCAPE_CHAR
+from graphics.constants import TEXT_CODES, CODE_FORMATTING, TEXT_ESCAPE_CHAR, UM_FNT_PT_FACTOR
 
 
 class Section(object):
@@ -27,7 +27,7 @@ class Section(object):
 class Text(object):
     """The class handling all text rendering shenanigans"""
 
-    def __init__(self, string: str, color: tuple[int, int, int], style: str, font_size: int, start: tuple[int, int], width: int, height: int, additional_colors: Optional[dict[str, tuple[int, int, int]]] = None) -> None:
+    def __init__(self, string: str, color: tuple[int, int, int], style: str, font_size: int, start: tuple[int, int], width: int, height: int, fn_ptr_factor: Optional[tuple[int, int]] = UM_FNT_PT_FACTOR, additional_colors: Optional[dict[str, tuple[int, int, int]]] = None) -> None:
         
         self.logger: Logger = get_logger('graphics')
         
@@ -41,6 +41,8 @@ class Text(object):
         self.start: tuple[int, int] = start
         self.width: int = width
         self.height: int = height
+
+        self.fn_ptr_factor = fn_ptr_factor
 
         self.escape_codes: dict[str, Union[tuple[int, int, int], str]] = TEXT_CODES
         self.escape_codes.update({
@@ -137,16 +139,17 @@ class Text(object):
     # Processing
 
     def remove_codes(self, base_split: list[str]) -> list[str]:
-        """Removes codes and returns the new splitted text and a dictionary of code indexes"""
+        """"""
         
         string = []
         code_to_index = {}
+        width = int(self.font_size * self.fn_ptr_factor[0])
 
         for s in base_split:
+            code_to_index = {}
             matches = self.escape_pattern.finditer(s)
             s_split = self.escape_pattern.split(s)
             codes = s_split[1::2] if len(s_split) > 1 else s_split
-
             for item in matches:
                 code_to_index[item.start(0)] = codes.pop(0)
 
@@ -154,12 +157,22 @@ class Text(object):
 
             i = 1
             while True:
-                if len(temp) > (self.start[0] + self.width) * i + i - 1:
-                    temp = temp[:(self.start[0] + self.width) * i + i - 1] + '\n' + temp[(self.start[0]+self.width) * i + i - 1:]
+                if len(temp) > ((self.width - self.start[0]) // width) * i + i - 1:
+                    temp = temp[:((self.width - self.start[0]) // width) * i + i - 1] + '\n' + temp[((self.width - self.start[0]) // width) * i + i - 1:]
                     i += 1
                 else: 
                     break
- 
+
+            # map_len = list(map(lambda s: len(s) > (self.width-self.start[0]) // width, temp))
+            # while any(map_len):
+            #     index = map_len.index(True)
+            #     new = [string[index][i:i + (self.width-self.start[0]) // width] for i in range(0, len(temp[index]), (self.width-self.start[0]) // width)]
+            #     i += len(new) - 1
+            #     temp[index] = new[0]
+            #     for s in new[1::-1]:
+            #         temp.insert(index + 1, s)
+            #     map_len = list(map(lambda s: len(s) > self.width // width, te)) 
+
             for i in code_to_index:
                 original = i
                 altered = original + temp[:i].count('\n')
@@ -178,16 +191,20 @@ class Text(object):
         for string in strings:
             if len(string) > 0:
                 splitstring = string.split('\n')
-                
-                for part in splitstring:
-                    semi_processed.append(Section(part, color, style, pos))
 
-                    pos = [self.start[0], pos[1] + height]
+                if len(splitstring) > 1:
+                    for part in splitstring:
+                        semi_processed.append(Section(part, color, style, pos))
 
-                pos[0] += len(splitstring[-1]) * (width)
-                pos[1] -= height
+                        pos = [self.start[0], pos[1] + height]
+
+                    pos[1] -= height   
+                else:
+                    semi_processed.append(Section(splitstring[0], color, style, pos))
+
+                pos = [pos[0] + len(splitstring[-1]) * (width), pos[1]]
                         
-            if codes: 
+            if codes:
                 code = codes.pop(0)
                 if code[2] == 'c':
                     color = self.escape_codes.get(code, color)
@@ -199,20 +216,22 @@ class Text(object):
 
     def process_text(self) -> None:
         """Internally processes the string. Use self.processed for results"""
-        
-        base = self.string.split('\n')
-        string = self.remove_codes(base)  
-        
-        string = '\n'.join(string)
-   
-        self.processed = []
 
         color = self.starting_color
         style = self.starting_style
         fontsize = self.font_size
 
-        height = fontsize
-        width = fontsize * 3 / 5
+        height = int(fontsize * self.fn_ptr_factor[1])
+        width = int(fontsize * self.fn_ptr_factor[0])
+        
+        base = self.string.split('\n')
+        string = self.remove_codes(base)  
+
+        #self.logger.info(string)
+
+        string = '\n'.join(string)
+   
+        self.processed = []
         
         pos = list(self.start)
 
@@ -229,7 +248,7 @@ class Text(object):
         pos = self.start[1]
         for group in semi_processed:
             if group.pos[1] != pos:
-                pos = group[3][1]
+                pos = group.pos[1]
                 number_of_lines += 1
 
         push = None

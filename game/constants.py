@@ -6,10 +6,12 @@ if TYPE_CHECKING:
 
 DEFAULT_ROOTDIR_PATH: str = 'res/game/root.json'
 
-FPS = 60
+FPS = 120
 
 # Applications
-
 APPLICATIONS: dict[str, Application] = {
 
 }
+
+# DEBUG
+HOSTNAME: str = 'hackerman'

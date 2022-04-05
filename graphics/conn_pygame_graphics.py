@@ -8,7 +8,7 @@ import random
 from typing import Optional
 from logging_module.custom_logging import get_logger
 from utils.general_utils import generate_id
-from graphics.constants import IMAGE_PATH, TITLEBAR_DEFAULT_HEIGHT
+from graphics.constants import IMAGE_PATH, TITLEBAR_DEFAULT_HEIGHT, DEFAULT_BOLD_FONT, DEFAULT_BOLDITALIC_FONT, DEFAULT_ITALIC_FONT, DEFAULT_REGULAR_FONT
 
 
 class Surface(pygame.Surface):
@@ -58,7 +58,12 @@ class ConnPygameGraphics(object):
         self.window: pygame.Surface = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
         pygame.display.set_caption(self.caption)
 
-        self.fonts: dict[str, str] = {}
+        self.fonts: dict[str, str] = {
+            'regular': DEFAULT_REGULAR_FONT,
+            'italic': DEFAULT_ITALIC_FONT,
+            'bold': DEFAULT_BOLD_FONT,
+            'bolditalic': DEFAULT_BOLDITALIC_FONT,
+        }
         self.render_queue: list = []
 
         self.image_path: str = IMAGE_PATH
@@ -209,6 +214,6 @@ class ConnPygameGraphics(object):
             self.logger.error(f'Invalid font type {font_type}. Ignoring render request')
             return
 
-        text = font.render(text, False, color, background)
+        text = font.render(text, True, color, background)
 
         return surface.blit(text, pos)

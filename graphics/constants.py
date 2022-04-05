@@ -1,7 +1,6 @@
 from typing import Union
 
 # Title Bar
-
 TITLEBAR_OPTIONS_PATH: str = 'application/titlebar_options.png'
 TITLEBAR_OPTIONS_DIMENSIONS: tuple[int, int] = (2, 1)  # width, height
 
@@ -10,6 +9,7 @@ TITLEBAR_1PX_DIMENSIONS: tuple[int, int] = (1, 4)  # width, height
 
 TITLEBAR_DEFAULT_HEIGHT: int = 30
 
+# General
 RESOLUTION: tuple[int, int] = (1366, 768) 
 
 APPLICATION_MIN_WIDTH = 100
@@ -55,15 +55,25 @@ TEXT_CODES: dict[str, Union[tuple[int, int, int], str]] = {
     '⸸{s:regular}': 'regular', 
     '⸸{s:bold}': 'bold', 
     '⸸{s:italic}': 'italic',
-    '⸸{s:bold-italic}': 'bold-italic'
+    '⸸{s:bold-italic}': 'bolditalic'
     
 }
 
 TEXT_ESCAPE_CHAR: str = '⸸'
 
-FONTSIZE_WIDTH_HEIGHT_RATIO: tuple[int, int, int] = ()
+UM_FNT_PT_FACTOR: tuple[float, float] = (1 / 2, 1)  # Telegrama Font size point conversion factors
 
+# Fonts
+DEFAULT_REGULAR_FONT: str = 'res/fonts/regular.ttf'
+DEFAULT_ITALIC_FONT: str = 'res/fonts/italic.ttf'
+DEFAULT_BOLD_FONT: str = 'res/fonts/bold.ttf'
+DEFAULT_BOLDITALIC_FONT: str = 'res/fonts/bolditalic.ttf'
 
 # Images
 IMAGE_PATH: str = 'res/images/'
-DESKTOP_BACKGROUND_PATH = 'desktop/background.png'
+DESKTOP_BACKGROUND_PATH: str = 'desktop/background.png'
+
+# Terminal
+TERMINAL_CURSOR_COLOR: tuple[int, int, int] = (255,255, 255, 255)
+TERMINAL_CONTENT_COLOR: tuple[int, int, int] = (255, 255, 255, 255)
+TERMINAL_FONT_SIZE: int = 16

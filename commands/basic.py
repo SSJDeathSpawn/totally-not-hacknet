@@ -1,13 +1,18 @@
+from __future__ import annotations
 from sys import stderr
 from typing import TYPE_CHECKING
 from game.command import Response
-from __future__ import annotations
 from exceptions.storage_system import PathError
 from game.storage_system.directory import Directory
+from logging_module.custom_logging import get_logger
 
 if TYPE_CHECKING:
+    from game.applications.application import Application
     from game.operating_system import OperatingSystem
+    import logging
 
+
+logger: logging.Logger = get_logger(__name__)
 
 """
 0 - ran to completion
@@ -22,7 +27,7 @@ def process_args(args: list) -> tuple[list[str], list[str], str]:
     """Processes command arguments"""
     
     # Flags
-    flags = list(filter(lambda arg: arg.startswith('-') and not arg.startswith('--') and arg != '-'), args)
+    flags = list(filter(lambda arg: arg.startswith('-') and not arg.startswith('--') and arg != '-', args))
     args = list(filter(lambda arg: arg not in flags, args))
     flags = ''.join(map(lambda arg: arg[1:], flags)).split()
 
@@ -34,23 +39,22 @@ def process_args(args: list) -> tuple[list[str], list[str], str]:
     return (flags, special_flags, args)    
 
 
-# Commands
+# Commmands
 
-def ls(os: OperatingSystem, *args) -> Response:
+def ls(app: Application, *args) -> Response:
     """List command"""
 
     flags, _, args = process_args(args)
-
-    # TODO: Add hidden folders
+    
     recursive = 'R' in flags
 
     if args:
         try:
-            directories = list(map(lambda arg: os.get_directory_by_path(arg), args))
+            directories = list(map(lambda arg: app.host.get_directory_by_path(arg), args))
         except PathError:
             return Response(1, '', f'Cannot access \'{args[0]}\'. No such file or directory')
     else:
-        directories = [os.selected.app.current_dir]
+        directories = [app.current_dir]
 
     stdout = ''
 
@@ -75,12 +79,14 @@ def ls(os: OperatingSystem, *args) -> Response:
             stdout += '\t'.join(directory.get_contents()) + '\n'
     
     else:
-        stdout = '\t'.join(directories[0].get_contents().sort(key=lambda x: x.get_name())) + '\n'
+        logger.debug(directories)
+        stdout = '\t'.join(sorted(list(map(lambda su: su.get_name(), directories[0].get_contents()))))
+        logger.debug('complete')
     
-    return Response(0, stdout=stdout, stderr=None)
-
+    return Response(0, stdout=stdout, stderr='')
+    
 
 def cd(os: OperatingSystem, *args) -> Response:
     """Change directory command"""
 
-    flags, special_flags, args = process_args(args)
+    _, _, args = process_args(args)

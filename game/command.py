@@ -1,8 +1,9 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 from collections.abc import Callable
 
 if TYPE_CHECKING:
-    from game.operating_system import OperatingSystem
+    from game.applications.application import Application
 
 
 class Response(object):
@@ -16,10 +17,10 @@ class Response(object):
 class Command(object):
     """Class representing a command in the Operating System"""
 
-    def __init__(self, name: str, func: Callable[[OperatingSystem, list[str]], Response], man_entry: str='') -> None:
+    def __init__(self, name: str, func: Callable[[Application, list[str]], Response], man_entry: str='') -> None:
         self.name = name
         self.func = func
         self.man_entry = man_entry
 
-    def __call__(self, os: OperatingSystem, *args) -> Response:
-        return self.func(os, *args)
+    def __call__(self, app: Application, *args) -> Response:
+        return self.func(app, *args)

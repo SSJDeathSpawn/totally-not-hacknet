@@ -1,15 +1,20 @@
 from __future__ import annotations
+from distutils.log import debug
 from typing import TYPE_CHECKING, Type
 from logging import Logger
+from game.applications.terminal import Terminal
+from game.command import Response, Command
 from logging_module.custom_logging import get_logger
 from concurrent.futures import ThreadPoolExecutor
 from utils.general_utils import generate_pid
 from utils.math import between, clamp
-from game.storage_system.directory import RootDir
+from game.storage_system.directory import RootDir, Directory
+from game.storage_system.file import File
 from game.applications.desktop import Desktop
 from game.applications.explorer import Explorer
 from game.constants import APPLICATIONS
 from game.applications.application import Application, ApplicationInstance
+from commands.basic import ls
 if TYPE_CHECKING:
     from game.system import System
     from graphics.conn_pygame_graphics import Surface
@@ -27,6 +32,11 @@ class OperatingSystem(object):
         self.system: System = system
         self.root: RootDir = root
 
+        # TODO: very short term temporary code pls remove asap
+        self.root.add(Directory(self.root, 'dir1', []))
+        self.root.add(Directory(self.root, 'dir2', []))
+        self.root.add(File(self.root, 'file1', 'abc'))
+
         self.events: list[pygame.event.Event] = []
 
         self.installed_apps: dict[str, Type[Application]] = APPLICATIONS
@@ -37,13 +47,27 @@ class OperatingSystem(object):
         self.startup_apps: dict[Application, bool] = {
             # class: is_bg
             Desktop: False,
-            Explorer: False
+            Terminal: False
+        }
+
+        self.commands = {
+            'ls': Command('ls', ls, 'prints contents')  # TODO: Put man entires as constants later on
         }
 
         self.selected: ApplicationInstance
 
         self.executor: ThreadPoolExecutor = ThreadPoolExecutor()
         self.temp = None
+
+    def execute_command(self, app: Application, name: str, args: list[str]) -> Response:
+        """Executes a command for an application"""
+
+        if name not in self.commands.keys():
+            self.logger.debug('No command found')
+            return Response(127, '', f'{name}: command not found')
+
+        self.logger.debug('command')
+        return self.commands.get(name)(app, *args)
 
     def boot(self) -> None:
         """Boots up the Operating System"""
@@ -111,7 +135,7 @@ class OperatingSystem(object):
         while self.running:
             self.system.graphics.render_surfaces()
             if self.temp and self.temp.result() != None:
-                    self.logger.debug(self.temp.result())
+                self.logger.debug(self.temp.result())
             clock.tick(fps)
 
             self.events = pygame.event.get()

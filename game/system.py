@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     from game.networking import Router
 
-import pygame
+import pygame, pygame.key
 
 
 class System(object):
@@ -35,6 +35,8 @@ class System(object):
 
         self.os: OperatingSystem = OperatingSystem(self, deserialize_root_directory(DEFAULT_ROOTDIR_PATH))
         self.graphics = Graphics(self)
+
+        pygame.key.set_repeat(500, 200)
 
         self.logger.debug(f'Initialized System with ID {self.ID}')
 
