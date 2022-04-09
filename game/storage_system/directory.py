@@ -20,7 +20,7 @@ class Directory(StorageUnit):
     def get_path(self) -> str:
         """Returns the directory's absolute path"""
         
-        return f'{self.parent.get_path()}{self.get_name()}/'
+        return f'{self.parent.get_path()}{"/" if not isinstance(self.parent, RootDir) else ""}{self.get_name()}'
 
     def get_su_by_name(self, name: str) -> Optional[StorageUnit]:
         """Returns SU with the given name from contents"""

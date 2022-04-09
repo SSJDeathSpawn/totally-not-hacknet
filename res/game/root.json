@@ -1,1 +1,34 @@
-[]
+[
+    {
+        "name": "hello.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "home",
+        "contents": [
+            {
+                "name": "hackermann",
+                "contents": [
+                    {
+                        "name": "Desktop",
+                        "contents": [
+                            {
+                                "name": "notes.txt",
+                                "contents": "Pain suffering misery"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "system",
+        "contents": [
+            {
+                "name": "system.bin",
+                "contents": "01000010"
+            }
+        ]
+    }
+]

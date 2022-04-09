@@ -41,6 +41,8 @@ class Terminal(Application):
         self.cursor.fill(TERMINAL_CURSOR_COLOR)
         self.cursor.set_alpha(155)
 
+        self.env_var = dict()
+
 
     # Helpers
 
@@ -119,7 +121,7 @@ class Terminal(Application):
                     if self.cur_pos > 0:
                         raw_stdin = Text.get_uncoded_text(self.stdin)
                         raw_stdin = raw_stdin[:self.cur_pos - 1] + raw_stdin[self.cur_pos:]
-                        
+
                         self.stdin = self.intellisense(raw_stdin.split(' ')[0]) + raw_stdin.split(' ')[0] + CODE_FORMATTING['RESET'] + (' ' if ' ' in raw_stdin else '') + ' '.join(raw_stdin.split(' ')[1:])
 
                     #Else annoying sound
@@ -158,7 +160,7 @@ class Terminal(Application):
     def update_cur_pos(self, amt: int) -> None:
         """Update the cursor position relative to stdin"""
         
-        if (self.cur_pos == 0 and amt < 0) or (self.cur_pos == len(self.stdin) and amt > 0):
+        if (self.cur_pos == 0 and amt < 0) or (self.cur_pos == len(Text.get_uncoded_text(self.stdin)) and amt > 0):
             # Annoying Sound Effect in future
             return
             

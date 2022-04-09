@@ -1,26 +1,29 @@
 from __future__ import annotations
-from distutils.log import debug
+
+import pygame.event
+import pygame.time
+
 from typing import TYPE_CHECKING, Type
+from concurrent.futures import ThreadPoolExecutor
 from logging import Logger
 from game.applications.terminal import Terminal
 from game.command import Response, Command
 from logging_module.custom_logging import get_logger
-from concurrent.futures import ThreadPoolExecutor
 from utils.general_utils import generate_pid
-from utils.math import between, clamp
+from utils.math import between
+from utils.deserializer import deserialize_root_directory
 from game.storage_system.directory import RootDir, Directory
 from game.storage_system.file import File
+from exceptions.storage_system import PathError
 from game.applications.desktop import Desktop
 from game.applications.explorer import Explorer
-from game.constants import APPLICATIONS
+from game.constants import APPLICATIONS, DEFAULT_ROOTDIR_PATH
 from game.applications.application import Application, ApplicationInstance
-from commands.basic import ls
+from commands.basic import ls, cd, exit, cat
+
 if TYPE_CHECKING:
     from game.system import System
     from graphics.conn_pygame_graphics import Surface
-
-import pygame.event
-import pygame.time
 
 
 class OperatingSystem(object):
@@ -30,12 +33,13 @@ class OperatingSystem(object):
         
         self.logger: Logger = get_logger('game')
         self.system: System = system
-        self.root: RootDir = root
+        self.root: RootDir = deserialize_root_directory(DEFAULT_ROOTDIR_PATH)
 
-        # TODO: very short term temporary code pls remove asap
-        self.root.add(Directory(self.root, 'dir1', []))
-        self.root.add(Directory(self.root, 'dir2', []))
-        self.root.add(File(self.root, 'file1', 'abc'))
+        # # TODO: very short term temporary code pls remove asap
+        # self.root.add(Directory(self.root, 'dir1', []))
+        # self.root.add(Directory(self.root, 'dir2', []))
+        # self.root.add(File(self.root, 'file1', 'abc'))
+        # self.root.get_su_by_name('dir1').add(File(self.root.get_su_by_name('dir1'), 'hello.txt', 'Do not speak of this'))
 
         self.events: list[pygame.event.Event] = []
 
@@ -51,7 +55,11 @@ class OperatingSystem(object):
         }
 
         self.commands = {
-            'ls': Command('ls', ls, 'prints contents')  # TODO: Put man entires as constants later on
+            'ls': Command('ls', ls, ''),
+            'cd': Command('cd', cd, ''),
+            'exit': Command('exit', exit, ''),
+            'cat': Command('cat', cat, '')
+            # TODO: Put man entires as constants later on
         }
 
         self.command_backlog: list[str] = []
@@ -61,11 +69,58 @@ class OperatingSystem(object):
         self.executor: ThreadPoolExecutor = ThreadPoolExecutor()
         self.temp = None
 
+    # Helpers
+
+    def get_su_by_path(self, path: str, current_dir: Directory) -> Directory:
+        """Returns a storage unit by path"""
+
+        original = path
+        
+        checktype = None
+        path = path.strip()
+
+        if path in ['', '/']: return self.root
+        path = path.split('/')
+
+        if path[-1] == '':
+            path.pop()
+            checktype = Directory
+
+        if path[0] == '':
+            current = self.root
+            path.pop(0)
+
+        else:
+            current = current_dir
+
+        for part in path:
+            if part == '..':
+                if current == self.root:
+                    return self.root
+                current = current.get_parent()
+
+            elif part == '.':
+                continue
+
+            else:
+                try:
+                    current = current.get_su_by_name(part)
+                    if not current: 
+                        raise PathError(f'no such file or directory: {original}')
+                except AttributeError:
+                    raise PathError(f'no such file or directory: {original}')
+
+        if checktype and not isinstance(current, checktype):
+            raise PathError(f'no such file or directory: {original}')
+
+        return current
+
+    # Main
+
     def execute_command(self, app: Application, name: str, args: list[str]) -> Response:
         """Executes a command for an application"""
 
         if name not in self.commands.keys():
-            self.logger.debug('No command found')
             return Response(127, '', f'{name}: command not found')
 
         self.logger.debug('command')

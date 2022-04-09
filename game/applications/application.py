@@ -40,6 +40,7 @@ class Application(object):
 
         self.selected: bool = False
         self.is_being_moved: bool = False
+        self.env_var: dict[str, str] = dict() 
 
     def send_events(self, events: list[pygame.event.Event]):
         """Sends events from the operating system to the application"""
