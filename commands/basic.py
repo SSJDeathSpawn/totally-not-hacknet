@@ -79,9 +79,7 @@ def ls(app: Application, *args) -> Response:
             stdout += '\t'.join(directory.get_contents()) + '\n'
     
     else:
-        logger.debug(directories)
         stdout = '\t'.join(sorted(list(map(lambda su: su.get_name(), directories[0].get_contents()))))
-        logger.debug('complete')
     
     return Response(0, stdout=stdout, stderr='')
     

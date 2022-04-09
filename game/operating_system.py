@@ -136,7 +136,7 @@ class OperatingSystem(object):
 
         while self.running:
             self.system.graphics.render_surfaces()
-            if self.temp and self.temp.result() != None:
+            if self.temp and self.temp.result():
                 self.logger.debug(self.temp.result())
             clock.tick(fps)
 

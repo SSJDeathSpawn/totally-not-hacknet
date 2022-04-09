@@ -28,6 +28,7 @@ CODE_FORMATTING: dict[str, str] = {
     'GREEN': '⸸{c:green}',
     'YELLOW': '⸸{c:yellow}',
     'BLUE': '⸸{c:blue}',
+    'CYAN': '⸸{c:cyan}',
     'MAGENTA': '⸸{c:magenta}',
     'WHITE': '⸸{c:white}',
     'RESET': '⸸{c:reset}⸸{s:reset}',
@@ -71,9 +72,18 @@ DEFAULT_BOLDITALIC_FONT: str = 'res/fonts/bolditalic.ttf'
 
 # Images
 IMAGE_PATH: str = 'res/images/'
-DESKTOP_BACKGROUND_PATH: str = 'desktop/background.png'
+DESKTOP_BACKGROUND_PATH: str = 'desktop/wallpaper.jpg'
 
 # Terminal
 TERMINAL_CURSOR_COLOR: tuple[int, int, int] = (255,255, 255, 255)
+TERMINAL_COLOR_CODES = {
+    '⸸{c:kaliblue}': (48, 102, 196),
+    '⸸{c:kaliorange}': (242, 132, 26)
+}
+TERMINAL_COLOR_FORMATTING: dict[str, str] = {
+    'KALI-BLUE': '⸸{c:kaliblue}', 
+    'KALI-ORANGE': '⸸{c:kaliorange}'
+}
 TERMINAL_CONTENT_COLOR: tuple[int, int, int] = (255, 255, 255, 255)
+TERMINAL_BGCOLOR: tuple[int, int, int, int] = (15, 15, 15, 217)
 TERMINAL_FONT_SIZE: int = 20

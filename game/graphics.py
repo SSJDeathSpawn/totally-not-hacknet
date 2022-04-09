@@ -82,17 +82,17 @@ class Graphics(object):
         return surface
             
 
-    def clear_surface(self, surface: Surface, area: Optional[tuple[int, int, int, int]]=None):  # x, y, width, height
+    def clear_surface(self, surface: Surface, color: tuple[int, int, int, int], area: Optional[tuple[int, int, int, int]]=None):  # x, y, width, height
         """Clears a given surface"""
 
         if not area:
-            surface.fill(pygame.Color('black'))
+            surface.fill(color)
 
         else:
-            surface.fill(pygame.Color('black'), pygame.Rect(*area))
+            surface.fill(color, pygame.Rect(*area))
         
 
-    def clear_app_surface(self, surface: Surface):
+    def clear_app_surface(self, surface: Surface, color: tuple[int, int, int, int]):
         """Clears everything on a given surface except for the title bar"""
 
-        self.clear_surface(surface, (0, TITLEBAR_DEFAULT_HEIGHT, surface.get_width(), surface.get_height() - TITLEBAR_DEFAULT_HEIGHT))
+        self.clear_surface(surface, color, (0, TITLEBAR_DEFAULT_HEIGHT, surface.get_width(), surface.get_height() - TITLEBAR_DEFAULT_HEIGHT))

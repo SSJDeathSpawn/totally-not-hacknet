@@ -5,7 +5,7 @@ from game.applications.application import Application
 from game.debug_constants import HOSTNAME
 from graphics.conn_pygame_graphics import Surface
 from graphics.text import Text, Section
-from graphics.constants import UM_FNT_PT_FACTOR, TERMINAL_CURSOR_COLOR, TERMINAL_FONT_SIZE, TERMINAL_CONTENT_COLOR, TITLEBAR_DEFAULT_HEIGHT, CODE_FORMATTING
+from graphics.constants import UM_FNT_PT_FACTOR, TERMINAL_CURSOR_COLOR, TERMINAL_FONT_SIZE, TERMINAL_CONTENT_COLOR, TITLEBAR_DEFAULT_HEIGHT, CODE_FORMATTING, TERMINAL_COLOR_CODES, TERMINAL_BGCOLOR, TERMINAL_COLOR_FORMATTING
 if TYPE_CHECKING:
     from game.command import Response
     from game.storage_system.directory import Directory
@@ -31,9 +31,7 @@ class Terminal(Application):
         self.new_commands_start: int = len(self.personal_backlog) - 1
         self.pointer = -1
         
-        self.text: Text = Text(self.content + self.stdin, TERMINAL_CONTENT_COLOR, 'regular', self.font_size, (5, TITLEBAR_DEFAULT_HEIGHT + 5), self.surface.get_width(), self.surface.get_height(), (5, 5), additional_colors = {'⸸{c:kaliblue}': (48, 102, 196), '⸸{c:kaliyellow}': (242, 132, 26)})
-
-        # self.char_limit = (self.surface.get_width() - self.text.start[0] - self.text.end_padding[0]) // int(self.font_size * UM_FNT_PT_FACTOR[0]), (self.surface.get_height() - self.text.start[1] - self.text.end_padding[1]) // (self.font_size * UM_FNT_PT_FACTOR[1])
+        self.text: Text = Text(self.content + self.stdin, TERMINAL_CONTENT_COLOR, 'regular', self.font_size, (5, TITLEBAR_DEFAULT_HEIGHT + 5), self.surface.get_width(), self.surface.get_height(), (5, 5), additional_colors = TERMINAL_COLOR_CODES)
 
         self.processed_text: list[Section] = self.text.get_processed_text()
 
@@ -75,38 +73,61 @@ class Terminal(Application):
         y = self.text.start[1] + new_lines * font_size[1]
 
         return x, y
+       
+    def intellisense(self, word: str) ->  str:
+        """Returns the appropriate color for the first first in stdin"""
+
+        if word in self.host.commands.keys():
+            return CODE_FORMATTING['CYAN']
+
+        elif word.startswith('./'):
+            if word[2:] in list(map(lambda su: su.get_name(), self.current_dir.get_contents())):
+                return CODE_FORMATTING['CYAN']
+
+        return CODE_FORMATTING['RED']
 
     # Main
 
     @Application.graphics_wrapper
     def graphics_handler(self) -> None:
-        self.graphics.clear_app_surface(self.surface)
+        self.graphics.clear_app_surface(self.surface, TERMINAL_BGCOLOR)
 
         for section in self.processed_text:
             self.graphics.conn_pygame_graphics.render_text(section.style, self.text.font_size, section.text, section.color, section.pos, surface=self.surface)
 
         self.set_cursor_alpha()
         self.surface.blit(self.cursor, self.get_cursor_rend_pos())
-
         
     def events_handler(self) -> None:
         super().events_handler()
 
         for event in self.events:
             if event.type == pygame.TEXTINPUT:
-                self.stdin = self.stdin[:self.cur_pos] + event.text + self.stdin[self.cur_pos:]
+                raw_stdin = Text.get_uncoded_text(self.stdin)
+                raw_stdin = raw_stdin[:self.cur_pos] + event.text + raw_stdin[self.cur_pos:]
+
+                try: 
+                    self.stdin = self.intellisense(raw_stdin.split(' ')[0]) + raw_stdin.split(' ')[0] + CODE_FORMATTING['RESET'] + (' ' if ' ' in raw_stdin else '') + ' '.join(raw_stdin.split(' ')[1:])
+                except Exception as e:
+                    self.logger.error(e)
+
                 self.personal_backlog[self.pointer] = self.stdin 
                 self.update_cur_pos(1)
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
                     if self.cur_pos > 0:
-                        self.stdin = self.stdin[:self.cur_pos-1] + self.stdin[self.cur_pos:]
+                        raw_stdin = Text.get_uncoded_text(self.stdin)
+                        raw_stdin = raw_stdin[:self.cur_pos - 1] + raw_stdin[self.cur_pos:]
+                        
+                        self.stdin = self.intellisense(raw_stdin.split(' ')[0]) + raw_stdin.split(' ')[0] + CODE_FORMATTING['RESET'] + (' ' if ' ' in raw_stdin else '') + ' '.join(raw_stdin.split(' ')[1:])
+
                     #Else annoying sound
                     self.update_cur_pos(-1)
 
                 if event.key == pygame.K_RETURN:
-                    self.execute_command(self.stdin)
+                    raw_stdin = Text.get_uncoded_text(self.stdin)
+                    self.execute_command(raw_stdin)
                     self.content += self.get_new_line()
                     self.stdin = ''
                     self.cur_pos = 0
@@ -146,7 +167,7 @@ class Terminal(Application):
     def get_new_line(self) -> str:
         """Returns a new terminal line"""
 
-        return '⸸{c:kaliblue}' + '┌──(' + '⸸{c:kaliyellow}' + HOSTNAME + '⸸{c:kaliblue}' + ')-[' + CODE_FORMATTING['RESET'] + self.current_dir.get_path() + '⸸{c:kaliblue}' + ']\n' + '└─' + '⸸{c:kaliyellow}' + '$ ' + CODE_FORMATTING['RESET']
+        return TERMINAL_COLOR_FORMATTING['KALI-BLUE'] + '┌──(' + TERMINAL_COLOR_FORMATTING['KALI-ORANGE'] + HOSTNAME + TERMINAL_COLOR_FORMATTING['KALI-BLUE'] + ')-[' + CODE_FORMATTING['RESET'] + self.current_dir.get_path() + TERMINAL_COLOR_FORMATTING['KALI-BLUE'] + ']\n' + '└─' + TERMINAL_COLOR_FORMATTING['KALI-ORANGE'] + '$ ' + CODE_FORMATTING['RESET']
 
     def execute_command(self, command: str) -> None:
         """Executes a terminal command and returns a Response object"""
@@ -157,9 +178,7 @@ class Terminal(Application):
 
         args = command.split(' ')
         name = args[0].lower()
-        self.logger.info('reaching here')
         args = args[1:]
-        self.logger.info('yeah')
 
         response = self.host.execute_command(self, name, args)
         
