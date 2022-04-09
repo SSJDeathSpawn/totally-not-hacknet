@@ -24,9 +24,12 @@ class Terminal(Application):
         self.font_size = TERMINAL_FONT_SIZE
 
         self.current_dir: Directory = self.host.root
-
         self.stdin: str = ''
         self.content: str = self.get_new_line()
+        self.personal_backlog = self.host.command_backlog + ['']
+        self.new_commands = len(self.personal_backlog)
+        self.backlog_alteration = dict()
+        self.pointer = -1
         
         self.text: Text = Text(self.content + self.stdin, TERMINAL_CONTENT_COLOR, 'regular', self.font_size, (0, TITLEBAR_DEFAULT_HEIGHT + 0), self.surface.get_width(), self.surface.get_height())
 
@@ -65,16 +68,31 @@ class Terminal(Application):
         for event in self.events:
             if event.type == pygame.TEXTINPUT:
                 self.stdin += event.text
+                self.personal_backlog[self.pointer] = self.stdin 
                 self.update_cur_pos(1)
             
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
-                self.stdin = self.stdin[:-1]
-                self.update_cur_pos(-1)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    self.stdin = self.stdin[:-1]
+                    self.update_cur_pos(-1)
 
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                self.execute_command(self.stdin)
-                self.content += self.get_new_line()
-                self.stdin = ''
+                if event.key == pygame.K_RETURN:
+                    self.execute_command(self.stdin)
+                    self.content += self.get_new_line()
+                    self.stdin = ''
+                    self.personal_backlog.append('')
+                
+                if event.key == pygame.K_UP:
+                    if abs(self.pointer) < len(self.personal_backlog):
+                        self.pointer -= 1
+                    #Else annoying sound
+                    self.stdin = self.personal_backlog[self.pointer]
+                
+                if event.key == pygame.K_DOWN:
+                    if self.pointer < -1:
+                        self.pointer += 1
+                    #Else annoying sound
+                    self.stdin = self.personal_backlog[self.pointer]
             
             if event.type in [pygame.TEXTINPUT, pygame.KEYDOWN]:
                 self.text.update_text(self.content + self.stdin, True)
@@ -110,3 +128,7 @@ class Terminal(Application):
             self.content += response.stdout + '\n'
         if response.stderr:
             self.content += response.stderr + '\n'
+    
+    def quit(self, ) -> None:
+        self.host.command_backlog += self.personal_backlog[self.new_commands:]
+        super().quit()

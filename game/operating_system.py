@@ -54,6 +54,8 @@ class OperatingSystem(object):
             'ls': Command('ls', ls, 'prints contents')  # TODO: Put man entires as constants later on
         }
 
+        self.command_backlog = []
+
         self.selected: ApplicationInstance
 
         self.executor: ThreadPoolExecutor = ThreadPoolExecutor()
