@@ -13,11 +13,11 @@ import pygame
 class Graphics(object):
     """System graphics layer"""
 
-    def __init__(self, system: System) -> None:
+    def __init__(self, system: System, fullscreen: bool = False) -> None:
         self.logger: Logger = get_logger('graphics')
         self.system: System = system
 
-        self.conn_pygame_graphics: ConnPygameGraphics = ConnPygameGraphics(*RESOLUTION, 'Totally Not Hacknet')
+        self.conn_pygame_graphics: ConnPygameGraphics = ConnPygameGraphics(*RESOLUTION, 'Totally Not Hacknet', fullscreen=fullscreen)
 
     def render_surfaces(self):
         """Blits all surfaces on to the original surface"""

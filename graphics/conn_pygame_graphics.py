@@ -44,7 +44,7 @@ class Surface(pygame.Surface):
 class ConnPygameGraphics(object):
     """Graphics handler at the outermost level"""
 
-    def __init__(self, width: int, height: int, caption: str) -> None:  
+    def __init__(self, width: int, height: int, caption: str, fullscreen: bool = False) -> None:  
 
         self.logger: logging.Logger = get_logger('graphics')
         self.logger.info('Hello from ConnPygameGraphics!')
@@ -55,7 +55,11 @@ class ConnPygameGraphics(object):
         self.height: int = height
         self.caption: str = caption
 
-        self.window: pygame.Surface = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+        if fullscreen:
+            self.window: pygame.Surface = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+        else:
+            self.window: pygame.Surface = pygame.display.set_mode((self.width, self.height))
+
         pygame.display.set_caption(self.caption)
 
         self.fonts: dict[str, str] = {

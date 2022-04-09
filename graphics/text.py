@@ -27,7 +27,7 @@ class Section(object):
 class Text(object):
     """The class handling all text rendering shenanigans"""
 
-    def __init__(self, string: str, color: tuple[int, int, int], style: str, font_size: int, start: tuple[int, int], width: int, height: int, fn_ptr_factor: Optional[tuple[int, int]] = UM_FNT_PT_FACTOR, additional_colors: Optional[dict[str, tuple[int, int, int]]] = None) -> None:
+    def __init__(self, string: str, color: tuple[int, int, int], style: str, font_size: int, start: tuple[int, int], width: int, height: int, end_padding: tuple[int, int], fn_ptr_factor: Optional[tuple[int, int]] = UM_FNT_PT_FACTOR, additional_colors: Optional[dict[str, tuple[int, int, int]]] = None) -> None:
         
         self.logger: Logger = get_logger('graphics')
         
@@ -39,8 +39,9 @@ class Text(object):
         self.font_size: int = font_size
 
         self.start: tuple[int, int] = start
-        self.width: int = width
-        self.height: int = height
+        self.end_padding: tuple[int, int] = end_padding
+        self.width: int = width - self.end_padding[0]
+        self.height: int = height - self.end_padding[0]
 
         self.fn_ptr_factor = fn_ptr_factor
 
@@ -54,11 +55,21 @@ class Text(object):
             self.escape_codes.update(additional_colors)
         
         self.escape_pattern: re.Pattern = re.compile('(' + TEXT_ESCAPE_CHAR + '\{(?:c|s):[a-z-]+\})')
+        Text.escape_pattern: re.Pattern = self.escape_pattern
 
         self.process_text()
 
-    # Getters
+    #Helper
 
+    @staticmethod
+    def get_uncoded_text(string: str) -> str:
+        """Returns the string without escape codes"""
+
+        return ''.join(re.split(Text.escape_pattern, string)[::2])
+        
+
+    # Getters
+    
     def get_raw_text(self, with_escape_codes: bool = False) -> str:
         """Returns the raw text"""
 

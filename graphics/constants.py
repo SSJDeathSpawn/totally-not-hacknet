@@ -76,4 +76,4 @@ DESKTOP_BACKGROUND_PATH: str = 'desktop/background.png'
 # Terminal
 TERMINAL_CURSOR_COLOR: tuple[int, int, int] = (255,255, 255, 255)
 TERMINAL_CONTENT_COLOR: tuple[int, int, int] = (255, 255, 255, 255)
-TERMINAL_FONT_SIZE: int = 16
+TERMINAL_FONT_SIZE: int = 20

@@ -17,7 +17,7 @@ import pygame, pygame.key
 class System(object):
     """Class representing a Computer System"""
 
-    def __init__(self, owner: str, ram: int):
+    def __init__(self, owner: str, ram: int, fullscreen: bool = False):
         self.logger = get_logger('game')
         
         self.ID: str = f'SYSTEM-{generate_id()}'
@@ -34,9 +34,9 @@ class System(object):
         self.external_storage_media: Optional[ExternalStorageMedium] = None
 
         self.os: OperatingSystem = OperatingSystem(self, deserialize_root_directory(DEFAULT_ROOTDIR_PATH))
-        self.graphics = Graphics(self)
+        self.graphics = Graphics(self, fullscreen=fullscreen)
 
-        pygame.key.set_repeat(500, 200)
+        pygame.key.set_repeat(200, 40)
 
         self.logger.debug(f'Initialized System with ID {self.ID}')
 

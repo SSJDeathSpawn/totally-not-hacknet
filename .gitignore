@@ -6,3 +6,4 @@ data/
 **/testing/
 logging_module/logging.conf
 **/test.py
+*.pyc
