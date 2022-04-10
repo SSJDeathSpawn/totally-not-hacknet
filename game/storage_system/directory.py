@@ -32,6 +32,11 @@ class Directory(StorageUnit):
 
         return elements[0]
 
+    def is_child(self, name: str) -> bool:
+        """Returns True if a storage unit with the given name exists as a child"""
+        
+        return name in list(map(lambda su: su.get_name(), self.get_contents()))
+
     # Setters
 
     def set_contents(self, contents: list[StorageUnit]) -> None:

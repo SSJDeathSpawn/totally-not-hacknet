@@ -179,7 +179,7 @@ class Terminal(Application):
             return
 
         args = command.split(' ')
-        name = args[0].lower()
+        name = args[0]
         args = args[1:]
 
         response = self.host.execute_command(self, name, args)

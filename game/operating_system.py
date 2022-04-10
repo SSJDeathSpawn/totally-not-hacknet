@@ -12,17 +12,18 @@ from logging_module.custom_logging import get_logger
 from utils.general_utils import generate_pid
 from utils.math import between
 from utils.deserializer import deserialize_root_directory
-from game.storage_system.directory import RootDir, Directory
-from game.storage_system.file import File
+from game.storage_system.directory import RootDir
 from exceptions.storage_system import PathError
 from game.applications.desktop import Desktop
 from game.applications.explorer import Explorer
 from game.constants import APPLICATIONS, DEFAULT_ROOTDIR_PATH
 from game.applications.application import Application, ApplicationInstance
-from commands.basic import ls, cd, exit, cat
+from commands.basic import ls, cd, exit, cat, mkdir, touch, mv
 
 if TYPE_CHECKING:
     from game.system import System
+    from game.storage_system.storage_unit import StorageUnit
+    from game.storage_system.directory import Directory
     from graphics.conn_pygame_graphics import Surface
 
 
@@ -58,7 +59,10 @@ class OperatingSystem(object):
             'ls': Command('ls', ls, ''),
             'cd': Command('cd', cd, ''),
             'exit': Command('exit', exit, ''),
-            'cat': Command('cat', cat, '')
+            'cat': Command('cat', cat, ''),
+            'mkdir': Command('mkdir', mkdir, ''),
+            'touch': Command('touch', touch, ''),
+            'mv': Command('mv', mv, '')
             # TODO: Put man entires as constants later on
         }
 
@@ -70,6 +74,22 @@ class OperatingSystem(object):
         self.temp = None
 
     # Helpers
+    def move_to_new_dir(self, su: StorageUnit, new_parent: Directory) -> None:
+        """Moves a storage unit from it's current parent to a new directory"""
+
+        su.get_parent().delete(su)
+        su.set_parent(new_parent)
+        new_parent.add(su)
+
+    def path_exists(self, path: str, current_dir: Directory) -> bool:
+        """Returns True if a path exists"""
+
+        try:
+            self.get_su_by_path(path, current_dir)
+        except PathError:
+            return False
+        else:
+            return True
 
     def get_su_by_path(self, path: str, current_dir: Directory) -> Directory:
         """Returns a storage unit by path"""
@@ -123,7 +143,6 @@ class OperatingSystem(object):
         if name not in self.commands.keys():
             return Response(127, '', f'{name}: command not found')
 
-        self.logger.debug('command')
         return self.commands.get(name)(app, *args)
 
     def boot(self) -> None:
