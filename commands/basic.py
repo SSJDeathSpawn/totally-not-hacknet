@@ -2,18 +2,17 @@ from __future__ import annotations
 
 import re
 import itertools
-
-from sys import stderr
 from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    import logging
+
 from game.command import Response
-from exceptions.storage_system import PathError, FileError
 from game.storage_system.directory import Directory
 from game.storage_system.file import File
+from exceptions.storage_system import PathError, FileError
 from logging_module.custom_logging import get_logger
-
 if TYPE_CHECKING:
     from game.applications.application import Application
-    import logging
 
 
 logger: logging.Logger = get_logger(__name__)
@@ -37,6 +36,7 @@ def process_args(args: list) -> tuple[list[str], list[str], str]:
 
 
 # Commmands
+
 def ls(app: Application, *args) -> Response:
     """List command"""
 
@@ -75,7 +75,7 @@ def ls(app: Application, *args) -> Response:
     
     else:
         stdout = '\t'.join(sorted(list(map(lambda su: su.get_name(), directories[0].get_contents()))))
-    
+        
     return Response(0, stdout=stdout, stderr='')
     
 
@@ -105,7 +105,7 @@ def cd(app: Application, *args) -> Response:
     return Response(0, stdout=None, stderr=None)
 
 
-def exit(app: Application, *args) -> Response:
+def exit_(app: Application, *args) -> Response:
     """Quits the application"""
 
     app.quit()
@@ -113,6 +113,7 @@ def exit(app: Application, *args) -> Response:
 
 
 def cat(app: Application, *args) -> Response:
+    """Displays the contents of a file"""
 
     _, _, args = process_args(args)
 
@@ -120,9 +121,11 @@ def cat(app: Application, *args) -> Response:
         su = app.host.get_su_by_path(args[0], app.current_dir)
     except PathError as e:
         return Response(1, stdout=None, stderr=f'cat: {e}')
+    except IndexError:
+        return Response(1, stdout=None, strerr=f'cat: command takes 1 file argument')
         
     if not isinstance(su, File):
-        return Response(1, stdout=None, stderr='cat: not a directory: {args[0]}')
+        return Response(1, stdout=None, stderr=f'cat: not a directory: {args[0]}')
     
     contents = bytes.decode(su.get_contents(), 'ascii') if type(su.get_contents()) == bytes else su.get_contents()  # Add this to the man string
 
@@ -287,3 +290,9 @@ def mv(app: Application, *args) -> Response:
         logger.error(e)
 
     return Response(0 if not stderr else 1, stdout=None, stderr=None if not stderr else stderr)
+
+def clear(app: Application, *args) -> Response:
+    """Clears the window text"""
+
+    app.content = ''
+    return Response(0, stdout=None, stderr=None)

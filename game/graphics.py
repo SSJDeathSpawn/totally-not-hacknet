@@ -27,7 +27,6 @@ class Graphics(object):
     def remove_surface(self, surface: Surface) -> None:
         """Removes the given surface from the render queue"""
 
-        self.logger.debug('Removing surface')
         self.conn_pygame_graphics.remove_surface(surface)
             
     def swap_surfaces(self, surface: Surface) -> Surface:

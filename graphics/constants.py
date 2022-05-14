@@ -62,7 +62,7 @@ TEXT_CODES: dict[str, Union[tuple[int, int, int], str]] = {
 
 TEXT_ESCAPE_CHAR: str = '⸸'
 
-UM_FNT_PT_FACTOR: tuple[float, float] = (1 / 2, 1)  # Telegrama Font size point conversion factors
+UM_FNT_PT_FACTOR: tuple[float, float] = (1 / 2, 1)  # Ubuntu Mono Font size point conversion factors
 
 # Fonts
 DEFAULT_REGULAR_FONT: str = 'res/fonts/regular.ttf'

@@ -42,9 +42,17 @@ class Terminal(Application):
         self.cursor.set_alpha(155)
 
         self.env_var = dict()
-
+        self.bottom_line = 0
 
     # Helpers
+
+    @property
+    def eff_surf_width(self) -> float:
+        """Returns effective surface width"""
+
+        font_size = self.font_size * UM_FNT_PT_FACTOR[0], self.font_size * UM_FNT_PT_FACTOR[1]
+
+        return ((self.surface.get_width() - self.text.start[0] - self.text.end_padding[0]) // font_size[0]) * font_size[0]
 
     def set_cursor_alpha(self) -> None:
         """Sets the alpha of the cursor to give a cursor effect"""
@@ -54,25 +62,31 @@ class Terminal(Application):
         alpha = 155 * val((pygame.time.get_ticks()/t_half) % 2)
         self.cursor.set_alpha(alpha)
 
+    def get_number_of_lines(self) -> int:
+        """Returns the number of lines in the terminal (excludes current line)"""
+
+        font_size = self.font_size * UM_FNT_PT_FACTOR[0], self.font_size * UM_FNT_PT_FACTOR[1]
+        
+        content_raw = Text.get_uncoded_text(self.content)
+
+        new_lines = -1
+        for line in content_raw.split('\n'):
+            new_lines += ((len(line) * font_size[0]) // self.eff_surf_width)
+            new_lines += 1
+
+        input_contrib = (len(content_raw.split('\n')[-1]) % (self.eff_surf_width // font_size[0]) + self.cur_pos) // (self.eff_surf_width // font_size[0])
+        new_lines += input_contrib
+
+        return new_lines
+
     def get_cursor_rend_pos(self) -> tuple[int, int]:
         """Gets the cursor position at the current point of time"""
 
         font_size = self.font_size * UM_FNT_PT_FACTOR[0], self.font_size * UM_FNT_PT_FACTOR[1]
         content = len(Text.get_uncoded_text(self.content).split('\n')[-1])
-        content_raw = Text.get_uncoded_text(self.content)
-        eff_surf_width = ((self.surface.get_width() - self.text.start[0] - self.text.end_padding[0]) // font_size[0]) * font_size[0]
 
-        x = self.text.start[0] + (((content + self.cur_pos) * font_size[0]) % (eff_surf_width))
-
-        new_lines = -1
-        for line in content_raw.split('\n'):
-            new_lines += ((len(line) * font_size[0]) // eff_surf_width)
-            new_lines += 1
-        
-        input_contrib = (len(content_raw.split('\n')[-1]) % (eff_surf_width // font_size[0]) + self.cur_pos) // (eff_surf_width // font_size[0])
-        new_lines += input_contrib
-
-        y = self.text.start[1] + new_lines * font_size[1]
+        x = self.text.start[0] + (((content + self.cur_pos) * font_size[0]) % (self.eff_surf_width))
+        y = self.text.start[1] + self.get_number_of_lines() * font_size[1]
 
         return x, y
        
@@ -95,7 +109,8 @@ class Terminal(Application):
         self.graphics.clear_app_surface(self.surface, TERMINAL_BGCOLOR)
 
         for section in self.processed_text:
-            self.graphics.conn_pygame_graphics.render_text(section.style, self.text.font_size, section.text, section.color, section.pos, surface=self.surface)
+            if section.pos[1] >= 5 + TITLEBAR_DEFAULT_HEIGHT:    
+                self.graphics.conn_pygame_graphics.render_text(section.style, self.text.font_size, section.text, section.color, section.pos, surface=self.surface)
 
         self.set_cursor_alpha()
         self.surface.blit(self.cursor, self.get_cursor_rend_pos())
@@ -152,9 +167,28 @@ class Terminal(Application):
 
                 if event.key == pygame.K_RIGHT:
                     self.update_cur_pos(1) 
+                
+                if self.get_number_of_lines() >= 27:
+                    if event.key == pygame.K_PAGEUP:
+                        self.bottom_line = max(min(self.bottom_line - 1, self.get_number_of_lines()), 27)
+
+                    if event.key == pygame.K_PAGEDOWN:
+                        self.bottom_line = max(min(self.bottom_line + 1, self.get_number_of_lines()), 27)
             
             if event.type in [pygame.TEXTINPUT, pygame.KEYDOWN]:
                 self.text.update_text(self.content + self.stdin, True)
+
+                if event.type == pygame.TEXTINPUT or event.key not in [pygame.K_PAGEDOWN, pygame.K_PAGEUP]:
+                    if self.get_number_of_lines() >= 27:
+                        self.bottom_line = self.get_number_of_lines()
+                    else:
+                        self.bottom_line = 0
+
+                if self.get_number_of_lines() > 27:
+                    self.text.update_starting_pos((5, TITLEBAR_DEFAULT_HEIGHT + 5 - (self.text.font_size * UM_FNT_PT_FACTOR[1] * (self.bottom_line - 27))))
+                else:
+                    self.text.update_starting_pos((5 , TITLEBAR_DEFAULT_HEIGHT + 5))
+
                 self.processed_text = self.text.get_processed_text()
                 
     def update_cur_pos(self, amt: int) -> None:
@@ -182,9 +216,10 @@ class Terminal(Application):
         name = args[0]
         args = args[1:]
 
+        self.content += self.stdin + '\n'
+
         response = self.host.execute_command(self, name, args)
         
-        self.content += self.stdin + '\n' 
         if response.stdout: 
             self.content += response.stdout + '\n'
         if response.stderr:

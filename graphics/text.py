@@ -270,10 +270,10 @@ class Text(object):
             count = 1
             pos = self.start[1]
             for index, group in enumerate(semi_processed):
-                if group[3][1] != pos:
+                if group.pos[1] != pos:
                     count += 1
-                    pos = group[3][1]
-                    if count > number_of_lines - (self.start[1]+self.height):
+                    pos = group.pos[1]
+                    if count > number_of_lines - (self.start[1] + self.height):
                         push = number_of_lines - (self.start[1] + self.height)
                         index_to_start = index
                         break

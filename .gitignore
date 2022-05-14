@@ -7,3 +7,4 @@ data/
 logging_module/logging.conf
 **/test.py
 *.pyc
+.env

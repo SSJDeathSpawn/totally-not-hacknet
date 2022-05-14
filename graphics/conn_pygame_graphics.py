@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import logging
 import pygame
-import copy
-import random
 
 from typing import Optional
 from logging_module.custom_logging import get_logger
@@ -14,7 +12,7 @@ from graphics.constants import IMAGE_PATH, TITLEBAR_DEFAULT_HEIGHT, DEFAULT_BOLD
 class Surface(pygame.Surface):
     """Adds ID and pos attributes to the pygame Surface class"""
 
-    def __init__(self, size: tuple[int, int], pos: list[int, int]) -> None:
+    def __init__(self, size: tuple[int, int], pos: list[int]) -> None:
         
         super().__init__(size, pygame.SRCALPHA)
 
@@ -92,7 +90,7 @@ class ConnPygameGraphics(object):
     def main(self) -> None:
         """Called on every iteration of the Game Loop"""
 
-        self.window.fill((0, 0, 0))
+        # self.window.fill((0, 0, 0))
 
         for surface in self.render_queue:
             self.window.blit(surface, surface.pos)

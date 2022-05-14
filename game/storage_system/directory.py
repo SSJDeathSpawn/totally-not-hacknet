@@ -1,6 +1,7 @@
 from __future__ import annotations
+
 from logging import Logger
-from typing import Optional
+from typing import Optional, Union
 from exceptions.storage_system import DirectoryError, RootDirError
 from game.storage_system.storage_unit import StorageUnit
 from logging_module.custom_logging import get_logger
@@ -16,6 +17,9 @@ class Directory(StorageUnit):
         self.logger: Logger = get_logger('game')
 
     # Getters
+
+    def get_contents(self) -> Union[str, bytes, list[StorageUnit]]:
+        return sorted(super().get_contents(), key=lambda su: su.__class__.__name__)
 
     def get_path(self) -> str:
         """Returns the directory's absolute path"""

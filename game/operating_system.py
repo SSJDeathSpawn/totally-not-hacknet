@@ -1,25 +1,26 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Type
+from concurrent.futures import ThreadPoolExecutor
+if TYPE_CHECKING:
+    from logging import Logger
+
 import pygame.event
 import pygame.time
 
-from typing import TYPE_CHECKING, Type
-from concurrent.futures import ThreadPoolExecutor
-from logging import Logger
-from game.applications.terminal import Terminal
-from game.command import Response, Command
 from logging_module.custom_logging import get_logger
 from utils.general_utils import generate_pid
 from utils.math import between
 from utils.deserializer import deserialize_root_directory
+from game.command import Response, Command
 from game.storage_system.directory import RootDir
-from exceptions.storage_system import PathError
+from game.applications.application import Application, ApplicationInstance
 from game.applications.desktop import Desktop
 from game.applications.explorer import Explorer
+from game.applications.terminal import Terminal
 from game.constants import APPLICATIONS, DEFAULT_ROOTDIR_PATH
-from game.applications.application import Application, ApplicationInstance
-from commands.basic import ls, cd, exit, cat, mkdir, touch, mv
-
+from exceptions.storage_system import PathError
+from commands.basic import ls, cd, exit_, cat, mkdir, touch, mv, clear
 if TYPE_CHECKING:
     from game.system import System
     from game.storage_system.storage_unit import StorageUnit
@@ -58,11 +59,12 @@ class OperatingSystem(object):
         self.commands = {
             'ls': Command('ls', ls, ''),
             'cd': Command('cd', cd, ''),
-            'exit': Command('exit', exit, ''),
+            'exit': Command('exit', exit_, ''),
             'cat': Command('cat', cat, ''),
             'mkdir': Command('mkdir', mkdir, ''),
             'touch': Command('touch', touch, ''),
-            'mv': Command('mv', mv, '')
+            'mv': Command('mv', mv, ''),
+            'clear': Command('clear', clear, '')
             # TODO: Put man entires as constants later on
         }
 
@@ -70,7 +72,7 @@ class OperatingSystem(object):
 
         self.selected: ApplicationInstance
 
-        self.executor: ThreadPoolExecutor = ThreadPoolExecutor()
+        # self.executor: ThreadPoolExecutor = ThreadPoolExecutor()
         self.temp = None
 
     # Helpers
@@ -193,6 +195,7 @@ class OperatingSystem(object):
         for event in self.events:
             if event.type == pygame.QUIT:
                 self.running = False
+                # self.executor.shutdown(wait=True)
                 pygame.quit()
                 return
     
@@ -207,26 +210,31 @@ class OperatingSystem(object):
         """Runs main loop of the Operating System"""
 
         self.boot()
+        
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            while self.running:
+                self.system.graphics.render_surfaces()
+                if self.temp and self.temp.result():
+                    self.logger.debug(self.temp.result())
+                clock.tick(fps)
 
-        while self.running:
-            self.system.graphics.render_surfaces()
-            if self.temp and self.temp.result():
-                self.logger.debug(self.temp.result())
-            clock.tick(fps)
+                self.events = pygame.event.get()
+                
+                self.events_handler()
+                if not self.running:
+                    break
 
-            self.events = pygame.event.get()
+
+                for instance in self.running_apps:
+                    if not instance.alive:
+                        self.running_apps.remove(instance)
+
+                for instance in self.running_apps: 
+                    if (not instance.running):
+                        instance.set_bg(instance != self.selected)
+
+                    instance.app.send_events(self.events)
+                    self.temp = executor.submit(instance.run)
+
+                #self.logger.debug(f'Selected {self.selected.app}')
             
-            self.events_handler()
-            
-            for instance in self.running_apps:
-                if not instance.alive:
-                    self.running_apps.remove(instance)
-
-            for instance in self.running_apps: 
-                if (not instance.running):
-                    instance.set_bg(instance != self.selected)
-
-                instance.app.send_events(self.events)
-                self.temp = self.executor.submit(instance.run)
-
-            #self.logger.debug(f'Selected {self.selected.app}')

@@ -1,5 +1,10 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional, Type, Any
+
+import os
+from dotenv import load_dotenv
+
 from graphics.conn_pygame_graphics import Surface
 from graphics.constants import RESOLUTION, TITLEBAR_DEFAULT_HEIGHT, TITLEBAR_OPTIONS_DIMENSIONS
 from threading import Thread
@@ -14,6 +19,8 @@ import pygame.event
 import pygame
 import functools
 import time
+
+load_dotenv()
 
 
 class Application(object):
@@ -57,23 +64,21 @@ class Application(object):
 
     def run(self) -> None:
         """Runs the graphics and events handlers"""
-            
-        if self.debug.get('i') >= 99:
-            self.logger.debug(f"Average in 100 cycles for {self.__class__.__name__}:")
-            self.logger.debug(f"Graphics: {self.debug.get('time')[0] / 100}")
-            self.logger.debug(f"Events: {self.debug.get('time')[1] / 100}")
-            self.debug['i'] = 0
-            self.debug['time'] = [0, 0]
 
-        start = time.time()
-        self.graphics_handler()
-        end = time.time()
-        self.debug['time'][0] += end-start
-        start = time.time()
-        self.events_handler()
-        end = time.time()
-        self.debug['time'][1] += end-start
-        self.debug['i'] += 1
+        if int(os.getenv('DEBUG')):
+            start = time.perf_counter()
+            self.graphics_handler()
+            end = time.perf_counter()
+            self.debug['time'][0] += end-start
+            start = time.perf_counter()
+            self.events_handler()
+            end = time.perf_counter()
+            self.debug['time'][1] += end-start
+            self.debug['i'] += 1
+
+        else:
+            self.graphics_handler()
+            self.events_handler()
 
     def idle(self) -> None:
         """Idle state of the application"""
@@ -83,7 +88,9 @@ class Application(object):
     def quit(self) -> None:
         """Quits the application"""
         
-        self.logger.debug('QUITTING')
+        if int(os.getenv('DEBUG')):
+            self.logger.debug(f"Graphics: {self.debug.get('time')[0] / self.debug.get('i')}")
+            self.logger.debug(f"Events: {self.debug.get('time')[1] / self.debug.get('i')}")
         
         self.graphics.remove_surface(self.surface)
         app_to_remove = list(filter(lambda app_instance: app_instance.app == self, self.host.running_apps))[0]
