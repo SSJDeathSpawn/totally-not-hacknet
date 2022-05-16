@@ -1,10 +1,138 @@
 [
     {
+        "name": "hello9.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello8.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello7.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello6.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello5.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello4.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello3.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello2.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello1.txt",
+        "contents": "hi there!"
+    },
+    {
         "name": "hello.txt",
         "contents": "hi there!"
     },
     {
-        "name": "home",
+        "name": "hello11.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello12.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello13.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello14.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello15.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello16.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello17.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello18.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello19.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello20.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello21.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello22.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello23.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello24.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello25.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello26.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello27.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello28.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello29.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello30.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello31.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello32.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "hello33.txt",
+        "contents": "hi there!"
+    },
+    {
+        "name": "homewdqujdhqwkjdhqwiudhqwuidqhwuiqdwu",
         "contents": [
             {
                 "name": "hackermann",
@@ -24,6 +152,42 @@
     },
     {
         "name": "system",
+        "contents": [
+            {
+                "name": "system.bin",
+                "contents": "01000010"
+            }
+        ]
+    },
+    {
+        "name": "folder",
+        "contents": [
+            {
+                "name": "system.bin",
+                "contents": "01000010"
+            }
+        ]
+    },
+    {
+        "name": "folder1",
+        "contents": [
+            {
+                "name": "system.bin",
+                "contents": "01000010"
+            }
+        ]
+    },
+    {
+        "name": "folder2",
+        "contents": [
+            {
+                "name": "system.bin",
+                "contents": "01000010"
+            }
+        ]
+    },
+    {
+        "name": "folder3",
         "contents": [
             {
                 "name": "system.bin",

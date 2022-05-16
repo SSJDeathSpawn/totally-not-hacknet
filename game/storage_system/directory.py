@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import pygame
+
 from logging import Logger
 from typing import Optional, Union
 from exceptions.storage_system import DirectoryError, RootDirError
+from game.constants import DIRECTORY_CHANGE
 from game.storage_system.storage_unit import StorageUnit
 from logging_module.custom_logging import get_logger
 
@@ -49,6 +52,10 @@ class Directory(StorageUnit):
         self._validate_contents(contents)
         self.contents = contents
 
+        if pygame.get_init():        
+            event = pygame.event.Event(DIRECTORY_CHANGE, path=self.get_path())
+            pygame.event.post(event)
+
     # Operations
 
     def add(self, su: StorageUnit) -> None:
@@ -61,6 +68,10 @@ class Directory(StorageUnit):
 
         self.contents.append(su)
 
+        if pygame.get_init():        
+            event = pygame.event.Event(DIRECTORY_CHANGE, path=self.get_path())
+            pygame.event.post(event)
+
     def delete(self, su: StorageUnit) -> None:
         """Deletes a storage unit from the contents"""
 
@@ -68,6 +79,10 @@ class Directory(StorageUnit):
             self.contents.remove(su)
         except ValueError:
             self.logger.warning('Given storage unit is not a child. Ignoring delete request')
+
+        if pygame.get_init():        
+            event = pygame.event.Event(DIRECTORY_CHANGE, path=self.get_path())
+            pygame.event.post(event)
 
     # Validation
 

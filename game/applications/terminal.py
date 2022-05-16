@@ -1,6 +1,10 @@
 from __future__ import annotations
+
 import math
-from typing import Optional, TYPE_CHECKING, Union
+from typing import Optional, TYPE_CHECKING
+
+import pygame
+
 from game.applications.application import Application
 from game.debug_constants import HOSTNAME
 from graphics.conn_pygame_graphics import Surface
@@ -10,8 +14,6 @@ if TYPE_CHECKING:
     from game.command import Response
     from game.storage_system.directory import Directory
     from game.operating_system import OperatingSystem
-
-import pygame
 
 
 class Terminal(Application):
@@ -109,7 +111,7 @@ class Terminal(Application):
         self.graphics.clear_app_surface(self.surface, TERMINAL_BGCOLOR)
 
         for section in self.processed_text:
-            if section.pos[1] >= 5 + TITLEBAR_DEFAULT_HEIGHT:    
+            if self.surface.get_height() - 5 > section.pos[1] >= 5 + TITLEBAR_DEFAULT_HEIGHT:    
                 self.graphics.conn_pygame_graphics.render_text(section.style, self.text.font_size, section.text, section.color, section.pos, surface=self.surface)
 
         self.set_cursor_alpha()

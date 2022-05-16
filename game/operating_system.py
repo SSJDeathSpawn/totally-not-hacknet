@@ -53,7 +53,8 @@ class OperatingSystem(object):
         self.startup_apps: dict[Application, bool] = {
             # class: is_bg
             Desktop: False,
-            Terminal: False
+            # Terminal: False,
+            Explorer: False
         }
 
         self.commands = {
@@ -178,7 +179,6 @@ class OperatingSystem(object):
             def get_index(surface: Surface) -> int:
                 return self.system.graphics.conn_pygame_graphics.get_index(surface)
 
-            self.logger.debug(list(map(lambda app_inst: app_inst.app, app_instance_choices)))
             app_surfaces = list(map(lambda app_inst: app_inst.app.surface, app_instance_choices))
             for index, surface in enumerate(app_surfaces):
                 gotten_index = get_index(surface)

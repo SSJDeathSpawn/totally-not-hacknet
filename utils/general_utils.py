@@ -196,6 +196,6 @@ generate_network_id = lambda *args, **kwargs: ResourceManager.use_resource(uses_
 generate_host_id = lambda *args, **kwargs: ResourceManager.use_resource(uses_resource(generate_host_id_inter, GENERATED_NETWORK_IDS_PATH, True), *args, **kwargs)
 
 # No Idea why this works
-# Double No Idea how this works
-# Triple No Idea how this works
-# Quadruple No Idea how this works
+# Double No Idea why this works
+# Triple No Idea why this works
+# Quadruple No Idea why this works

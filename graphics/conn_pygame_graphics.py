@@ -176,7 +176,7 @@ class ConnPygameGraphics(object):
         try:
             image = pygame.image.load(f'{self.image_path}{name}')
         except FileNotFoundError:
-            self.logger.error('Invalid image file name. Ignoring load request')
+            self.logger.error(f'Invalid image file path {self.image_path}{name}. Ignoring load request')
             return
 
         return image

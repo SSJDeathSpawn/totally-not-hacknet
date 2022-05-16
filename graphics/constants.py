@@ -1,4 +1,11 @@
-from typing import Union
+from typing import Union, Type
+
+from game.storage_system.storage_unit import StorageUnit
+from game.storage_system.file import File
+from game.storage_system.directory import Directory
+
+# Colors
+WHITE: tuple[int, int, int, int] = (255, 255, 255, 255)
 
 # Title Bar
 TITLEBAR_OPTIONS_PATH: str = 'application/titlebar_options.png'
@@ -72,7 +79,7 @@ DEFAULT_BOLDITALIC_FONT: str = 'res/fonts/bolditalic.ttf'
 
 # Images
 IMAGE_PATH: str = 'res/images/'
-DESKTOP_BACKGROUND_PATH: str = 'desktop/wallpaper.jpg'
+DESKTOP_BACKGROUND_PATH: str = 'desktop/background.png'
 
 # Terminal
 TERMINAL_CURSOR_COLOR: tuple[int, int, int] = (255,255, 255, 255)
@@ -84,6 +91,29 @@ TERMINAL_COLOR_FORMATTING: dict[str, str] = {
     'KALI-BLUE': '⸸{c:kaliblue}', 
     'KALI-ORANGE': '⸸{c:kaliorange}'
 }
-TERMINAL_CONTENT_COLOR: tuple[int, int, int] = (255, 255, 255, 255)
+TERMINAL_CONTENT_COLOR: tuple[int, int, int, int] = (255, 255, 255, 255)
 TERMINAL_BGCOLOR: tuple[int, int, int, int] = (15, 15, 15, 217)
 TERMINAL_FONT_SIZE: int = 20
+
+# Explorer
+FILE_ICON_PATH: str = 'explorer/file.png'
+FILE_ICON_SELECTED_PATH: str = 'explorer/file_selected.png'
+FOLDER_ICON_PATH: str = 'explorer/folder.png'
+FOLDER_ICON_SELECTED_PATH: str = 'explorer/folder_selected.png'
+SU_ICON_DIMENSIONS: tuple[int, int] = (64, 64)
+SU_ICON_LABEL_FNT_SIZE: int = 12
+
+EXPLORER_BGCOLOR: tuple[int, int, int, int] = (20, 20, 20, 252)
+EXPLORER_TEXT_COLOR: tuple[int, int, int, int] = (255, 115, 255, 255)
+ICON_PADDING: tuple[int, int, int, int] = (20, 20, 20, 20)
+
+PATH_FROM_CLASS: dict[Type[StorageUnit], dict[bool, str]] = {
+    File: {
+        True: FILE_ICON_SELECTED_PATH,
+        False: FILE_ICON_PATH
+    },
+    Directory: {
+        True: FOLDER_ICON_SELECTED_PATH,
+        False: FOLDER_ICON_PATH
+    }
+}
