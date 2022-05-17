@@ -94,6 +94,14 @@ class OperatingSystem(object):
         else:
             return True
 
+    def get_app_inst_by_surface(self, surface: Surface) -> Optional[ApplicationInstance]:
+        """Returns an application instance by the surface (didn't see this one coming)"""
+
+        try:
+            return list(filter(lambda inst: inst.app.surface.ID == surface.ID, self.running_apps))[0]
+        except IndexError:
+            return
+
     def get_su_by_path(self, path: str, current_dir: Directory) -> Directory:
         """Returns a storage unit by path"""
 

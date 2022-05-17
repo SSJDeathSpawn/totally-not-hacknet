@@ -6,6 +6,7 @@ from game.storage_system.directory import Directory
 
 # Colors
 WHITE: tuple[int, int, int, int] = (255, 255, 255, 255)
+BLACK: tuple[int, int, int, int] = (0, 0, 0, 255)
 
 # Title Bar
 TITLEBAR_OPTIONS_PATH: str = 'application/titlebar_options.png'
@@ -81,6 +82,11 @@ DEFAULT_BOLDITALIC_FONT: str = 'res/fonts/bolditalic.ttf'
 IMAGE_PATH: str = 'res/images/'
 DESKTOP_BACKGROUND_PATH: str = 'desktop/background.png'
 
+# Applications
+WINDOW_OUTLINE_COLOR: tuple[int, int, int, int] = (55, 55, 55, 255)
+
+SCROLLBAR_WIDTH: int = 15
+
 # Terminal
 TERMINAL_CURSOR_COLOR: tuple[int, int, int] = (255,255, 255, 255)
 TERMINAL_COLOR_CODES = {
@@ -100,11 +106,12 @@ FILE_ICON_PATH: str = 'explorer/file.png'
 FILE_ICON_SELECTED_PATH: str = 'explorer/file_selected.png'
 FOLDER_ICON_PATH: str = 'explorer/folder.png'
 FOLDER_ICON_SELECTED_PATH: str = 'explorer/folder_selected.png'
-SU_ICON_DIMENSIONS: tuple[int, int] = (64, 64)
+SU_ICON_DIMENSIONS: tuple[int, int] = (42, 42)
 SU_ICON_LABEL_FNT_SIZE: int = 12
 
 EXPLORER_BGCOLOR: tuple[int, int, int, int] = (20, 20, 20, 252)
 EXPLORER_TEXT_COLOR: tuple[int, int, int, int] = (255, 115, 255, 255)
+EXPLORER_SCROLLBAR_COLOR: tuple[int, int, int, int] = (30, 30, 30, 255)
 ICON_PADDING: tuple[int, int, int, int] = (20, 20, 20, 20)
 
 PATH_FROM_CLASS: dict[Type[StorageUnit], dict[bool, str]] = {

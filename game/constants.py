@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 DEFAULT_ROOTDIR_PATH: str = 'res/game/root.json'
 
-FPS = 120
+FPS = 60
 
 # Applications
 APPLICATIONS: dict[str, Application] = {

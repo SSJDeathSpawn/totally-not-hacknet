@@ -84,6 +84,11 @@ class ConnPygameGraphics(object):
         """Returns the index of a passed in surface"""
 
         return self.render_queue.index(self.get_surface_by_id(surface.ID))
+
+    def get_selected(self) -> Surface:
+        """Returns the surface at the end of the render queue"""
+        
+        return self.render_queue[-1]
     
     # Main
 

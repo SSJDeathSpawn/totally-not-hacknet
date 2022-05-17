@@ -95,6 +95,7 @@ class Application(object):
         self.graphics.remove_surface(self.surface)
         app_to_remove = list(filter(lambda app_instance: app_instance.app == self, self.host.running_apps))[0]
         self.host.running_apps.remove(app_to_remove)
+        self.host.selected = self.host.get_app_inst_by_surface(self.graphics.conn_pygame_graphics.get_selected())
 
     def events_handler(self) -> None:
         """Handles the pygame events passed into the application on the current tick"""

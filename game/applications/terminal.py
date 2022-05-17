@@ -116,6 +116,8 @@ class Terminal(Application):
 
         self.set_cursor_alpha()
         self.surface.blit(self.cursor, self.get_cursor_rend_pos())
+
+        self.graphics.draw_outlines(self.surface)
         
     def events_handler(self) -> None:
         super().events_handler()
@@ -130,7 +132,7 @@ class Terminal(Application):
                 except Exception as e:
                     self.logger.error(e)
 
-                self.personal_backlog[self.pointer] = self.stdin 
+                self.personal_backlog[self.pointer] = self.stdin
                 self.update_cur_pos(1)
             
             if event.type == pygame.KEYDOWN:
@@ -141,28 +143,36 @@ class Terminal(Application):
 
                         self.stdin = self.intellisense(raw_stdin.split(' ')[0]) + raw_stdin.split(' ')[0] + CODE_FORMATTING['RESET'] + (' ' if ' ' in raw_stdin else '') + ' '.join(raw_stdin.split(' ')[1:])
 
-                    #Else annoying sound
+                    # Else annoying sound
                     self.update_cur_pos(-1)
 
                 if event.key == pygame.K_RETURN:
                     raw_stdin = Text.get_uncoded_text(self.stdin)
                     self.execute_command(raw_stdin)
                     self.content += self.get_new_line()
+
+                    # backlog
+                    if self.stdin in self.personal_backlog[:self.pointer]:
+                        self.personal_backlog.remove(self.stdin)
+                    if self.stdin:    
+                        self.personal_backlog.append('')
+
                     self.stdin = ''
                     self.cur_pos = 0
-                    self.personal_backlog.append('')
                 
                 if event.key == pygame.K_UP:
                     if abs(self.pointer) < len(self.personal_backlog):
                         self.pointer -= 1
-                    #Else annoying sound
+                    # Else annoying sound
                     self.stdin = self.personal_backlog[self.pointer]
+                    self.cur_pos = len(Text.get_uncoded_text(self.stdin))
                 
                 if event.key == pygame.K_DOWN:
                     if self.pointer < -1:
                         self.pointer += 1
-                    #Else annoying sound
+                    # Else annoying sound
                     self.stdin = self.personal_backlog[self.pointer]
+                    self.cur_pos = len(Text.get_uncoded_text(self.stdin))
                 
                 if event.key == pygame.K_LEFT:
                     self.update_cur_pos(-1)
