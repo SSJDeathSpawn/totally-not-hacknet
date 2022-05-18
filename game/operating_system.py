@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING, Type, Optional
 from concurrent.futures import ThreadPoolExecutor
 if TYPE_CHECKING:
     from logging import Logger
@@ -13,12 +13,14 @@ from utils.general_utils import generate_pid
 from utils.math import between
 from utils.deserializer import deserialize_root_directory
 from game.command import Response, Command
-from game.storage_system.directory import RootDir
+from game.storage_system.directory import RootDir, Directory
 from game.applications.application import Application, ApplicationInstance
 from game.applications.desktop import Desktop
 from game.applications.explorer import Explorer
 from game.applications.terminal import Terminal
+from game.applications.messagebox import MessageBox
 from game.constants import APPLICATIONS, DEFAULT_ROOTDIR_PATH
+from graphics.constants import MESSAGE_BOX_TEXT_COLOR, MESSAGE_BOX_TIME
 from exceptions.storage_system import PathError
 from commands.basic import ls, cd, exit_, cat, mkdir, touch, mv, clear
 if TYPE_CHECKING:
@@ -53,7 +55,7 @@ class OperatingSystem(object):
         self.startup_apps: dict[Application, bool] = {
             # class: is_bg
             Desktop: False,
-            # Terminal: False,
+            Terminal: False,
             Explorer: False
         }
 
@@ -156,16 +158,23 @@ class OperatingSystem(object):
 
         return self.commands.get(name)(app, *args)
 
+    def send_message(self, message: str, color: tuple[int, int, int, int], seconds: int) -> None:
+        """Sends a message to the user through a MessageBox"""
+
+        self.start_app(MessageBox, self, False, message, color, seconds)
+
     def boot(self) -> None:
         """Boots up the Operating System"""
         
         for app in self.startup_apps:
             self.start_app(app, self, self.startup_apps.get(app))
 
-    def start_app(self, app: Type[Application], opened_by: OperatingSystem, open_in_bg: bool = False) -> ApplicationInstance:
+        self.send_message('WELCOME!!!', MESSAGE_BOX_TEXT_COLOR, MESSAGE_BOX_TIME)
+
+    def start_app(self, app: Type[Application], opened_by: OperatingSystem, open_in_bg: bool = False, *args) -> ApplicationInstance:
         """Starts a new application instance"""
 
-        instance = ApplicationInstance(app(self, opened_by=opened_by), generate_pid(), open_in_bg)
+        instance = ApplicationInstance(app(self, *args, opened_by=opened_by), generate_pid(), open_in_bg)
 
         self.running_apps.add(instance)
         if not open_in_bg:
@@ -213,6 +222,9 @@ class OperatingSystem(object):
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
                 self.start_app(Explorer, self)
+
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+                self.send_message('This is a message box. There is a new message for you.', MESSAGE_BOX_TEXT_COLOR, 10)
 
     def main_loop(self, clock: pygame.time.Clock, fps: int) -> None:
         """Runs main loop of the Operating System"""

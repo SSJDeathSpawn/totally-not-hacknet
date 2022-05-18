@@ -100,8 +100,6 @@ class Explorer(Application):
         units[exc_index] = list(self.storage_units.items())[exc_index]
         self.storage_units = dict(units)
         self.update_surface()
-
-        self.logger.info('deselected')
         
     def invert_selection(self, index: int) -> None:
         """Select a Storage Unit at given index"""
@@ -123,7 +121,7 @@ class Explorer(Application):
         
         mod_icons = dict(list(org_icons.items())[(self.max_cols * self.scroll):(self.max_icons + (self.max_cols * (self.scroll+1)))])
 
-        self.graphics.draw_explorer_icons(self.cached_surface, dict(mod_icons), SU_ICON_DIMENSIONS, ICON_PADDING, SU_ICON_LABEL_FNT_SIZE, self.scroll, self.max_scroll, textcolor=EXPLORER_TEXT_COLOR, scrollbar_color=EXPLORER_SCROLLBAR_COLOR)
+        self.graphics.draw_explorer_icons(self.cached_surface, dict(mod_icons), SU_ICON_DIMENSIONS, ICON_PADDING, SU_ICON_LABEL_FNT_SIZE, self.scroll, self.max_scroll, self.current_dir.get_path(), textcolor=EXPLORER_TEXT_COLOR, scrollbar_color=EXPLORER_SCROLLBAR_COLOR)
 
     def check_for_change(self) -> None:
         """Checks for changes in the current directory and updates the dictionary while keeping the previous selected values"""
@@ -191,3 +189,6 @@ class Explorer(Application):
                         else:
                             self.deselect_all(icon_index)
                             self.invert_selection(icon_index)
+
+                    else:
+                        self.deselect_all(-1)

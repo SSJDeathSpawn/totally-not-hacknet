@@ -1,0 +1,2 @@
+class MessageBoxError(Exception):
+    pass

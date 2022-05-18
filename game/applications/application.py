@@ -85,12 +85,15 @@ class Application(object):
         
         self.graphics_handler()
     
-    def quit(self) -> None:
+    def quit(self, debug=int(os.getenv('DEBUG'))) -> None:
         """Quits the application"""
         
-        if int(os.getenv('DEBUG')):
-            self.logger.debug(f"Graphics: {self.debug.get('time')[0] / self.debug.get('i')}")
-            self.logger.debug(f"Events: {self.debug.get('time')[1] / self.debug.get('i')}")
+        if debug:
+            if self.debug.get('i'):
+                self.logger.debug(f"Graphics: {self.debug.get('time')[0] / self.debug.get('i')}")
+                self.logger.debug(f"Events: {self.debug.get('time')[1] / self.debug.get('i')}")
+            else:
+                self.logger.warning('0 interations. Odd.')
         
         self.graphics.remove_surface(self.surface)
         app_to_remove = list(filter(lambda app_instance: app_instance.app == self, self.host.running_apps))[0]
@@ -111,7 +114,7 @@ class Application(object):
                     self.is_being_moved = True
 
                 # Quitting the window
-                elif event.button == 1 and between(event.pos, (self.surface.pos[0] + self.surface.get_width() - TITLEBAR_OPTIONS_DIMENSIONS[0] * TITLEBAR_DEFAULT_HEIGHT, self.surface.pos[1]), (self.surface.pos[0] + self.surface.get_width(), self.surface.pos[1]+TITLEBAR_DEFAULT_HEIGHT)):
+                elif event.button == 1 and between(event.pos, (self.surface.pos[0] + self.surface.get_width() - (TITLEBAR_OPTIONS_DIMENSIONS[0] * TITLEBAR_DEFAULT_HEIGHT) / 2, self.surface.pos[1]), (self.surface.pos[0] + self.surface.get_width(), self.surface.pos[1]+TITLEBAR_DEFAULT_HEIGHT)):
                     self.quit()
                     return
 

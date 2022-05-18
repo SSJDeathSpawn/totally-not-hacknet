@@ -49,6 +49,8 @@ class ConnPygameGraphics(object):
 
         pygame.init()
 
+        info: pygame.display._VidInfo = pygame.display.Info()
+
         self.width: int = width
         self.height: int = height
         self.caption: str = caption

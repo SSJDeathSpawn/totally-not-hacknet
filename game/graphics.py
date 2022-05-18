@@ -2,9 +2,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Type
 from logging_module.custom_logging import get_logger
 from graphics.conn_pygame_graphics import ConnPygameGraphics, Surface
-from graphics.constants import RESOLUTION, APPLICATION_MIN_HEIGHT, APPLICATION_MIN_WIDTH, TITLEBAR_1PX_DIMENSIONS, TITLEBAR_DEFAULT_HEIGHT, TITLEBAR_OPTIONS_PATH, TITLEBAR_OPTIONS_DIMENSIONS, TITLEBAR_1PX_PATH, UM_FNT_PT_FACTOR, WHITE, BLACK, SCROLLBAR_WIDTH, WINDOW_OUTLINE_COLOR
+from graphics.constants import RESOLUTION, APPLICATION_MIN_HEIGHT, APPLICATION_MIN_WIDTH, TITLEBAR_1PX_DIMENSIONS, TITLEBAR_DEFAULT_HEIGHT, TITLEBAR_OPTIONS_PATH, TITLEBAR_OPTIONS_DIMENSIONS, TITLEBAR_1PX_PATH, UM_FNT_PT_FACTOR, WHITE, BETTER_WHITE, BLACK, SCROLLBAR_WIDTH, WINDOW_OUTLINE_COLOR, EXPLORER_CWD_FONT_SIZE
 if TYPE_CHECKING:
     from logging import Logger
+    from graphics.text import Section
     from game.system import System
     from game.storage_system.storage_unit import StorageUnit
 
@@ -82,8 +83,13 @@ class Graphics(object):
 
         return surface
 
-    def draw_outlines(self, surface: Surface, color: tuple[int, int, int, int]=WINDOW_OUTLINE_COLOR) -> None:
+    def draw_outline(self, surface: Surface, color: tuple[int, int, int, int]=WINDOW_OUTLINE_COLOR):
         """Draws an outline on the surface"""
+
+        self.conn_pygame_graphics.draw_rect(color, 0, 0, surface.get_width(), surface.get_height(), 1, surface=surface)
+
+    def draw_outlines(self, surface: Surface, color: tuple[int, int, int, int]=WINDOW_OUTLINE_COLOR) -> None:
+        """Draws the outlines on the surface"""
 
         self.conn_pygame_graphics.draw_rect(color, 0, 0, surface.get_width(), surface.get_height(), 1, surface=surface)
         self.conn_pygame_graphics.draw_line(color, (0, TITLEBAR_DEFAULT_HEIGHT), (surface.get_width(), TITLEBAR_DEFAULT_HEIGHT), surface=surface)
@@ -103,15 +109,32 @@ class Graphics(object):
 
         self.clear_surface(surface, color, (0, TITLEBAR_DEFAULT_HEIGHT, surface.get_width(), surface.get_height() - TITLEBAR_DEFAULT_HEIGHT))
 
-    def draw_explorer_icons(self, surface: Surface, icons: dict[str, tuple[str, bool]], icon_dims: tuple[int, int], padding: tuple[int, int, int, int], fontsize: int, scroll: int, max_scroll: int, textcolor: tuple[int, int, int, int]=WHITE, scrollbar_color: tuple[int, int, int, int]=BLACK):
+    def display_messagebox_text(self, surface: Surface, processed: list[Section], fontsize: int, exception: Type[Exception]) -> None:
+        """Renders centered text in the Message Box"""
+
+        lines = len(processed)
+        line_height = fontsize * UM_FNT_PT_FACTOR[1]
+        char_width = fontsize * UM_FNT_PT_FACTOR[0]
+        total_height = lines * line_height
+
+        if total_height > surface.get_height():
+            raise exception('too much text')
+
+        start_y = (surface.get_height() - total_height) / 2
+
+        for index, section in enumerate(processed):
+            text_width = char_width * len(section.text)
+            x = (surface.get_width() - text_width) / 2
+            self.conn_pygame_graphics.render_text(section.style, fontsize, section.text, section.color, (x, start_y + (index * line_height)), surface=surface)
+
+    def draw_explorer_icons(self, surface: Surface, icons: dict[str, tuple[str, bool]], icon_dims: tuple[int, int], padding: tuple[int, int, int, int], fontsize: int, scroll: int, max_scroll: int, current_dir_path: str, textcolor: tuple[int, int, int, int]=WHITE, scrollbar_color: tuple[int, int, int, int]=BLACK):
         """Draws the icons in the explorer window
          
         Args:
             padding: top, right, bottom, left
         """
 
-        max_per_row = surface.get_width() // (icon_dims[0] + padding[1] + padding[3])
-
+        max_per_row = (surface.get_width() - 20 - 2) // (icon_dims[0] + padding[1] + padding[3])
         row_width = max_per_row * (icon_dims[0] + padding[1] + padding[3])
 
         # Calculating the margin, accounting for scrollbar width
@@ -122,6 +145,9 @@ class Graphics(object):
         else:
             scrollbar_width = SCROLLBAR_WIDTH
             x_margin = x_margin - SCROLLBAR_WIDTH
+
+        # Printing cwd
+        self.conn_pygame_graphics.render_text('bold', EXPLORER_CWD_FONT_SIZE, f'cwd: {current_dir_path}', BETTER_WHITE, (5, 5), surface=surface)
 
         # Drawing scrollbar
         scrollbar_x = surface.get_width() - scrollbar_width
@@ -141,7 +167,7 @@ class Graphics(object):
 
             # Icon position
             x = (x_margin / 2) + (padding[1] + padding[3] + icon_dims[0]) * x_cell + padding[1]
-            y = (padding[2] + padding[0] + icon_dims[1]) * y_cell + padding[0]
+            y = (padding[2] + padding[0] + icon_dims[1]) * y_cell + padding[0] + EXPLORER_CWD_FONT_SIZE
 
             if 0 < y < surface.get_height():
                 self.conn_pygame_graphics.blit_image((x, y), icon[1][0], width=icon_dims[0], height=icon_dims[1], surface=surface)
@@ -154,7 +180,7 @@ class Graphics(object):
 
             # Text position
             x = (x_margin / 2) + (padding[1] + padding[3] + icon_dims[0]) * x_cell + padding[1]
-            y = (padding[2] + padding[0] + icon_dims[1]) * y_cell + padding[0] + icon_dims[1] + ((20 - fontsize) // 2)
+            y = (padding[2] + padding[0] + icon_dims[1]) * y_cell + padding[0] + icon_dims[1] + ((20 - fontsize) // 2) + EXPLORER_CWD_FONT_SIZE
 
             text = icon[0]
             char_width = fontsize * UM_FNT_PT_FACTOR[0]

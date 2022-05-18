@@ -6,7 +6,9 @@ from game.storage_system.directory import Directory
 
 # Colors
 WHITE: tuple[int, int, int, int] = (255, 255, 255, 255)
+BETTER_WHITE: tuple[int, int, int, int] = (215, 215, 215, 255)
 BLACK: tuple[int, int, int, int] = (0, 0, 0, 255)
+RED: tuple[int, int, int, int] = (255, 0, 0, 0)
 
 # Title Bar
 TITLEBAR_OPTIONS_PATH: str = 'application/titlebar_options.png'
@@ -22,10 +24,6 @@ RESOLUTION: tuple[int, int] = (1366, 768)
 
 APPLICATION_MIN_WIDTH = 100
 APPLICATION_MIN_HEIGHT = 100
-
-# File Explorer Color Pallete
-
-EXP_BACKGROUND: tuple[int, int, int] = (22, 0, 64)
 
 # Formatting
 
@@ -83,9 +81,18 @@ IMAGE_PATH: str = 'res/images/'
 DESKTOP_BACKGROUND_PATH: str = 'desktop/background.png'
 
 # Applications
-WINDOW_OUTLINE_COLOR: tuple[int, int, int, int] = (55, 55, 55, 255)
+WINDOW_OUTLINE_COLOR: tuple[int, int, int, int] = (65, 65, 65, 255)
 
 SCROLLBAR_WIDTH: int = 15
+
+# Message Box
+MESSAGE_BOX_DIMENSIONS: tuple[int, int] = (320, 160)
+MESSAGE_BOX_PADDING: tuple[int, int] = (10, 10)
+MESSAGE_BOX_FONT_SIZE: int = 20
+MESSAGE_BOX_TEXT_COLOR: tuple[int, int, int, int] = (255, 46, 99, 255)
+MESSAGE_BOX_BGCOLOR: tuple[int, int, int, int] = (30, 30, 30, 250)
+MESSAGE_BOX_OUTLINE_COLOR: tuple[int, int, int, int] = (65, 65, 65, 255)
+MESSAGE_BOX_TIME: int = 3
 
 # Terminal
 TERMINAL_CURSOR_COLOR: tuple[int, int, int] = (255,255, 255, 255)
@@ -112,6 +119,7 @@ SU_ICON_LABEL_FNT_SIZE: int = 12
 EXPLORER_BGCOLOR: tuple[int, int, int, int] = (20, 20, 20, 252)
 EXPLORER_TEXT_COLOR: tuple[int, int, int, int] = (255, 115, 255, 255)
 EXPLORER_SCROLLBAR_COLOR: tuple[int, int, int, int] = (30, 30, 30, 255)
+EXPLORER_CWD_FONT_SIZE: int = 17
 ICON_PADDING: tuple[int, int, int, int] = (20, 20, 20, 20)
 
 PATH_FROM_CLASS: dict[Type[StorageUnit], dict[bool, str]] = {
