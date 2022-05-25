@@ -176,12 +176,18 @@ def generate_host_id_inter(network_id: str) -> Optional[str]:
             
         host_ids = generated.get(network_id)
 
-        while True:
-            new_id = str(random.randint(1, 255))
+        possible_ids = set(range(1,255)).difference(set(map(int, host_ids)))
 
-            if new_id not in host_ids:
-                generated[network_id].append(new_id)
-                break
+        if possible_ids:
+            while True:
+                new_id = str(random.randint(1, 255))
+
+                if new_id not in host_ids:
+                    generated[network_id].append(new_id)
+                    break
+        else:
+            logger.warning("All host ids have been used up (1-255)! No host ID will be returned.")
+            return
 
     # Storing ID
     with open(GENERATED_NETWORK_IDS_PATH, 'w') as f:

@@ -94,6 +94,9 @@ MESSAGE_BOX_BGCOLOR: tuple[int, int, int, int] = (30, 30, 30, 250)
 MESSAGE_BOX_OUTLINE_COLOR: tuple[int, int, int, int] = (65, 65, 65, 255)
 MESSAGE_BOX_TIME: int = 3
 
+# TTy
+TTY_FONT_SIZE: int = 20
+
 # Terminal
 TERMINAL_CURSOR_COLOR: tuple[int, int, int] = (255,255, 255, 255)
 TERMINAL_COLOR_CODES = {

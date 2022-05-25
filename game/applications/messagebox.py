@@ -22,7 +22,7 @@ class MessageBox(Application):
         super().__init__(host, opened_by)
 
         # self.surface: Surface = self.host.system.graphics.get_surface(*MESSAGE_BOX_DIMENSIONS, [(RESOLUTION[0] - MESSAGE_BOX_DIMENSIONS[0] - 20), (RESOLUTION[1] - MESSAGE_BOX_DIMENSIONS[1] - 20)])
-        self.surface: Surface = self.host.system.graphics.get_surface(*MESSAGE_BOX_DIMENSIONS, [random.randint(20, RESOLUTION[0] - MESSAGE_BOX_DIMENSIONS[0] - 20), random.randint(20, RESOLUTION[1] - MESSAGE_BOX_DIMENSIONS[1] - 20)])
+        self.surface: Surface = self.graphics.get_surface(*MESSAGE_BOX_DIMENSIONS, [random.randint(20, RESOLUTION[0] - MESSAGE_BOX_DIMENSIONS[0] - 20), random.randint(20, RESOLUTION[1] - MESSAGE_BOX_DIMENSIONS[1] - 20)])
 
         self.message: Text = Text(message, color, 'regular', MESSAGE_BOX_FONT_SIZE, (MESSAGE_BOX_PADDING[0], MESSAGE_BOX_PADDING[1]), self.surface.get_width() - (2 * MESSAGE_BOX_PADDING[0]), self.surface.get_height() - (2 * MESSAGE_BOX_PADDING[1]), [0, 0])
 

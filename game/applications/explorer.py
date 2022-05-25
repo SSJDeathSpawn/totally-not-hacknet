@@ -21,7 +21,7 @@ class Explorer(Application):
     def __init__(self, host: OperatingSystem, opened_by: Optional[OperatingSystem] = None):
         super().__init__(host, opened_by)
 
-        self.surface: Surface = self.host.system.graphics.get_app_surface(800, 600, [200, 200])
+        self.surface: Surface = self.graphics.get_app_surface(800, 600, [200, 200])
         self.cached_surface: Surface = Surface((800, 600-TITLEBAR_DEFAULT_HEIGHT), (0, TITLEBAR_DEFAULT_HEIGHT))
         self.current_dir: Directory = self.host.root
         

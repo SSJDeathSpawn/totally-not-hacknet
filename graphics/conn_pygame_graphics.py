@@ -49,7 +49,7 @@ class ConnPygameGraphics(object):
 
         pygame.init()
 
-        info: pygame.display._VidInfo = pygame.display.Info()
+        # info: pygame.display._VidInfo = pygame.display.Info()
 
         self.width: int = width
         self.height: int = height
@@ -97,7 +97,7 @@ class ConnPygameGraphics(object):
     def main(self) -> None:
         """Called on every iteration of the Game Loop"""
 
-        # self.window.fill((0, 0, 0))
+        self.window.fill(pygame.Color('gold'))
 
         for surface in self.render_queue:
             self.window.blit(surface, surface.pos)

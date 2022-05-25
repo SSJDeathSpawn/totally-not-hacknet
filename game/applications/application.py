@@ -34,7 +34,7 @@ class Application(object):
 
         self.opened_by: OperatingSystem = opened_by
         self.host: OperatingSystem = host
-        self.graphics: Graphics = self.host.system.graphics
+        self.graphics: Graphics = self.host.graphics
         self.events: list[pygame.event.Event] = []
         self.surface: Optional[Surface] = None
         self.copy_surface: Optional[Surface] = None

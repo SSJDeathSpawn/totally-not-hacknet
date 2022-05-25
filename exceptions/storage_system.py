@@ -1,14 +1,17 @@
-class StorageUnitError(Exception):
+from exceptions.better_exception import LoggingException
+
+
+class StorageUnitError(LoggingException):
     pass
 
-class FileError(Exception):
+class FileError(LoggingException):
     pass
 
-class DirectoryError(Exception):
+class DirectoryError(LoggingException):
     pass
 
-class RootDirError(Exception):
+class RootDirError(LoggingException):
     pass
 
-class PathError(Exception):
+class PathError(LoggingException):
     pass

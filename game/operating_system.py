@@ -12,13 +12,14 @@ from logging_module import get_logger
 from utils import generate_pid, between, deserialize_root_directory
 from game.command import Response, Command
 from game.storage_system import RootDir, Directory
-from game.applications import Application, ApplicationInstance, Desktop, Explorer, Terminal, MessageBox
+from game.applications import Application, ApplicationInstance, Desktop, Explorer, Terminal, MessageBox, TeleTypeWriter
 from game.constants import APPLICATIONS, DEFAULT_ROOTDIR_PATH
 from graphics import MESSAGE_BOX_TEXT_COLOR, MESSAGE_BOX_TIME
 from exceptions import PathError
 from commands.basic import ls, cd, exit_, cat, mkdir, touch, mv, clear
 if TYPE_CHECKING:
     from game.system import System
+    from game.graphics import Graphics
     from game.storage_system import StorageUnit, Directory
     from graphics import Surface
 
@@ -26,11 +27,18 @@ if TYPE_CHECKING:
 class OperatingSystem(object):
     """Class representing an Operating System"""
     
-    def __init__(self, system: System, root: RootDir) -> None:
+    def __init__(self, root: RootDir) -> None:
         
         self.logger: Logger = get_logger('game')
-        self.system: System = system
-        self.root: RootDir = deserialize_root_directory(DEFAULT_ROOTDIR_PATH)
+        self.root: RootDir = root
+
+        self.graphics: Graphics | None = None
+
+        self.username: str = 'root'  # Temporary
+
+        """
+        
+        """ 
 
         # # TODO: very short term temporary code pls remove asap
         # self.root.add(Directory(self.root, 'dir1', []))
@@ -40,16 +48,17 @@ class OperatingSystem(object):
 
         self.events: list[pygame.event.Event] = []
 
-        self.installed_apps: dict[str, Type[Application]] = APPLICATIONS
-
         self.running = True
         self.running_apps: set[ApplicationInstance] = set()
 
+        self.installed_apps: dict[str, Type[Application]] = APPLICATIONS
+
         self.startup_apps: dict[Application, bool] = {
             # class: is_bg
-            Desktop: False,
-            Terminal: False,
-            Explorer: False
+            TeleTypeWriter: False
+            # Desktop: False,
+            #Terminal: False,
+            #Explorer: False
         }
 
         self.commands = {
@@ -162,7 +171,7 @@ class OperatingSystem(object):
         for app in self.startup_apps:
             self.start_app(app, self, self.startup_apps.get(app))
 
-        self.send_message('WELCOME!!!', MESSAGE_BOX_TEXT_COLOR, MESSAGE_BOX_TIME)
+        ## self.send_message('WELCOME!!!', MESSAGE_BOX_TEXT_COLOR, MESSAGE_BOX_TIME)
 
     def start_app(self, app: Type[Application], opened_by: OperatingSystem, open_in_bg: bool = False, *args) -> ApplicationInstance:
         """Starts a new application instance"""
@@ -187,7 +196,7 @@ class OperatingSystem(object):
             max_index = -1
 
             def get_index(surface: Surface) -> int:
-                return self.system.graphics.conn_pygame_graphics.get_index(surface)
+                return self.graphics.conn_pygame_graphics.get_index(surface)
 
             app_surfaces = list(map(lambda app_inst: app_inst.app.surface, app_instance_choices))
             for index, surface in enumerate(app_surfaces):
@@ -197,7 +206,7 @@ class OperatingSystem(object):
             
             self.selected = app_instance_choices[max_index]
             if not isinstance(self.selected.app, Desktop):
-                self.system.graphics.conn_pygame_graphics.select_surface(self.selected.app.surface)
+                self.graphics.conn_pygame_graphics.select_surface(self.selected.app.surface)
     
     def events_handler(self) -> None:
         """Events handler for the operating system"""
@@ -226,7 +235,7 @@ class OperatingSystem(object):
         
         with ThreadPoolExecutor(max_workers=5) as executor:
             while self.running:
-                self.system.graphics.render_surfaces()
+                self.graphics.render_surfaces()
                 if self.temp and self.temp.result():
                     self.logger.debug(self.temp.result())
                 clock.tick(fps)

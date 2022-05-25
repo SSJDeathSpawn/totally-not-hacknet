@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from game.applications.application import Application
 
 DEFAULT_ROOTDIR_PATH: str = 'res/game/root.json'
+BOOT_MEDIA_ROOTDIR_PATH: str = 'res/game/boot_media_root.json'
 
 FPS = 60
 

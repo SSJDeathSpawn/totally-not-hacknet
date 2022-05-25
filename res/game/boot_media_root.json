@@ -1,0 +1,15 @@
+[
+    {
+        "name": "root",
+        "contents": [
+
+        ]
+    },
+    {
+        "name": "system",
+        "permissions": "0",
+        "contents": [
+            
+        ]
+    }   
+]
