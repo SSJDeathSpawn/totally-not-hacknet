@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Optional, TYPE_CHECKING
 
 import pygame
@@ -26,11 +27,8 @@ class Explorer(Application):
         
         self.scroll: int = 0
         self.storage_units: dict[StorageUnit, bool] = dict.fromkeys(self.current_dir.get_contents(), False)
-        self.ctrl: bool = False
 
-        # TEMPORARY PLS REMOVE
-        self.storage_units[self.host.get_su_by_path('/hello.txt', self.current_dir)] = True
-        self.storage_units[self.host.get_su_by_path('/homewdqujdhqwkjdhqwiudhqwuidqhwuiqdwu', self.current_dir)] = True
+        self.clipboard: list[StorageUnit] = []
 
         self.update_surface()
 
@@ -88,7 +86,7 @@ class Explorer(Application):
         except IndexError:
             return None
 
-    def get_selected(self) -> None:
+    def get_selected(self) -> dict[StorageUnit, bool]:
         """Returns the dictionary of selected Storage Units"""
 
         return dict(list(filter(lambda su: su[1], list(self.storage_units.items()))))
@@ -148,7 +146,7 @@ class Explorer(Application):
             if event.type == DIRECTORY_CHANGE:
                 event.path == self.current_dir.get_path() and self.update_surface()
 
-            if event.type == pygame.KEYDOWN:
+            if event.type ==  pygame.KEYDOWN:
                 if event.key == pygame.K_PAGEDOWN:
                     self.scroll = min(self.max_scroll, self.scroll + 1)
                     self.update_surface()
@@ -170,20 +168,37 @@ class Explorer(Application):
                             self.update_surface()
                 
                 if event.key == pygame.K_p:
-                    self.current_dir.delete(self.host.get_su_by_path('hello.txt', self.current_dir))
+                    self.logger.debug(self.clipboard)
 
-                if event.key == pygame.K_LCTRL:
-                    self.ctrl = True
+                if event.key == pygame.K_c and event.mod & pygame.KMOD_LCTRL:
+                    self.clipboard = list(map(lambda item: item[0], self.get_selected().items()))
 
-            if event.type == pygame.KEYUP and event.key == pygame.K_LCTRL:
-                self.ctrl = False
+                if event.key == pygame.K_v and event.mod & pygame.KMOD_CTRL:
+                    for su in self.clipboard:
+                        new_su = deepcopy(su)
+                        ordinal = lambda n: f'{n}{"tsnrhtdd"[(n // 10 % 10 != 1) * (n % 10 < 4) * n % 10 : : 4]}'
 
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        if self.current_dir.get_su_by_name(new_su.get_name()):
+                            if self.current_dir.get_su_by_name(f'{new_su.get_name()}(copy)'):
+                                if self.current_dir.get_su_by_name(f'{new_su.get_name()}(another_copy)'):
+                                    num = 3
+                                    while self.current_dir.get_su_by_name(f'{new_su.get_name()}({ordinal(num)}_copy)'):
+                                        num += 1
+                                    new_su.set_name(f'{new_su.get_name()}({ordinal(num)}_copy)')
+                                else:
+                                    new_su.set_name(f'{new_su.get_name()}(another_copy)')
+                            else:
+                                new_su.set_name(f'{new_su.get_name()}(copy)')
+                    
+                        self.current_dir.add(new_su)
+                                    
 
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1: 
                     icon_index = self.get_icon_index(pygame.mouse.get_pos())
 
                     if icon_index != None:
-                        if self.ctrl:
+                        if pygame.key.get_mods() & pygame.KMOD_CTRL:
                             self.invert_selection(icon_index)
 
                         else:

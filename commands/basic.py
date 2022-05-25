@@ -204,7 +204,6 @@ def touch(app: Application, *args) -> Response:
             if not app.host.path_exists('/'.join(arg.split('/')[:-1]), app.current_dir):
                 return Response(1, stdout=None, stderr=f'touch: cannot touch {arg}: No such file or directory')
             else:
-                logger.info('I reached here.')
                 su = app.host.get_su_by_path('/'.join(arg.split('/')[:-1]), app.current_dir)
         else:
             su = app.current_dir 

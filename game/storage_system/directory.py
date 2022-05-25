@@ -59,13 +59,17 @@ class Directory(StorageUnit):
     # Operations
 
     def add(self, su: StorageUnit) -> None:
-        """Adds a storage unit to the contents"""
+        """Adds a storage unit to the contents (handles parent)"""
 
         self._validate_directory_element(su)
 
         if self.get_su_by_name(su.get_name()) is not None:
             raise DirectoryError('Directory cannot have more than 1 storage units with the same name')
 
+        if su.parent != self:
+            if su.parent:
+                su.parent.delete(su)
+            su.set_parent(self)
         self.contents.append(su)
 
         if pygame.get_init():        

@@ -8,26 +8,19 @@ if TYPE_CHECKING:
 import pygame.event
 import pygame.time
 
-from logging_module.custom_logging import get_logger
-from utils.general_utils import generate_pid
-from utils.math import between
-from utils.deserializer import deserialize_root_directory
+from logging_module import get_logger
+from utils import generate_pid, between, deserialize_root_directory
 from game.command import Response, Command
-from game.storage_system.directory import RootDir, Directory
-from game.applications.application import Application, ApplicationInstance
-from game.applications.desktop import Desktop
-from game.applications.explorer import Explorer
-from game.applications.terminal import Terminal
-from game.applications.messagebox import MessageBox
+from game.storage_system import RootDir, Directory
+from game.applications import Application, ApplicationInstance, Desktop, Explorer, Terminal, MessageBox
 from game.constants import APPLICATIONS, DEFAULT_ROOTDIR_PATH
-from graphics.constants import MESSAGE_BOX_TEXT_COLOR, MESSAGE_BOX_TIME
-from exceptions.storage_system import PathError
+from graphics import MESSAGE_BOX_TEXT_COLOR, MESSAGE_BOX_TIME
+from exceptions import PathError
 from commands.basic import ls, cd, exit_, cat, mkdir, touch, mv, clear
 if TYPE_CHECKING:
     from game.system import System
-    from game.storage_system.storage_unit import StorageUnit
-    from game.storage_system.directory import Directory
-    from graphics.conn_pygame_graphics import Surface
+    from game.storage_system import StorageUnit, Directory
+    from graphics import Surface
 
 
 class OperatingSystem(object):

@@ -215,7 +215,7 @@ class Terminal(Application):
     def get_new_line(self) -> str:
         """Returns a new terminal line"""
 
-        return TERMINAL_COLOR_FORMATTING['KALI-BLUE'] + '┌──(' + TERMINAL_COLOR_FORMATTING['KALI-ORANGE'] + HOSTNAME + TERMINAL_COLOR_FORMATTING['KALI-BLUE'] + ')-[' + CODE_FORMATTING['RESET'] + self.current_dir.get_path() + TERMINAL_COLOR_FORMATTING['KALI-BLUE'] + ']\n' + '└─' + TERMINAL_COLOR_FORMATTING['KALI-ORANGE'] + '$ ' + CODE_FORMATTING['RESET']
+        return TERMINAL_COLOR_FORMATTING['KALI-BLUE'] + '┌──[' + TERMINAL_COLOR_FORMATTING['KALI-ORANGE'] + HOSTNAME + TERMINAL_COLOR_FORMATTING['KALI-BLUE'] + ']─[' + CODE_FORMATTING['RESET'] + self.current_dir.get_path() + TERMINAL_COLOR_FORMATTING['KALI-BLUE'] + ']\n' + '└────' + TERMINAL_COLOR_FORMATTING['KALI-ORANGE'] + '$ ' + CODE_FORMATTING['RESET']
 
     def execute_command(self, command: str) -> None:
         """Executes a terminal command and returns a Response object"""

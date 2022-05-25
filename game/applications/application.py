@@ -5,11 +5,10 @@ from typing import TYPE_CHECKING, Optional, Type, Any
 import os
 from dotenv import load_dotenv
 
-from graphics.conn_pygame_graphics import Surface
-from graphics.constants import RESOLUTION, TITLEBAR_DEFAULT_HEIGHT, TITLEBAR_OPTIONS_DIMENSIONS
-from threading import Thread
-from logging_module.custom_logging import get_logger
-from utils.math import between, clamp
+from graphics import Surface
+from graphics import RESOLUTION, TITLEBAR_DEFAULT_HEIGHT, TITLEBAR_OPTIONS_DIMENSIONS
+from logging_module import get_logger
+from utils import between, clamp
 if TYPE_CHECKING:
     from game.operating_system import OperatingSystem
     from game.graphics import Graphics
