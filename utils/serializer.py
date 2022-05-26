@@ -27,6 +27,7 @@ def serialize_root_directory(root: RootDir, path: str) -> None:
 
     try:
         with open(path, 'w') as f:
+            logger.debug(str(type(root_dir_contents)))
             json.dump(root_dir_contents, f, indent=4)
             
     except FileNotFoundError as e:
@@ -36,8 +37,10 @@ def serialize_root_directory(root: RootDir, path: str) -> None:
 def __file2dict(file_su: File) -> dict[str, str]:
     """Converts a file into a dictionary"""
 
-    return {'name': file_su.get_name(), 'contents': file_su.get_contents()} # FIXME: Decode if bytes
+    file_dict = {'name': file_su.get_name(), 'contents': file_su.get_contents()} # FIXME: Decode if bytes
+    file_dict.update(file_su.metadata)
 
+    return file_dict
 
 def __dir2dict(dir_su: Directory) -> dict[str, list]:
     """Converts a directory into a dictionary"""
@@ -50,4 +53,7 @@ def __dir2dict(dir_su: Directory) -> dict[str, list]:
         else:
             contents.append(__dir2dict(content))
     
-    return {'name': dir_su.get_name(), 'contents': contents}
+    dir_dict = {'name': dir_su.get_name(), 'contents': contents}
+    dir_dict.update(dir_su.metadata)
+
+    return dir_dict

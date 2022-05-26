@@ -15,7 +15,6 @@ long_options: list[str] = ['fullscreen=']
 
 
 def main():
-
     fullscreen: bool = False
 
     arguments, _ = getopt.getopt(argument_list, options, long_options)
@@ -24,8 +23,7 @@ def main():
             fullscreen = True
 
     logger.info('Hi! Starting Computer System')
-    system = System('AsyncXeno', 4096, fullscreen=fullscreen)
-    system.run_os()
+    System('Ziphernet Kilog 2000', 4096, fullscreen=fullscreen)
     logger.info('Bye!')
 
 

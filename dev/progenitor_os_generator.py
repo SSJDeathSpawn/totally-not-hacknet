@@ -1,12 +1,15 @@
 from game import OperatingSystem, BOOT_MEDIA_ROOTDIR_PATH, Command
+from game.storage_system import RootDir
+from game.applications import TeleTypeWriter
 from utils import deserialize_root_directory
 from commands.basic import *
-from pickle import dumps
+from commands import install_os
+from pickle import dumps, loads
 
 
-progenitor: OperatingSystem = OperatingSystem(deserialize_root_directory(BOOT_MEDIA_ROOTDIR_PATH))
+progenitor: OperatingSystem = OperatingSystem(RootDir())
 progenitor.startup_apps = {
-    "": False
+    TeleTypeWriter: False
 }
 progenitor.commands = {
     'ls': Command('ls', ls, ''),
@@ -16,7 +19,22 @@ progenitor.commands = {
     'mkdir': Command('mkdir', mkdir, ''),
     'touch': Command('touch', touch, ''),
     'mv': Command('mv', mv, ''),
-    'clear': Command('clear', clear, '')
+    'clear': Command('clear', clear, ''),
+    'install': Command('install', install_os, ''),
+    'reboot': Command('reboot', reboot, '')
 }
 
 progenitor: bytes = dumps(progenitor)
+s = len(progenitor)
+print(s)
+progenitor = int.from_bytes(progenitor, 'big')
+print(progenitor)
+progenitor = progenitor.to_bytes(s, 'big')
+progenitor = loads(progenitor)
+
+print(progenitor)
+
+# progenitor = bytes(progenitor, 'utf-8')
+# print(progenitor)
+# progenitor = loads(progenitor)
+# print(progenitor)

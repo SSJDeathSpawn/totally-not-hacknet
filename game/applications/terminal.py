@@ -92,6 +92,11 @@ class Terminal(Application):
         y = self.text.start[1] + self.get_number_of_lines() * font_size[1]
 
         return x, y
+
+    def get_input(self) -> str:
+        """Gets input from the terminal"""
+
+        pass
        
     def intellisense(self, word: str) ->  str:
         """Returns the appropriate color for the first first in stdin"""

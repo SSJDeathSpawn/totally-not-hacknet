@@ -6,7 +6,7 @@ import pygame
 from typing import Optional
 from logging_module.custom_logging import get_logger
 from utils.general_utils import generate_id
-from graphics.constants import IMAGE_PATH, TITLEBAR_DEFAULT_HEIGHT, DEFAULT_BOLD_FONT, DEFAULT_BOLDITALIC_FONT, DEFAULT_ITALIC_FONT, DEFAULT_REGULAR_FONT
+from graphics.constants import IMAGE_PATH, TITLEBAR_DEFAULT_HEIGHT, DEFAULT_BOLD_FONT, DEFAULT_BOLDITALIC_FONT, DEFAULT_ITALIC_FONT, DEFAULT_REGULAR_FONT, BLACK
 
 
 class Surface(pygame.Surface):
@@ -87,17 +87,17 @@ class ConnPygameGraphics(object):
 
         return self.render_queue.index(self.get_surface_by_id(surface.ID))
 
-    def get_selected(self) -> Surface:
+    def get_selected(self) -> Surface | None:
         """Returns the surface at the end of the render queue"""
         
-        return self.render_queue[-1]
+        return self.render_queue[-1] if self.render_queue else None
     
     # Main
 
     def main(self) -> None:
         """Called on every iteration of the Game Loop"""
 
-        self.window.fill(pygame.Color('gold'))
+        self.window.fill(BLACK)
 
         for surface in self.render_queue:
             self.window.blit(surface, surface.pos)

@@ -96,6 +96,7 @@ MESSAGE_BOX_TIME: int = 3
 
 # TTy
 TTY_FONT_SIZE: int = 20
+TTY_TEXT_PADDING: tuple[int, int] = (3, 3)
 
 # Terminal
 TERMINAL_CURSOR_COLOR: tuple[int, int, int] = (255,255, 255, 255)

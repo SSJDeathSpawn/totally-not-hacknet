@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union, TYPE_CHECKING, Optional
+from typing import Union, TYPE_CHECKING, Optional, Any
 from exceptions.storage_system import StorageUnitError
 from game.storage_system.constants import INVALID_CHARACTERS
 if TYPE_CHECKING:
@@ -19,6 +19,8 @@ class StorageUnit(object):
 
         self._validate_contents(contents)
         self.contents: Union[str, bytes, list[StorageUnit]] = contents
+
+        self.metadata: dict[str, Any] = {}
 
     # Getters
 

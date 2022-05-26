@@ -14,9 +14,8 @@ from game.command import Response, Command
 from game.storage_system import RootDir, Directory
 from game.applications import Application, ApplicationInstance, Desktop, Explorer, Terminal, MessageBox, TeleTypeWriter
 from game.constants import APPLICATIONS, DEFAULT_ROOTDIR_PATH
-from graphics import MESSAGE_BOX_TEXT_COLOR, MESSAGE_BOX_TIME
+from graphics import MESSAGE_BOX_TEXT_COLOR, MESSAGE_BOX_TIME, BLACK
 from exceptions import PathError
-from commands.basic import ls, cd, exit_, cat, mkdir, touch, mv, clear
 if TYPE_CHECKING:
     from game.system import System
     from game.graphics import Graphics
@@ -27,7 +26,7 @@ if TYPE_CHECKING:
 class OperatingSystem(object):
     """Class representing an Operating System"""
     
-    def __init__(self, root: RootDir) -> None:
+    def __init__(self, root: RootDir, username: str = 'root', password: str = 'root') -> None:
         
         self.logger: Logger = get_logger('game')
         self.root: RootDir = root
@@ -53,25 +52,9 @@ class OperatingSystem(object):
 
         self.installed_apps: dict[str, Type[Application]] = APPLICATIONS
 
-        self.startup_apps: dict[Application, bool] = {
-            # class: is_bg
-            TeleTypeWriter: False
-            # Desktop: False,
-            #Terminal: False,
-            #Explorer: False
-        }
+        self.startup_apps: dict[Application, bool] = {}
 
-        self.commands = {
-            'ls': Command('ls', ls, ''),
-            'cd': Command('cd', cd, ''),
-            'exit': Command('exit', exit_, ''),
-            'cat': Command('cat', cat, ''),
-            'mkdir': Command('mkdir', mkdir, ''),
-            'touch': Command('touch', touch, ''),
-            'mv': Command('mv', mv, ''),
-            'clear': Command('clear', clear, '')
-            # TODO: Put man entires as constants later on
-        }
+        self.commands: dict[str, Command] = {}
 
         self.command_backlog: list[str] = []
 
@@ -213,11 +196,9 @@ class OperatingSystem(object):
         
         for event in self.events:
             if event.type == pygame.QUIT:
-                self.running = False
-                # self.executor.shutdown(wait=True)
-                pygame.quit()
+                self.send_shutdown_signal()
                 return
-    
+
             # Window selection
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 self.check_for_selection(event)
@@ -227,6 +208,11 @@ class OperatingSystem(object):
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
                 self.send_message('This is a message box. There is a new message for you.', MESSAGE_BOX_TEXT_COLOR, 10)
+    
+    def send_shutdown_signal(self) -> None:
+        """Shuts the OS down""" 
+
+        self.running = False
 
     def main_loop(self, clock: pygame.time.Clock, fps: int) -> None:
         """Runs main loop of the Operating System"""
@@ -244,6 +230,7 @@ class OperatingSystem(object):
                 
                 self.events_handler()
                 if not self.running:
+                    self.logger.debug("Supposed to return")
                     break
 
 
@@ -258,5 +245,4 @@ class OperatingSystem(object):
                     instance.app.send_events(self.events)
                     self.temp = executor.submit(instance.run)
 
-                #self.logger.debug(f'Selected {self.selected.app}')
-            
+        pygame.quit()       

@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Optional
 from utils import deserialize_root_directory
 from game.storage_system import RootDir
+from exceptions import DeserializationError
 
 
 class InternalStorageMedium(object):
@@ -11,7 +12,10 @@ class InternalStorageMedium(object):
         self.root: Optional[RootDir]
 
         if path:
-            self.root = deserialize_root_directory(path)
+            try:
+                self.root = deserialize_root_directory(path)
+            except DeserializationError:
+                self.root = None
         else:
             self.root = None
 

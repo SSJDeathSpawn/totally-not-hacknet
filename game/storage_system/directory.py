@@ -113,7 +113,7 @@ class Directory(StorageUnit):
 class RootDir(Directory):
     """Class representing the root directory in the virtual file system"""
 
-    def __init__(self, contents: list[StorageUnit]) -> None:
+    def __init__(self, contents: list[StorageUnit] = []) -> None:
 
         super().__init__(None, '', contents)
 

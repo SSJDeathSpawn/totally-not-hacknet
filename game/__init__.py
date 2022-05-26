@@ -1,3 +1,3 @@
-from .operating_system import OperatingSystem
-from .command import Command
+from .operating_system import *
+from .command import *
 from .constants import *

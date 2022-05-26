@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import time
 import itertools
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -43,6 +44,8 @@ def ls(app: Application, *args) -> Response:
     flags, _, args = process_args(args)
     
     recursive = 'R' in flags
+
+    time.sleep(2)
 
     if args:
         try:
@@ -189,7 +192,7 @@ def mkdir(app: Application, *args) -> Response:
                 su = app.host.get_su_by_path(last_dir, app.current_dir)
                 last_dir = last_dir + '/' + arg[len(last_dir)+1:].split('/')[0]
                 
-            su.add(Directory(su, last_dir.split('/')[-1], []))
+            su.add(Directory(su, last_dir.split('/')[-1], []))    
 
     return Response(0, stdout=None if stdout == '' else stdout, stderr=None)
 
@@ -214,7 +217,7 @@ def touch(app: Application, *args) -> Response:
 
         a = pattern.split(name)
 
-        #No magic
+        # No magic
         if len(a) == 1:
             su.add(File(su, arg.split('/')[-1], ''))
 
@@ -295,3 +298,11 @@ def clear(app: Application, *args) -> Response:
 
     app.content = ''
     return Response(0, stdout=None, stderr=None)
+
+
+def reboot(app: Application, *args) -> Response:
+    """Reboots the computer"""
+
+    app.host.reboot()
+
+    return Response(0, None, None)
