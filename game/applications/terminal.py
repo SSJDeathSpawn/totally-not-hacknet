@@ -9,7 +9,7 @@ from game.applications.application import Application
 from game.debug_constants import HOSTNAME
 from graphics.conn_pygame_graphics import Surface
 from graphics.text import Text, Section
-from graphics.constants import UM_FNT_PT_FACTOR, TERMINAL_CURSOR_COLOR, TERMINAL_FONT_SIZE, TERMINAL_CONTENT_COLOR, TITLEBAR_DEFAULT_HEIGHT, CODE_FORMATTING, TERMINAL_COLOR_CODES, TERMINAL_BGCOLOR, TERMINAL_COLOR_FORMATTING
+from graphics.constants import IBM_FNT_PT_FACTOR, TERMINAL_CURSOR_COLOR, TERMINAL_FONT_SIZE, TERMINAL_CONTENT_COLOR, TITLEBAR_DEFAULT_HEIGHT, CODE_FORMATTING, TERMINAL_COLOR_CODES, TERMINAL_BGCOLOR, TERMINAL_COLOR_FORMATTING
 if TYPE_CHECKING:
     from game.command import Response
     from game.storage_system.directory import Directory
@@ -38,9 +38,9 @@ class Terminal(Application):
         self.processed_text: list[Section] = self.text.get_processed_text()
 
         self.cur_pos: int = 0  # Relative to the start of stdin
-        self.max_lines: int = ((self.surface.get_height() - TITLEBAR_DEFAULT_HEIGHT) // self.font_size * UM_FNT_PT_FACTOR[1]) - 1
+        self.max_lines: int = ((self.surface.get_height() - TITLEBAR_DEFAULT_HEIGHT) // self.font_size * IBM_FNT_PT_FACTOR[1]) - 1
 
-        self.cursor = pygame.Surface((self.font_size * UM_FNT_PT_FACTOR[0], self.font_size * UM_FNT_PT_FACTOR[1]), pygame.SRCALPHA)
+        self.cursor = pygame.Surface((self.font_size * IBM_FNT_PT_FACTOR[0], self.font_size * IBM_FNT_PT_FACTOR[1]), pygame.SRCALPHA)
         self.cursor.fill(TERMINAL_CURSOR_COLOR)
         self.cursor.set_alpha(155)
 
@@ -53,7 +53,7 @@ class Terminal(Application):
     def eff_surf_width(self) -> float:
         """Returns effective surface width"""
 
-        font_size = self.font_size * UM_FNT_PT_FACTOR[0], self.font_size * UM_FNT_PT_FACTOR[1]
+        font_size = self.font_size * IBM_FNT_PT_FACTOR[0], self.font_size * IBM_FNT_PT_FACTOR[1]
 
         return ((self.surface.get_width() - self.text.start[0] - self.text.end_padding[0]) // font_size[0]) * font_size[0]
 
@@ -68,7 +68,7 @@ class Terminal(Application):
     def get_number_of_lines(self) -> int:
         """Returns the number of lines in the terminal (excludes current line)"""
 
-        font_size = self.font_size * UM_FNT_PT_FACTOR[0], self.font_size * UM_FNT_PT_FACTOR[1]
+        font_size = self.font_size * IBM_FNT_PT_FACTOR[0], self.font_size * IBM_FNT_PT_FACTOR[1]
         
         content_raw = Text.get_uncoded_text(self.content)
 
@@ -85,11 +85,11 @@ class Terminal(Application):
     def get_cursor_rend_pos(self) -> tuple[int, int]:
         """Gets the cursor position at the current point of time"""
 
-        font_size = self.font_size * UM_FNT_PT_FACTOR[0], self.font_size * UM_FNT_PT_FACTOR[1]
+        font_size = self.font_size * IBM_FNT_PT_FACTOR[0], self.font_size * IBM_FNT_PT_FACTOR[1]
         content = len(Text.get_uncoded_text(self.content).split('\n')[-1])
 
         x = self.text.start[0] + (((content + self.cur_pos) * font_size[0]) % (self.eff_surf_width))
-        y = self.text.start[1] + self.get_number_of_lines() * font_size[1]
+        y = self.text.start[1] + self.get_number_of_lines() * font_size[1] + 4
 
         return x, y
 
@@ -203,7 +203,7 @@ class Terminal(Application):
                         self.bottom_line = 0
 
                 if self.get_number_of_lines() > self.max_lines:
-                    self.text.update_starting_pos((5, TITLEBAR_DEFAULT_HEIGHT + 5 - (self.text.font_size * UM_FNT_PT_FACTOR[1] * (self.bottom_line - self.max_lines))))
+                    self.text.update_starting_pos((5, TITLEBAR_DEFAULT_HEIGHT + 5 - (self.text.font_size * IBM_FNT_PT_FACTOR[1] * (self.bottom_line - self.max_lines))))
                 else:
                     self.text.update_starting_pos((5 , TITLEBAR_DEFAULT_HEIGHT + 5))
 

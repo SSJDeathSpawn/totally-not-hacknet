@@ -4,7 +4,7 @@ from logging import Logger
 from typing import Optional, Union
 
 from logging_module.custom_logging import get_logger
-from graphics.constants import TEXT_CODES, CODE_FORMATTING, TEXT_ESCAPE_CHAR, UM_FNT_PT_FACTOR
+from graphics.constants import TEXT_CODES, CODE_FORMATTING, TEXT_ESCAPE_CHAR, IBM_FNT_PT_FACTOR
 
 
 class Section(object):
@@ -27,7 +27,7 @@ class Section(object):
 class Text(object):
     """The class handling all text rendering shenanigans"""
 
-    def __init__(self, string: str, color: tuple[int, int, int], style: str, font_size: int, start: tuple[int, int], width: int, height: int, end_padding: tuple[int, int], fn_ptr_factor: Optional[tuple[int, int]] = UM_FNT_PT_FACTOR, additional_colors: Optional[dict[str, tuple[int, int, int]]] = None) -> None:
+    def __init__(self, string: str, color: tuple[int, int, int], style: str, font_size: int, start: tuple[int, int], width: int, height: int, end_padding: tuple[int, int], fn_ptr_factor: Optional[tuple[int, int]] = IBM_FNT_PT_FACTOR, additional_colors: Optional[dict[str, tuple[int, int, int]]] = None) -> None:
         
         self.logger: Logger = get_logger('graphics')
         

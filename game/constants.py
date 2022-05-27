@@ -21,3 +21,5 @@ HOSTNAME: str = 'hackerman'
 
 # User events
 DIRECTORY_CHANGE: pygame.event.Event = pygame.USEREVENT + 1
+GET_INPUT: pygame.event.Event = pygame.USEREVENT + 2
+INPUT_RECEIVED: pygame.event.Event = pygame.USEREVENT + 3

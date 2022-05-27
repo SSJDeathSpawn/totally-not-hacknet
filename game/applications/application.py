@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional, Type, Any
 import os
 from dotenv import load_dotenv
 
-from graphics import Surface
+from graphics.conn_pygame_graphics import Surface
 from graphics import RESOLUTION, TITLEBAR_DEFAULT_HEIGHT, TITLEBAR_OPTIONS_DIMENSIONS
 from logging_module import get_logger
 from utils import between, clamp

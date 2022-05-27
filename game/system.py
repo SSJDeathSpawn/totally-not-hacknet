@@ -39,13 +39,12 @@ class System(object):
         # self.os: OperatingSystem = OperatingSystem(deserialize_root_directory(DEFAULT_ROOTDIR_PATH))
         # self.os: OperatingSystem = OperatingSystem(deserialize_root_directory(self.external_storage_media.get_data()))
 
+        pygame.key.set_repeat(200, 40)
+        self.reboot_system: bool = False
+
         if not self.handle_boot():
             return
-
-        pygame.key.set_repeat(200, 40)
-
         self.logger.debug(f'Initialized System with ID {self.ID}')
-
         self.run_os()
 
     
@@ -59,11 +58,17 @@ class System(object):
         self._os.graphics = self.graphics
         # Other system attribs
 
-    def reboot(self) -> bool:
+    def shutdown(self) -> None:
+        """Shutd down the system"""
+
+        self.os.send_shutdown_signal()
+        self.reboot_system = False
+
+    def reboot(self) -> None:
         """Reboots the system"""
 
         self.os.send_shutdown_signal()
-        self.handle_boot()
+        self.reboot_system = True
 
     def handle_boot(self) -> bool:
         """Handles boot"""
@@ -83,6 +88,8 @@ class System(object):
                 os = pickle.loads(os)
                 os.root = root
                 os.reboot = self.reboot
+                os.shutdown = self.shutdown
+                os.welcome_message = True
 
                 self.os = os
 
@@ -102,6 +109,7 @@ class System(object):
             progenitor = pickle.loads(progenitor)
             progenitor.root = root
             progenitor.reboot = self.reboot
+            progenitor.shutdown = self.shutdown
 
             self.os = progenitor
             
@@ -123,8 +131,20 @@ class System(object):
 
     def run_os(self):
         """Runs the operating system installed"""
+
         if self.os:
             self.os.main_loop(self.clock, FPS)
+
+        self.check_for_reboot()
+
+    def check_for_reboot(self) -> None:
+        """Checks if the system has to reboot"""
+
+
+        if self.reboot_system:
+            if not self.handle_boot():
+                return
+            self.run_os()
 
     def install_os(self):
         """Installs an Operating System on the system"""

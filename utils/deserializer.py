@@ -4,7 +4,6 @@ from logging import Logger
 
 from logging_module.custom_logging import get_logger
 from game.storage_system.directory import Directory, RootDir
-from game.storage_system import constants as ss_consts
 from game.storage_system.file import File
 from exceptions.ser_des import DeserializationError
 from utils.validator import validate_root_dir_contents

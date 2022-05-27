@@ -6,8 +6,9 @@ from threading import Thread
 import pygame
 
 from game.applications.application import Application
-from graphics import RESOLUTION, TTY_FONT_SIZE, BETTER_WHITE, WHITE, BLACK, UM_FNT_PT_FACTOR, TTY_TEXT_PADDING
-from graphics import Text, Section
+from graphics import RESOLUTION, TTY_FONT_SIZE, BETTER_WHITE, WHITE, BLACK, IBM_FNT_PT_FACTOR, TTY_TEXT_PADDING
+from graphics import Text, Section, CODE_FORMATTING
+from game.constants import GET_INPUT, INPUT_RECEIVED
 if TYPE_CHECKING:
     from game.storage_system import Directory
     from game import OperatingSystem    
@@ -40,13 +41,13 @@ class TeleTypeWriter(Application):
 
         self.cur_pos: int = 0  # Relative to the start of stdin
 
-        self.cursor = pygame.Surface((self.font_size * UM_FNT_PT_FACTOR[0], self.font_size * UM_FNT_PT_FACTOR[1]), pygame.SRCALPHA)
+        self.cursor = pygame.Surface((self.font_size * IBM_FNT_PT_FACTOR[0], self.font_size * IBM_FNT_PT_FACTOR[1]), pygame.SRCALPHA)
         self.cursor.fill(BETTER_WHITE)
 
         self.env_var = dict()
-        self.max_lines: int = ((self.surface.get_height()) // (self.font_size * UM_FNT_PT_FACTOR[1])) - 1
+        self.max_lines: int = ((self.surface.get_height()) // (self.font_size * IBM_FNT_PT_FACTOR[1])) - 1
         self.bottom_line = 0
-        self.running_command: Thread | None = None
+        self.input_mode: bool = False
         self.hide_input: bool = False
     
     # Helpers
@@ -55,14 +56,14 @@ class TeleTypeWriter(Application):
     def eff_surf_width(self) -> float:
         """Returns effective surface width"""
 
-        font_size = self.font_size * UM_FNT_PT_FACTOR[0], self.font_size * UM_FNT_PT_FACTOR[1]
+        font_size = self.font_size * IBM_FNT_PT_FACTOR[0], self.font_size * IBM_FNT_PT_FACTOR[1]
 
         return ((self.surface.get_width() - self.text.start[0] - self.text.end_padding[0]) // font_size[0]) * font_size[0]
 
     def get_number_of_lines(self) -> int:
         """Returns the number of lines in the terminal (excludes current line)"""
 
-        font_size = self.font_size * UM_FNT_PT_FACTOR[0], self.font_size * UM_FNT_PT_FACTOR[1]
+        font_size = self.font_size * IBM_FNT_PT_FACTOR[0], self.font_size * IBM_FNT_PT_FACTOR[1]
         
         content_raw = Text.get_uncoded_text(self.content)
 
@@ -79,11 +80,11 @@ class TeleTypeWriter(Application):
     def get_cursor_rend_pos(self) -> tuple[int, int]:
         """Gets the cursor position at the current point of time"""
 
-        font_size = self.font_size * UM_FNT_PT_FACTOR[0], self.font_size * UM_FNT_PT_FACTOR[1]
+        font_size = self.font_size * IBM_FNT_PT_FACTOR[0], self.font_size * IBM_FNT_PT_FACTOR[1]
         content = len(Text.get_uncoded_text(self.content).split('\n')[-1])
 
         x = self.text.start[0] + (((content + self.cur_pos) * font_size[0]) % (self.eff_surf_width))
-        y = self.text.start[1] + self.get_number_of_lines() * font_size[1]
+        y = self.text.start[1] + self.get_number_of_lines() * font_size[1] + TTY_TEXT_PADDING[1] + 1
 
         return x, y
 
@@ -107,17 +108,16 @@ class TeleTypeWriter(Application):
         self.graphics.draw_outline(self.surface)
 
     def events_handler(self) -> None:
+                
+        for event in self.events:
 
-        if self.running_command and not self.running_command.is_alive():
-            try:
-                self.running_command.start()
+            if event.type == GET_INPUT:
+                self.input_mode = True
+                if event.password:
+                    self.hide_input = True
                 self.stdin = ''
                 self.cur_pos = 0
                 self.update_text()
-            except RuntimeError:
-                self.running_command = None
-                
-        for event in self.events:
 
             if event.type == pygame.TEXTINPUT:
                 raw_stdin = Text.get_uncoded_text(self.stdin)
@@ -138,16 +138,28 @@ class TeleTypeWriter(Application):
                     # Else annoying sound
                     self.update_cur_pos(-1)
 
-                if self.running_command is None:
-                    if event.key == pygame.K_RETURN:
-                        raw_stdin = Text.get_uncoded_text(self.stdin)
+                if event.key == pygame.K_RETURN:
+                    raw_stdin = Text.get_uncoded_text(self.stdin)
+                    if self.input_mode:
+                        pygame.event.post(pygame.event.Event(INPUT_RECEIVED, input=raw_stdin))
+                        if self.hide_input:
+                            self.content += '•' * len(raw_stdin) + '\n'
+                        else:
+                            self.content += self.stdin + '\n'
+                        self.hide_input = False
+                        self.input_mode = False
+                    else:
                         self.running_command = Thread(target=self.execute_command, args=(raw_stdin,))
+                        self.running_command.start()
 
                         # backlog
                         if self.stdin in self.personal_backlog[:self.pointer]:
                             self.personal_backlog.remove(self.stdin)
                         if self.stdin:    
                             self.personal_backlog.append('')
+
+                    self.stdin = ''
+                    self.cur_pos = 0
 
                 if event.key == pygame.K_UP:
                     if abs(self.pointer) < len(self.personal_backlog):
@@ -178,30 +190,39 @@ class TeleTypeWriter(Application):
         self.content += text
         self.update_text()
 
-    def get_input(self, hide: bool=False) -> str:
-        """Gets user Input"""
+    # def get_input(self, hide: bool=False) -> str:
+    #     """Gets user Input"""
 
-        self.hide_input = hide
+    #     self.hide_input = hide
+    #     # self.stdin = ''
 
-        listening = True
-        while listening:
-            for event in self.events:
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                    stdin = '•' * len(self.stdin) if self.hide_input else self.stdin
-                    self.content += stdin + '\n'
+    #     listening = True
+    #     while listening:
+    #         if self.events:
+    #             self.logger.debug(self.events)
+    #         events = self.events.copy()
+    #         for event in events:
+    #             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+    #                 self.logger.info("I was asked to give input")
+    #                 raw_stdin = Text.get_uncoded_text(self.stdin)
+    #                 stdin = '•' * len(raw_stdin) if self.hide_input else self.stdin
+    #                 self.content += stdin + '\n'
 
-                    output = self.stdin
+    #                 output = raw_stdin
 
-                    self.stdin = ''
-                    stdin = '•' * len(self.stdin) if self.hide_input else self.stdin
-                    self.cur_pos = 0
-                    self.hide_input = False 
+    #                 self.stdin = ''
+    #                 stdin = '•' * len(self.stdin) if self.hide_input else self.stdin
+    #                 self.cur_pos = 0
+    #                 self.hide_input = False 
 
-                    event_to_remove = event
-                    listening = False
+    #                 # event_to_remove = event
+    #                 listening = False
+    #                 break
             
-        self.events.remove(event_to_remove)    
-        return output
+    #     # self.events.remove(event_to_remove)   
+    #     self.logger.info(f'Returning output:[OUTPUT START]{output}[OUTPUT END]')
+    #     self.logger.debug(self.events)
+    #     return output
 
     def update_text(self, event=None) -> None:
         """Updates text"""
@@ -209,15 +230,15 @@ class TeleTypeWriter(Application):
         stdin = '•' * len(self.stdin) if self.hide_input else self.stdin
         self.text.update_text(self.content + stdin, True)
 
-        if event:
-            if event.type == pygame.TEXTINPUT or event.key not in [pygame.K_PAGEDOWN, pygame.K_PAGEUP]:
-                if self.get_number_of_lines() >= self.max_lines:
-                    self.bottom_line = self.get_number_of_lines()
-                else:
-                    self.bottom_line = 0
+        # if event:
+        #     if event.type == pygame.TEXTINPUT or event.key not in [pygame.K_PAGEDOWN, pygame.K_PAGEUP]:
+        if self.get_number_of_lines() >= self.max_lines:
+            self.bottom_line = self.get_number_of_lines()
+        else:
+            self.bottom_line = 0
 
         if self.get_number_of_lines() > self.max_lines:
-            self.text.update_starting_pos((TTY_TEXT_PADDING[0], TTY_TEXT_PADDING[1] - (self.text.font_size * UM_FNT_PT_FACTOR[1] * (self.bottom_line - self.max_lines))))
+            self.text.update_starting_pos((TTY_TEXT_PADDING[0], TTY_TEXT_PADDING[1] - (self.text.font_size * IBM_FNT_PT_FACTOR[1] * (self.bottom_line - self.max_lines))))
         else:
             self.text.update_starting_pos(TTY_TEXT_PADDING)
 
@@ -235,7 +256,7 @@ class TeleTypeWriter(Application):
     def get_new_line(self) -> str:
         """Returns a new terminal line"""
 
-        return self.host.username + ':' + self.current_dir.get_path() + '$ '
+        return CODE_FORMATTING['YELLOW'] + self.host.username + CODE_FORMATTING['RESET'] + ':' + self.current_dir.get_path() + '$ '
 
     def execute_command(self, command: str) -> None:
         """Executes a terminal command and returns a Response object"""
@@ -255,7 +276,7 @@ class TeleTypeWriter(Application):
             if response.stdout: 
                 self.content += response.stdout + '\n'
             if response.stderr:
-                self.content += response.stderr + '\n'  
+                self.content += CODE_FORMATTING['RED'] + response.stderr + CODE_FORMATTING['RESET'] + '\n'  
 
         self.content += self.get_new_line()
         self.update_text()

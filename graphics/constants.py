@@ -69,12 +69,18 @@ TEXT_CODES: dict[str, Union[tuple[int, int, int], str]] = {
 TEXT_ESCAPE_CHAR: str = '⸸'
 
 UM_FNT_PT_FACTOR: tuple[float, float] = (1 / 2, 1)  # Ubuntu Mono Font size point conversion factors
+IBM_FNT_PT_FACTOR: tuple[float, float] = (3 / 5, 1)  # IBM Plex Mono Font size point conversion factors
 
 # Fonts
-DEFAULT_REGULAR_FONT: str = 'res/fonts/regular.ttf'
-DEFAULT_ITALIC_FONT: str = 'res/fonts/italic.ttf'
-DEFAULT_BOLD_FONT: str = 'res/fonts/bold.ttf'
-DEFAULT_BOLDITALIC_FONT: str = 'res/fonts/bolditalic.ttf'
+# DEFAULT_REGULAR_FONT: str = 'res/fonts/regular.ttf'
+# DEFAULT_ITALIC_FONT: str = 'res/fonts/italic.ttf'
+# DEFAULT_BOLD_FONT: str = 'res/fonts/bold.ttf'
+# DEFAULT_BOLDITALIC_FONT: str = 'res/fonts/bolditalic.ttf'
+
+DEFAULT_REGULAR_FONT: str = 'res/fonts/IBMregular.ttf'
+DEFAULT_ITALIC_FONT: str = 'res/fonts/IBMitalic.ttf'
+DEFAULT_BOLD_FONT: str = 'res/fonts/IBMbold.ttf'
+DEFAULT_BOLDITALIC_FONT: str = 'res/fonts/IBMbolditalic.ttf'
 
 # Images
 IMAGE_PATH: str = 'res/images/'

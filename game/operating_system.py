@@ -9,12 +9,14 @@ import pygame.event
 import pygame.time
 
 from logging_module import get_logger
-from utils import generate_pid, between, deserialize_root_directory
+from utils.general_utils import generate_pid
+from utils.math import between
 from game.command import Response, Command
 from game.storage_system import RootDir, Directory
 from game.applications import Application, ApplicationInstance, Desktop, Explorer, Terminal, MessageBox, TeleTypeWriter
-from game.constants import APPLICATIONS, DEFAULT_ROOTDIR_PATH
+from game.constants import APPLICATIONS, INPUT_RECEIVED
 from graphics import MESSAGE_BOX_TEXT_COLOR, MESSAGE_BOX_TIME, BLACK
+from collections import Counter
 from exceptions import PathError
 if TYPE_CHECKING:
     from game.system import System
@@ -59,6 +61,8 @@ class OperatingSystem(object):
         self.command_backlog: list[str] = []
 
         self.selected: ApplicationInstance
+
+        self.welcome_message = False
 
         # self.executor: ThreadPoolExecutor = ThreadPoolExecutor()
         self.temp = None
@@ -154,7 +158,8 @@ class OperatingSystem(object):
         for app in self.startup_apps:
             self.start_app(app, self, self.startup_apps.get(app))
 
-        ## self.send_message('WELCOME!!!', MESSAGE_BOX_TEXT_COLOR, MESSAGE_BOX_TIME)
+        # if self.welcome_message:
+        #     self.send_message('WELCOME!!!', MESSAGE_BOX_TEXT_COLOR, MESSAGE_BOX_TIME)
 
     def start_app(self, app: Type[Application], opened_by: OperatingSystem, open_in_bg: bool = False, *args) -> ApplicationInstance:
         """Starts a new application instance"""
@@ -195,8 +200,9 @@ class OperatingSystem(object):
         """Events handler for the operating system"""
         
         for event in self.events:
+
             if event.type == pygame.QUIT:
-                self.send_shutdown_signal()
+                self.shutdown()
                 return
 
             # Window selection
@@ -208,6 +214,9 @@ class OperatingSystem(object):
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
                 self.send_message('This is a message box. There is a new message for you.', MESSAGE_BOX_TEXT_COLOR, 10)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                self.logger.debug("Doink")
     
     def send_shutdown_signal(self) -> None:
         """Shuts the OS down""" 
@@ -225,14 +234,16 @@ class OperatingSystem(object):
                 if self.temp and self.temp.result():
                     self.logger.debug(self.temp.result())
                 clock.tick(fps)
-
-                self.events = pygame.event.get()
+                
+                self.events = []
+                events = pygame.event.get(exclude=INPUT_RECEIVED)
+                for event in events:
+                    if event not in self.events:
+                        self.events.append(event) 
                 
                 self.events_handler()
                 if not self.running:
-                    self.logger.debug("Supposed to return")
                     break
-
 
                 for instance in self.running_apps:
                     if not instance.alive:
@@ -245,4 +256,4 @@ class OperatingSystem(object):
                     instance.app.send_events(self.events)
                     self.temp = executor.submit(instance.run)
 
-        pygame.quit()       
+            #executor.shutdown(wait=True)

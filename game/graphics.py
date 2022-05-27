@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Type
 from logging_module.custom_logging import get_logger
 from graphics.conn_pygame_graphics import ConnPygameGraphics, Surface
-from graphics.constants import RESOLUTION, APPLICATION_MIN_HEIGHT, APPLICATION_MIN_WIDTH, TITLEBAR_1PX_DIMENSIONS, TITLEBAR_DEFAULT_HEIGHT, TITLEBAR_OPTIONS_PATH, TITLEBAR_OPTIONS_DIMENSIONS, TITLEBAR_1PX_PATH, UM_FNT_PT_FACTOR, WHITE, BETTER_WHITE, BLACK, SCROLLBAR_WIDTH, WINDOW_OUTLINE_COLOR, EXPLORER_CWD_FONT_SIZE
+from graphics.constants import RESOLUTION, APPLICATION_MIN_HEIGHT, APPLICATION_MIN_WIDTH, TITLEBAR_1PX_DIMENSIONS, TITLEBAR_DEFAULT_HEIGHT, TITLEBAR_OPTIONS_PATH, TITLEBAR_OPTIONS_DIMENSIONS, TITLEBAR_1PX_PATH, IBM_FNT_PT_FACTOR, WHITE, BETTER_WHITE, BLACK, SCROLLBAR_WIDTH, WINDOW_OUTLINE_COLOR, EXPLORER_CWD_FONT_SIZE
 if TYPE_CHECKING:
     from logging import Logger
     from graphics.text import Section
@@ -113,8 +113,8 @@ class Graphics(object):
         """Renders centered text in the Message Box"""
 
         lines = len(processed)
-        line_height = fontsize * UM_FNT_PT_FACTOR[1]
-        char_width = fontsize * UM_FNT_PT_FACTOR[0]
+        line_height = fontsize * IBM_FNT_PT_FACTOR[1]
+        char_width = fontsize * IBM_FNT_PT_FACTOR[0]
         total_height = lines * line_height
 
         if total_height > surface.get_height():
@@ -183,7 +183,7 @@ class Graphics(object):
             y = (padding[2] + padding[0] + icon_dims[1]) * y_cell + padding[0] + icon_dims[1] + ((20 - fontsize) // 2) + EXPLORER_CWD_FONT_SIZE
 
             text = icon[0]
-            char_width = fontsize * UM_FNT_PT_FACTOR[0]
+            char_width = fontsize * IBM_FNT_PT_FACTOR[0]
             max_chars = int(icon_dims[0] // char_width)
 
             color = textcolor if icon[1][1] else WHITE
@@ -234,5 +234,5 @@ class Graphics(object):
                 org_x = x
                 if len(line) < max_chars:
                     x += ((max_chars - len(line)) * char_width) / 2
-                self.conn_pygame_graphics.render_text('regular', fontsize, line, color, (x, y + (index * fontsize * UM_FNT_PT_FACTOR[1])), surface=surface)
+                self.conn_pygame_graphics.render_text('regular', fontsize, line, color, (x, y + (index * fontsize * IBM_FNT_PT_FACTOR[1])), surface=surface)
                 x = org_x

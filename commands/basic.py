@@ -45,8 +45,6 @@ def ls(app: Application, *args) -> Response:
     
     recursive = 'R' in flags
 
-    time.sleep(2)
-
     if args:
         try:
             directories = list(map(lambda arg: app.host.get_su_by_path(arg, app.current_dir), args))
@@ -61,7 +59,7 @@ def ls(app: Application, *args) -> Response:
         nonlocal stdout
         for directory in directories:
             stdout += directory.get_path() + ':\n'
-            stdout += '\t'.join(list(map(lambda su: su.get_name(), directory.get_contents())))
+            stdout += '   '.join(list(map(lambda su: su.get_name(), directory.get_contents())))
 
             stdout += '\n\n'
             
@@ -74,10 +72,10 @@ def ls(app: Application, *args) -> Response:
     elif len(args) > 1:    
         for directory in directories:
             stdout += directory.get_name() + ':\n'
-            stdout += '\t'.join(directory.get_contents()) + '\n'
+            stdout += '   '.join(directory.get_contents()) + '\n'
     
     else:
-        stdout = '\t'.join(sorted(list(map(lambda su: su.get_name(), directories[0].get_contents()))))
+        stdout = '   '.join(sorted(list(map(lambda su: su.get_name(), directories[0].get_contents()))))
         
     return Response(0, stdout=stdout, stderr='')
     
@@ -139,8 +137,6 @@ def mkdir(app: Application, *args) -> Response:
     """Makes new directory"""
 
     flags, _, args = process_args(args)
-
-    logger.debug(flags)
 
     stdout = ''
 
@@ -304,5 +300,13 @@ def reboot(app: Application, *args) -> Response:
     """Reboots the computer"""
 
     app.host.reboot()
+
+    return Response(0, None, None)
+
+
+def shutdown(app: Application, *args) -> Response:
+    """Shuts down the computer"""
+
+    app.host.shutdown()
 
     return Response(0, None, None)
